@@ -3,8 +3,8 @@ struct OZSolution{T1, T2}
     k::T1
     gr::T2
     Sk::T2
-    Ck::T2
-    Cr::T2
+    ck::T2
+    cr::T2
 end
 
 function convert_vecofmat_to_3darr(a)
@@ -18,10 +18,10 @@ function convert_vecofmat_to_3darr(a)
 end
 
 
-function OZSolution(r::T1, k::T1, gr::T, Sk::T, Ck::T, Cr::T) where {T1,T<:Vector{<:AbstractMatrix}}
+function OZSolution(r::T1, k::T1, gr::T, Sk::T, ck::T, cr::T) where {T1,T<:Vector{<:AbstractMatrix}}
     gr = convert_vecofmat_to_3darr(gr)
     Sk = convert_vecofmat_to_3darr(Sk)
-    Ck = convert_vecofmat_to_3darr(Ck)
-    Cr = convert_vecofmat_to_3darr(Cr)
-    OZSolution(r, k, gr, Sk, Ck, Cr)
+    Ck = convert_vecofmat_to_3darr(ck)
+    Cr = convert_vecofmat_to_3darr(cr)
+    OZSolution(r, k, gr, Sk, ck, cr)
 end

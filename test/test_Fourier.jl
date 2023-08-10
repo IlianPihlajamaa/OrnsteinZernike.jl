@@ -1,10 +1,7 @@
-import Pkg; Pkg.activate(".")
 
-import OrnsteinZernike, StaticArrays
-using FFTW
 
 function main()
-    M = 2^12
+    M = 2^8
 
     F = rand(M)
     dr = 0.01
@@ -20,19 +17,19 @@ function main()
     
     println("Testing out-of-place")
     
-    @show maximum(abs.(F-Fnew))
+    @test maximum(abs.(F-Fnew)) .< 1e-15
     
     Fnew2 = copy(F) 
     Fhat2 = copy(Fhat) 
     
     OrnsteinZernike.inverse_fourier!(Fnew2, Fhat, plan1, dk);
     println("Testing in-place inverse")
-    @show maximum(abs.(F-Fnew2))
+    @test maximum(abs.(F-Fnew2))  .< 1e-15
 
     @time OrnsteinZernike.fourier!(Fhat2, F, plan2, dr);
     
     println("Testing in-place forward")
-    @show maximum(abs.(Fhat-Fhat2))
+    @test maximum(abs.(Fhat-Fhat2))  .< 1e-15
 
     println("testing multicomponent transform")
 
@@ -40,19 +37,13 @@ function main()
         F = rand(StaticArrays.SMatrix{Nspecies, Nspecies, Float64, Nspecies*Nspecies}, M)
         forwardplan, backwardplan =  OrnsteinZernike.find_fourier_plans_3d(F)
         Fhat = copy(F)
-        @time OrnsteinZernike.fourier!(Fhat, F, forwardplan, dr);
-        F2 = copy(F)
+        OrnsteinZernike.fourier!(Fhat, F, forwardplan, dr);
+        F2 = copy(F) 
         OrnsteinZernike.inverse_fourier!(F2, Fhat, backwardplan, dk);
-        @show maximum(abs.(maximum.(F-F2)))
+        @test maximum(abs.(maximum.(F-F2)))  .< 1e-15
         Fhat11 = OrnsteinZernike.radial_fourier_transform_3d(getindex.(F, 1, 1), r, k);
-        @show maximum(abs.(getindex.(Fhat, 1, 1)-Fhat11))
+        @test maximum(abs.(getindex.(Fhat, 1, 1)-Fhat11))  .< 1e-15
     end
 end
 main()
-
-using Random
-Random.seed!(5234)
-a = rand(10)
-using FFTW
-FFTW.r2r(a, FFTW.RODFT00)
 

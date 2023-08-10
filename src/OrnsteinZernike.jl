@@ -1,5 +1,12 @@
 module OrnsteinZernike
-using FFTW, QuadGK, StaticArrays, LinearAlgebra, Plots, BlockArrays
+using FFTW, StaticArrays, LinearAlgebra
+
+export SimpleLiquids
+export OZSolution
+export Exact, FourierIteration, NgIteration, DensityRamp
+export PercusYevick,  HypernettedChain, MeanSpherical
+export SingleComponentHardSpheres, MultiComponentHardSpheres
+export compute_compressibility, compute_excess_energy, compute_virial_pressure
 
 include("Systems.jl")
 include("Potentials.jl")
