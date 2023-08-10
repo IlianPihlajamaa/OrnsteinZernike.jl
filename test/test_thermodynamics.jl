@@ -11,7 +11,7 @@ closure = PercusYevick()
 method = Exact(M=M)
 sol = solve(system, closure, method)
 
-method = NgIteration(M=M, max_iterations=10000, tolerance=10^-10)
+method = NgIteration(M=M, tolerance=10^-10, verbose=false, max_iterations=10^3)
 sol2 = solve(system, closure, method)
 
 

@@ -84,7 +84,7 @@ end
 
 function compute_compressibility(sol::OZSolution, system::SimpleLiquid{dims, 1, T1, T2, P}) where {dims, T1, T2, P}
     ρ = system.ρ
-    ĉ = sol.Ck
+    ĉ = sol.ck
     k = sol.k
     dĉdk = (ĉ[2]-ĉ[1])/(k[2]-k[1])
     ĉ0 = ĉ[1] - k[1] * dĉdk
@@ -146,7 +146,7 @@ function compute_compressibility(sol::OZSolution, system::SimpleLiquid{dims, spe
     ρ = system.ρ
     ρ0 = sum(ρ.diag)
     x = ρ.diag/ρ0
-    ĉ = sol.ĉ
+    ĉ = sol.ck
     T = typeof(ρ)
     k = sol.k
     dcdk = (c[2]-c[1])/(k[2]-k[1])

@@ -19,7 +19,7 @@ struct FourierIteration <: Method
     verbose::Bool
 end
 
-function FourierIteration(; mixing_parameter=0.5, max_iterations=10^6, tolerance=10^-6, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))
+function FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance=10^-6, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))
     @assert max_iterations > 0 
     @assert tolerance > 0 
     @assert 0 <= mixing_parameter <= 1
@@ -36,7 +36,7 @@ struct NgIteration <: Method
     verbose::Bool
 end
 
-function NgIteration(; N_stages=3, max_iterations=10^6, tolerance=10^-6, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))
+function NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-6, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))
     @assert max_iterations > 0 
     @assert tolerance > 0 
     @assert N_stages > 0

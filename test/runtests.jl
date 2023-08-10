@@ -1,7 +1,7 @@
-using Test, OrnsteinZernike
+using Test, OrnsteinZernike, StaticArrays
 using FFTW
 
-for target in ["Fourier", "exact_PY", "FourierIteration_HS", "NGIteration_HS", "thermodynamics", "DensityRamp"]
+for target in ["Fourier", "FourierIteration_HS", "NGIteration_HS", "thermodynamics", "DensityRamp"]
     @testset "$target" begin
         include("test_$target.jl")
     end

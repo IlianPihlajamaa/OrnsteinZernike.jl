@@ -1,7 +1,8 @@
 module OrnsteinZernike
 using FFTW, StaticArrays, LinearAlgebra
 
-export SimpleLiquids
+export solve
+export SimpleLiquid
 export OZSolution
 export Exact, FourierIteration, NgIteration, DensityRamp
 export PercusYevick,  HypernettedChain, MeanSpherical

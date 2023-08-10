@@ -21,7 +21,7 @@ end
 function OZSolution(r::T1, k::T1, gr::T, Sk::T, ck::T, cr::T) where {T1,T<:Vector{<:AbstractMatrix}}
     gr = convert_vecofmat_to_3darr(gr)
     Sk = convert_vecofmat_to_3darr(Sk)
-    Ck = convert_vecofmat_to_3darr(ck)
-    Cr = convert_vecofmat_to_3darr(cr)
+    ck = convert_vecofmat_to_3darr(ck)
+    cr = convert_vecofmat_to_3darr(cr)
     OZSolution(r, k, gr, Sk, ck, cr)
 end
