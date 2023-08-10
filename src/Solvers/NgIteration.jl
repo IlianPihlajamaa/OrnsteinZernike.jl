@@ -1,7 +1,3 @@
-
-"""
-
-"""
 function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, method::NgIteration; init=nothing) where {dims, T1, T2, P}
     N_stages = method.N_stages
     r, k = construct_r_and_k_grid(system, method)

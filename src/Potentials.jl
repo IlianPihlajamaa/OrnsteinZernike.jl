@@ -10,7 +10,7 @@ abstract type Potential end
 """
     SingleComponentHardSpheres
 
-Implements the hard-sphere pair interaction u(r) = inf r<1 and u(r) = 0 r>1.
+Implements the hard-sphere pair interaction `u(r) = inf` for `r < 1` and `u(r) = 0` for `r > 1`.
 
 Example:
 `closure = SingleComponentHardSpheres()`
@@ -25,9 +25,9 @@ end
 """
     MultiComponentHardSpheres
 
-Implements the hard-sphere pair interaction uᵢⱼ(r) = inf r<Dᵢⱼ and uᵢⱼ(r) = 0 r>Dᵢⱼ for a multicomponent system.
+Implements the hard-sphere pair interaction `uᵢⱼ(r) = inf` for `r < Dᵢⱼ` and `uᵢⱼ(r) = 0` for `r > Dᵢⱼ` for a multicomponent system.
 
-Expects a vector Dᵢ of diameters for each of the species. An additive mixing rule is used (Dᵢⱼ = (Dᵢ+Dⱼ)/2).
+Expects a vector Dᵢ of diameters for each of the species. An additive mixing rule is used (`Dᵢⱼ = (Dᵢ+Dⱼ)/2`).
 
 Example:
 `closure = MultiComponentHardSpheres([0.8, 0.9, 1.0])`

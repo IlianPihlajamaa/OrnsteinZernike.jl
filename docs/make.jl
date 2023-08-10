@@ -5,7 +5,16 @@ push!(LOAD_PATH,"../src/")
 makedocs(sitename="OrnsteinZernike.jl Documentation",
          pages = [
             "Index" => "index.md",
-            "An other page" => "anotherPage.md",
+            "Tutorials" => ["SingleCompLJ.md",
+                            "HardSphereMixture.md",
+                            "HighDensities.md"],
+            "Basics"=> ["GeneralWorkflow.md",
+                        "Potentials.md",
+                        "Closures.md",
+                        "Solvers.md"],
+            "Extending" => ["ExtendingPotentials.md",
+                            "ExtendingClosures.md"],
+            "API" => "API.md",
          ],
          format = Documenter.HTML(prettyurls = false)
 )

@@ -1,14 +1,14 @@
 """
-Closure
+    Closure
 
 Abstract closure type
 """
 abstract type Closure end
 
 """
-Percus Yevick Closure
+    PercusYevick
 
-Implements the closure c(r) = f(r)*(1+γ(r)), or equivalently b(r) = ln(1 + γ(r)) - γ(r).
+Implements the Percus-Yevick closure c(r) = f(r)*(1+γ(r)), or equivalently b(r) = ln(1 + γ(r)) - γ(r).
 
 Example:
 `closure = PercusYevick()`
@@ -16,9 +16,9 @@ Example:
 struct PercusYevick <: Closure end
 
 """
-Hypernetted Chain Closure
+    HypernettedChain
 
-Implements the closure c(r) = (f(r)+1)*exp(γ(r)) - γ(r) - 1, or equivalently b(r) = 0.
+Implements the Hypernetted Chain closure c(r) = (f(r)+1)*exp(γ(r)) - γ(r) - 1, or equivalently b(r) = 0.
 
 Example:
 `closure = HypernettedChain()`
@@ -26,14 +26,14 @@ Example:
 struct HypernettedChain <: Closure end
 
 """
-Mean Spherical Closure
+    MeanSphericalApproximation
 
-Implements the closure c(r) = -βu(r), or equivalently b(r) = ln(γ(r) - βu(r) + 1) - γ(r) +  βu(r).
+Implements the MSA closure c(r) = -βu(r), or equivalently b(r) = ln(γ(r) - βu(r) + 1) - γ(r) +  βu(r).
 
 Example:
-`closure = MeanSpherical()`
+`closure = MeanSphericalApproximation()`
 """
-struct MeanSpherical <: Closure end
+struct MeanSphericalApproximation <: Closure end
 
 
 function bridge_function(::HypernettedChain, γ, _, _)
@@ -42,7 +42,7 @@ function bridge_function(::HypernettedChain, γ, _, _)
     return B
 end
 
-function bridge_function(::MeanSpherical, γ, u_long_range, _) 
+function bridge_function(::MeanSphericalApproximation, γ, u_long_range, _) 
     oneunit = one.(γ)
     s = @. γ - u_long_range # temp s = γ*
     B = @. log(oneunit + s) - s

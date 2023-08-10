@@ -1,5 +1,5 @@
 """
-Method
+    Method
 
 Abstract method type
 """
@@ -31,7 +31,7 @@ function Exact(;  M=2^10, dr = sqrt(π/(M+1))/(2π))
 end
 
 """
-FourierIteration <: Method
+    FourierIteration <: Method
 
 Solves the system by recursive iteration in Fourier Space. Essentially, the algorithm is:
 
@@ -72,7 +72,7 @@ function FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance
 end
 
 """
-NgIteration <: Method
+    NgIteration <: Method
 
 Solves the system by recursive iteration in Fourier Space, and uses the Ng acceleration method. Essentially, the algorithm is:
 
@@ -112,7 +112,7 @@ function NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-6, verbose
 end
 
 """
-DensityRamp <: Method
+    DensityRamp <: Method
 
 Solves the system by iteratively solving systems of increasing density, using the previous solution as initial guess at a higher density. This may help deal with convergence issues
 

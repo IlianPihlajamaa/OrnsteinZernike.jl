@@ -21,8 +21,8 @@ Let's solve the Ornstein-Zernike equation for a single component three-dimension
 ```julia
 using OrnsteinZernike
 dims = 3; kBT = 1.0; ρ = 0.5;
-pot = SingleComponentHardSpheres()
-system = SimpleLiquid(dims, ρ, kBT, pot)
+potential = SingleComponentHardSpheres()
+system = SimpleLiquid(dims, ρ, kBT, potential)
 closure = PercusYevick()
 sol = @time solve(system, closure);
 ```
@@ -40,5 +40,7 @@ using Plots
 plot(sol.r, sol.gr, xlims=(0,5))
 ```
 ![image](docs/Figs/example.png)
+
+See the <a href="https://ilianpihlajamaa.github.io/OrnsteinZernike.jl/dev/">Documentation</a> for more details.
 
 Please open an issue if anything is unclear in the documentation, if any unexpected errors arise or for feature requests. PRs are of course also welcome.
