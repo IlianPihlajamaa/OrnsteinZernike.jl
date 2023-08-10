@@ -1,5 +1,14 @@
 ## Single component
 
+"""
+    compute_excess_energy(sol::OZSolution, system::SimpleLiquid)
+
+Computes the excess energy per particle Eₓ, such that E = (dims/2*kBT + Eₓ)*N.
+
+uses the formula Eₓ = 1/2 ρ ∫dr g(r) u(r) for single component systems
+and Eₓ = 1/2 ρ Σᵢⱼ xᵢxⱼ ∫dr gᵢⱼ(r) uᵢⱼ(r) for mixtures. Here x is the concentration fraction ρᵢ/sum(ρ).
+
+"""
 function compute_excess_energy(sol::OZSolution, system::SimpleLiquid{3, 1, T1, T2, P}) where {T1, T2, P}
     r = sol.r
     dr = r[1] - r[2]
@@ -21,6 +30,14 @@ function compute_excess_energy(sol::OZSolution, system::SimpleLiquid{3, 1, T1, T
     return E
 end
 
+"""
+    compute_virial_pressure(sol::OZSolution, system::SimpleLiquid)
+
+Computes the pressure via the virial route
+
+uses the formula p = kBTρ - 1/6 ρ^2 ∫dr g(r) u'(r) for single component systems
+and p =  kBT Σᵢρᵢ - 1/6 Σᵢ ρᵢρⱼ ∫dr gᵢⱼ(r) u'ᵢⱼ(r) for mixtures.
+"""
 function compute_virial_pressure(sol::OZSolution, system::SimpleLiquid{3, 1, T1, T2, P}) where {T1, T2, P}
     r = sol.r
     ρ = system.ρ
@@ -82,6 +99,15 @@ function compute_virial_pressure(sol::OZSolution, system::SimpleLiquid{3, 1, T1,
     return p
 end
 
+
+"""
+    compute_compressibility(sol::OZSolution, system::SimpleLiquid)
+
+Computes the isothermal compressibility χ of the system
+
+uses the formula 1/χ = 1 - ρ ĉ(k=0) for single component systems and
+1/χ = 1 - ρ Σᵢⱼ xᵢxⱼ ĉᵢⱼ(k=0) for mixtures. 
+"""
 function compute_compressibility(sol::OZSolution, system::SimpleLiquid{dims, 1, T1, T2, P}) where {dims, T1, T2, P}
     ρ = system.ρ
     ĉ = sol.ck

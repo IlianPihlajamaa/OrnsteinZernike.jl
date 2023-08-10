@@ -1,11 +1,37 @@
+
+"""
+Potential
+
+Abstract potential type
+"""
 abstract type Potential end
 
+
+"""
+    SingleComponentHardSpheres
+
+Implements the hard-sphere pair interaction u(r) = inf r<1 and u(r) = 0 r>1.
+
+Example:
+`closure = SingleComponentHardSpheres()`
+"""
 struct SingleComponentHardSpheres <: Potential end
 
 function evaluate_potential(::SingleComponentHardSpheres, r::Number)
     return ifelse(r < oneunit(r), Inf64, 0.0)*oneunit(r)
 end
 
+
+"""
+    MultiComponentHardSpheres
+
+Implements the hard-sphere pair interaction uᵢⱼ(r) = inf r<Dᵢⱼ and uᵢⱼ(r) = 0 r>Dᵢⱼ for a multicomponent system.
+
+Expects a vector Dᵢ of diameters for each of the species. An additive mixing rule is used (Dᵢⱼ = (Dᵢ+Dⱼ)/2).
+
+Example:
+`closure = MultiComponentHardSpheres([0.8, 0.9, 1.0])`
+"""
 struct MultiComponentHardSpheres{N_components, T} <: Potential 
     D::SVector{N_components, T}
 end
