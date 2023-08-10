@@ -10,7 +10,7 @@ One of the big triumphs in liquid state theory is the ability to approximate the
 This can be done using the exact Ornstein-Zernike equation: 
 $$g(r) - 1 = c(r) + \int d\textbf{r}' c(\textbf{r}')(g(\textbf{r}- \textbf{r}') - 1)$$
 
-Here $g(r)$ is the radial distribution function, which describes the structure of a liquid and $c(r)$ is the direct correlation function. Together an approximate closure relation, which links $c(r)$ to the interaction potential of the particles, this integral equation can be solved. 
+Here $g(r)$ is the radial distribution function, which describes the structure of a liquid and $c(r)$ is the direct correlation function. Together with an approximate closure relation, which links $c(r)$ to the interaction potential of the particles, this integral equation can be solved. 
 
 This package implements common solution methods for the Ornstein Zernike equation, for single component systems as well as mixtures. It implements many predefined closure relations and many interaction potentials. Moreover, extending the package to include other closure relations or interaction potentials takes minimal effort.
 
@@ -26,6 +26,7 @@ system = SimpleLiquid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 sol = @time solve(system, closure);
 ```
+which prints
 ```
 After iteration 0, the error is 10.4396417.
 After iteration 10, the error is 1.2794593.
@@ -33,10 +34,11 @@ After iteration 20, the error is 1.1e-6.
 Converged after 22 iterations, the error is 2.0e-7.
 0.006574 seconds (176 allocations: 254.781 KiB)
 ```
+Now that we have solved the equation, we can plot the solution:
 ```julia
 using Plots
 plot(sol.r, sol.gr, xlims=(0,5))
 ```
-![image](dosc/Figs.example.png)
+![image](docs/Figs/example.png)
 
 Please open an issue if anything is unclear in the documentation, if any unexpected errors arise or for feature requests. PRs are of course also welcome.
