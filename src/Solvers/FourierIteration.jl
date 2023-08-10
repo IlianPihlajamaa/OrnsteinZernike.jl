@@ -1,6 +1,6 @@
 
 """
-
+this is a function
 """
 function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure, method::FourierIteration; init=nothing) where {dims, species, T1, T2, P}
     r, k = construct_r_and_k_grid(system, method)
