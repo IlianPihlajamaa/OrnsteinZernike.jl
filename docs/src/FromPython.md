@@ -51,6 +51,6 @@ plt.xlim(0, 5)
 plt.show()
 ```
 
-![image](Figs/pythonfig.png)
+![image](../Figs/pythonfig.png)
 
 See the documentation of [juliacall](https://pypi.org/project/juliacall/) for more information on how to call Julia from Python.

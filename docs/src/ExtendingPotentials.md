@@ -2,7 +2,7 @@
 
 Creating your own potentials type is very easy. It takes two steps. First, the type itself must be created, and secondly, function that evaluates the potentials must be overloaded. 
 
-## Example 
+### Example 
 
 We want to implement the interaction potential 
 $$u(r) = \epsilon (\frac{\sigma}{r})^6.$$
@@ -44,8 +44,11 @@ using Plots
 plot(sol.r, sol.gr, xlims=(0,5), xlabel="r", ylabel="g(r)")
 ```
 
+## Mixtures
 
 In the case of multicomponent systems, instead of a number the `evaluate_potential` should return a `StaticMatrix` from the `StaticArrays` package containing either values for $u_{ij}$. 
+
+### Example
 
 Suppose we want to implement the same potential for the multicomponent case:
 $$u_{ij}(r) = \epsilon_{ij} (\frac{\sigma_{ij}}{r_{ij}})^6.$$
@@ -79,7 +82,7 @@ end
 
 and now we can use it:
 
-```@example 1
+```@example 2
 ϵ = [1.0 2.0; 0.4 0.9]
 σ = [1.0 1.0; 1.0 0.8]
 dims = 3 # we consider a 3D system
