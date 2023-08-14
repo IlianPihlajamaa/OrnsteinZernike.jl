@@ -82,7 +82,27 @@ end
 
 and now we can use it:
 
-```@example 2
+```@example 3
+using OrnsteinZernike, StaticArrays # hide
+
+import OrnsteinZernike.Potential # hide
+struct MyPot2{Nspecies} <: Potential  # hide
+    epsilon::Matrix{Float64} # hide
+    sigma::Matrix{Float64} # hide
+end # hide
+
+import OrnsteinZernike.evaluate_potential # hide
+function OrnsteinZernike.evaluate_potential(pot::MyPot2{Nspecies}, r::Number) where Nspecies # hide
+    # we can construct a mutable sized matrix first # hide
+    out = MMatrix{Nspecies, Nspecies, Float64, Nspecies*Nspecies}(undef)  # hide
+    for species2 = 1:Nspecies # hide
+        for species1 = 1:Nspecies # hide
+            out[species1, species2] = pot.epsilon[species1, species2] * (pot.sigma[species1, species2] / r) ^ 6 # hide
+        end # hide
+    end # hide
+    # and convert it to an immutable variant # hide
+    return SMatrix(out)  # hide
+end # hide
 ϵ = [1.0 2.0; 0.4 0.9]
 σ = [1.0 1.0; 1.0 0.8]
 dims = 3 # we consider a 3D system
