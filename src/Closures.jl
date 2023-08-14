@@ -8,61 +8,67 @@ abstract type Closure end
 """
     PercusYevick
 
-Implements the Percus-Yevick closure c(r) = f(r)*(1+γ(r)), or equivalently b(r) = ln(1 + γ(r)) - γ(r).
+Implements the Percus-Yevick closure \$c(r) = f(r)(1+\\gamma(r))\$, or equivalently \$b(r) = \\ln(1 + \\gamma(r)) - γ(r)\$.
 
 Example:
-`closure = PercusYevick()`
+```julia
+closure = PercusYevick()
+```
 """
 struct PercusYevick <: Closure end
 
 """
     HypernettedChain
 
-Implements the Hypernetted Chain closure c(r) = (f(r)+1)*exp(γ(r)) - γ(r) - 1, or equivalently b(r) = 0.
+Implements the Hypernetted Chain closure \$c(r) = (f(r)+1)\\exp(\\gamma(r)) - \\gamma(r) - 1\$, or equivalently \$b(r) = 0\$.
 
 Example:
-`closure = HypernettedChain()`
+```julia
+closure = HypernettedChain()
+```
 """
 struct HypernettedChain <: Closure end
 
 """
     MeanSphericalApproximation
 
-Implements the MSA closure c(r) = -βu(r), or equivalently b(r) = ln(γ(r) - βu(r) + 1) - γ(r) +  βu(r).
+Implements the MSA closure \$c(r) = -\\beta u(r)\$, or equivalently \$b(r) = \\ln(\\gamma(r) - \\beta u(r) + 1) - γ(r) +  \\beta u(r)\$.
 
 Example:
-`closure = MeanSphericalApproximation()`
+```julia
+closure = MeanSphericalApproximation()
+```
 """
 struct MeanSphericalApproximation <: Closure end
 
 
-function bridge_function(::HypernettedChain, γ, _, _)
+function bridge_function(::HypernettedChain, _, _, γ, _)
     zerounit = zero.(γ)
     B = zerounit
     return B
 end
 
-function bridge_function(::MeanSphericalApproximation, γ, u_long_range, _) 
+function bridge_function(::MeanSphericalApproximation, _, _, γ, u_long_range) 
     oneunit = one.(γ)
     s = @. γ - u_long_range # temp s = γ*
     B = @. log(oneunit + s) - s
     return B
 end
 
-function c_closure_from_γ(closure, r, mayer_f, γ, u_long_range)
-    B = bridge_function(closure, γ, u_long_range, r)
+function closure_c_from_gamma(closure, r, mayer_f, γ, u_long_range)
+    B = bridge_function(closure, r, γ, u_long_range, r)
     myone = one.(B)
     c = @. -myone - γ + (mayer_f + myone)*exp(γ)*real(exp(B))
     return c
 end
 
-function cmulr_closure_from_Γmulr(closure::Closure, r, mayer_f, Γmulr, u_long_range)
+function closure_cmulr_from_gammamulr(closure::Closure, r, mayer_f, Γmulr, u_long_range)
     γ = Γmulr/r
-    return r*c_closure_from_γ(closure, r, mayer_f, γ, u_long_range) 
+    return r*closure_c_from_gamma(closure, r, mayer_f, γ, u_long_range) 
 end
 
 
-function cmulr_closure_from_Γmulr(::PercusYevick, r, mayer_f::T, Γmulr::T, u_long_range::T) where T
+function closure_cmulr_from_gammamulr(::PercusYevick, r, mayer_f::T, Γmulr::T, _::T) where T
     return  @. mayer_f*(r + Γmulr)
 end
 

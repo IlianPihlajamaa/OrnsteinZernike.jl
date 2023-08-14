@@ -11,14 +11,23 @@ abstract type Method end
 
 Solves the system exactly. This is only implemented for specific systems.
 
-Construct using `Exact(;  M=2^10, dr = sqrt(π/(M+1))/(2π))`
+Right now, the implemented exact methods are
+- three-dimensional single-component system of hard spheres with the Percus Yevick closure
+- three-dimensional multi-component system of hard spheres with the Percus Yevick closure
+
+Construct using 
+
+```Exact(;  M=2^10, dr = sqrt(π/(M+1))/(2π))```
+
 Here, `M` is the number of points that the exact solution is evaluated on, and `dr` is the grid spacing.
-These are used to perform fourier transformations.
+These are used to perform Fourier transformations.
 
 Examples
 
 `method = Exact()`
+
 `method = Exact(M=1000)`
+
 `method = Exact(M=1000, dr=0.01)`
 """
 struct Exact <: Method 
@@ -45,14 +54,14 @@ Solves the system by recursive iteration in Fourier Space. Essentially, the algo
 Optionally, a mixing rule is used to mix the new and previous iteration of c(r) in step 2. 
 
 Arguments:
-- M::Int: number of points discretize the solution on 
-- dr::Float64: grid spacing in real space
-- mixing_parameter::Float64: mixing parameter for iteration mixing. A value of 1 is no mixing. Must be between 0 and 1. 
-- max_iterations::Int64: maximal number of iterations 
-- tolerance::Float64: tolerance to be reached
-- verbose::Bool: whether or not to print convergence information
+- `M::Int`: number of points discretize the solution on 
+- `dr::Float64`: grid spacing in real space
+- `mixing_parameter::Float64`: mixing parameter for iteration mixing. A value of 1 is no mixing. Must be between 0 and 1. 
+- `max_iterations::Int64`: maximal number of iterations 
+- `tolerance::Float64`: tolerance to be reached
+- `verbose::Bool`: whether or not to print convergence information
 
-default: FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance=10^-6, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))
+Default: `FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance=10^-6, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))`
 """
 struct FourierIteration <: Method 
     M::Int
@@ -63,7 +72,7 @@ struct FourierIteration <: Method
     verbose::Bool
 end
 
-function FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance=10^-6, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))
+function FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance=10^-10, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))
     @assert max_iterations > 0 
     @assert tolerance > 0 
     @assert 0 <= mixing_parameter <= 1
@@ -85,14 +94,17 @@ Solves the system by recursive iteration in Fourier Space, and uses the Ng accel
 7. compare with previous value, if not converged go to 2.
 
 Arguments:
-- M::Int: number of points discretize the solution on 
-- dr::Float64: grid spacing in real space
-- N_stages::Int: Number of previous values to take into account for step 6. A higher number should lead to faster convergence, yet more computation time per iteration.
-- max_iterations::Int64: maximal number of iterations 
-- tolerance::Float64: tolerance to be reached
-- verbose::Bool: whether or not to print convergence information
+- `M::Int`: number of points discretize the solution on 
+- `dr::Float64`: grid spacing in real space
+- `N_stages::Int`: Number of previous values to take into account for step 6. A higher number should lead to faster convergence, yet more computation time per iteration.
+- `max_iterations::Int64`: maximal number of iterations 
+- `tolerance::Float64`: tolerance to be reached
+- `verbose::Bool`: whether or not to print convergence information
 
-default: NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-6, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))
+Default: `NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-6, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))`
+
+References:
+Ng, K. C. (1974). Hypernetted chain solutions for the classical one‐component plasma up to Γ= 7000. The Journal of Chemical Physics, 61(7), 2680-2689.
 """
 struct NgIteration <: Method 
     M::Int
@@ -103,7 +115,7 @@ struct NgIteration <: Method
     verbose::Bool
 end
 
-function NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-6, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))
+function NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-10, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))
     @assert max_iterations > 0 
     @assert tolerance > 0 
     @assert N_stages > 0
@@ -212,6 +224,4 @@ include("Solvers/Exact.jl")
 include("Solvers/FourierIteration.jl")
 include("Solvers/NgIteration.jl")
 include("Solvers/DensityRamp.jl")
-
-
 

@@ -3,10 +3,9 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
     r, k = construct_r_and_k_grid(system, method)
     dr = r[2] - r[1]
     dk = k[2] - k[1]
-    β = 1.0 / system.kBT
     ρ = system.ρ
 
-    mayer_f = find_mayer_f_function(system, r, β)
+    mayer_f = find_mayer_f_function(system, r)
     u_long_range = copy(mayer_f)*0.0
 
     Γhat = copy(mayer_f)
@@ -33,7 +32,7 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
 
     # first bootstrapping steps 
     for stage = reverse(1:N_stages)
-        C .= cmulr_closure_from_Γmulr.((closure, ), r, mayer_f, fn[stage+1], u_long_range)
+        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, fn[stage+1], u_long_range)
         fourier!(Ĉ, C, forwardplan, dr)
         @. Γhat = (k - Ĉ*ρ) \ (Ĉ * ρ * Ĉ)
         inverse_fourier!(gn[stage+1], Γhat, backwardplan, dk)
@@ -46,7 +45,7 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
             error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
         end
         Γold = fn[1]  
-        C .= cmulr_closure_from_Γmulr.((closure, ), r, mayer_f, Γold, u_long_range)
+        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, Γold, u_long_range)
         fourier!(Ĉ, C, forwardplan, dr)
         @. Γhat = (k - Ĉ*ρ) \ (Ĉ * ρ * Ĉ)
 
@@ -99,11 +98,10 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     r, k = construct_r_and_k_grid(system, method)
     dr = r[2] - r[1]
     dk = k[2] - k[1]
-    β = 1.0 / system.kBT
     ρ = system.ρ
     Ns = length(ρ.diag)
     Nr = length(r)
-    mayer_f = find_mayer_f_function(system, r, β)
+    mayer_f = find_mayer_f_function(system, r)
     u_long_range = copy(mayer_f)*0.0
     T = eltype(mayer_f)
     TT = eltype(T)
@@ -133,7 +131,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     iteration = 0
     # first bootstrapping steps 
     for stage = reverse(1:N_stages)
-        C .= cmulr_closure_from_Γmulr.((closure, ), r, mayer_f, fn_red[stage+1], u_long_range)
+        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, fn_red[stage+1], u_long_range)
         fourier!(Ĉ, C, forwardplan, dr)
         for ik in eachindex(Γhat, Ĉ)
             Γhat[ik] = (k[ik] * I - Ĉ[ik]*ρ) \ (Ĉ[ik] * ρ * Ĉ[ik])
@@ -146,7 +144,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
         if iteration > max_iterations
             error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
         end
-        C .= cmulr_closure_from_Γmulr.((closure, ), r, mayer_f, fn_red[1], u_long_range)
+        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, fn_red[1], u_long_range)
         fourier!(Ĉ, C, forwardplan, dr)
         for ik in eachindex(Γhat, Ĉ)
             Γhat[ik] = (k[ik] * I - Ĉ[ik]*ρ) \ (Ĉ[ik] * ρ * Ĉ[ik])

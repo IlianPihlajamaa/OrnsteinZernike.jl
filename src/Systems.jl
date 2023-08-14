@@ -46,6 +46,8 @@ function SimpleLiquid(dims, ρ::Number, kBT, potential)
     Tρ = typeof(ρ)
     TkT = typeof(kBT)
     Tpot = typeof(potential)
+    utest = evaluate_potential(potential, 1.2)
+    @assert (utest isa Number) "The density and potential must match. Here the density has type $(typeof(ρ)) and the potential returns type $(typeof(utest))."
     return SimpleLiquid{dims, 1, Tρ, TkT, Tpot}(ρ, kBT, potential)
 end
 
@@ -55,5 +57,17 @@ function SimpleLiquid(dims, ρ::AbstractVector, kBT, potential)
     Ns = length(ρ)
     ρ = Diagonal(SVector{Ns}(ρ))
     Tρ = typeof(ρ)
+    utest = evaluate_potential(potential, 1.2)
+    @assert size(utest)==(Ns, Ns) "The density and potential must match sizes. Here the density has type $(typeof(ρ)), with length $(length(ρ)) and the potential returns type $(typeof(utest))."
+
     return SimpleLiquid{dims, Ns, Tρ, TkT, Tpot}(ρ, kBT, potential)
+end
+
+dimensions(::SimpleLiquid{dims, T1,T2,T3,T4}) where {dims, T1,T2,T3,T4} = dims 
+
+function Base.show(io::IO, ::MIME"text/plain", p::SimpleLiquid)
+    println(io, "$(dimensions(p)) dimensional SimpleLiquid:")
+    println(io, " ρ = $(p.ρ)")
+    println(io, " kBT = $(p.kBT)")
+    println(io, " potential = $(p.potential)")
 end

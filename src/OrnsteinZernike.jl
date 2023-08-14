@@ -11,7 +11,7 @@ export SimpleLiquid
 export OZSolution
 export Exact, FourierIteration, NgIteration, DensityRamp
 export PercusYevick,  HypernettedChain, MeanSphericalApproximation
-export SingleComponentHardSpheres, MultiComponentHardSpheres
+export SingleComponentHardSpheres, MultiComponentHardSpheres, SingleComponentLennardJones
 export compute_compressibility, compute_excess_energy, compute_virial_pressure
 
 include("Systems.jl")

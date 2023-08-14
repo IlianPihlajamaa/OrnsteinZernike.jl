@@ -10,10 +10,12 @@ abstract type Potential end
 """
     SingleComponentHardSpheres
 
-Implements the hard-sphere pair interaction `u(r) = inf` for `r < 1` and `u(r) = 0` for `r > 1`.
+Implements the hard-sphere pair interaction \$ u(r) = \\infty\$ for \$r < 1\$ and \$u(r) = 0\$ for \$r > 1\$.
 
 Example:
-`closure = SingleComponentHardSpheres()`
+```julia
+closure = SingleComponentHardSpheres()
+```
 """
 struct SingleComponentHardSpheres <: Potential end
 
@@ -25,12 +27,14 @@ end
 """
     MultiComponentHardSpheres
 
-Implements the hard-sphere pair interaction `uᵢⱼ(r) = inf` for `r < Dᵢⱼ` and `uᵢⱼ(r) = 0` for `r > Dᵢⱼ` for a multicomponent system.
+Implements the hard-sphere pair interaction \$u_{ij}(r) = \\infty\$ for \$r < D_{ij}\$ and \$u_{ij}(r) = 0\$ for \$r > D_{ij}\$.
 
-Expects a vector Dᵢ of diameters for each of the species. An additive mixing rule is used (`Dᵢⱼ = (Dᵢ+Dⱼ)/2`).
+Expects a vector \$D_i\$ of diameters for each of the species. An additive mixing rule is used \$\\left(D_{ij} = (D_{i}+D_{j})/2\\right)\$.
 
 Example:
-`closure = MultiComponentHardSpheres([0.8, 0.9, 1.0])`
+```julia
+closure = MultiComponentHardSpheres([0.8, 0.9, 1.0])
+```
 """
 struct MultiComponentHardSpheres{N_components, T} <: Potential 
     D::SVector{N_components, T}
@@ -52,16 +56,48 @@ function evaluate_potential(potential::MultiComponentHardSpheres{N,T}, r::Number
     return SMatrix(pot)
 end
 
+
+"""
+    SingleComponentLennardJones
+
+Implements the Lennard-Jones pair interaction \$u(r) = 4\\epsilon [(\\sigma/r)^{12} - (\\sigma/r)^6]\$.
+
+Expects values `ϵ` and `σ`, which respecively are the strength of the potential and particle size. 
+
+Example:
+```julia
+closure = SingleComponentLennardJones(1.0, 2.0)
+```
+"""
+struct SingleComponentLennardJones{T1, T2} <: Potential 
+    ϵ::T1
+    σ::T2
+end
+
+
+function evaluate_potential(potential::SingleComponentLennardJones, r::Number)
+    ϵ = potential.ϵ
+    σ = potential.σ
+    return 4ϵ * ((σ/r)^12 - (σ/r)^6)
+end
+
+
 """
 exp(- beta * u) - 1.
 """
-function find_mayer_f_function(system::SimpleLiquid{dims, species, T1, T2, P}, r::Number, β::Number) where {dims, species, T1, T2, P}
+function find_mayer_f_function(system::SimpleLiquid{dims, species, T1, T2, P}, r::Number) where {dims, species, T1, T2, P}
     U = evaluate_potential(system.potential, r)
-    return @. exp(-β*U) - 1.0
+    β = 1/system.kBT
+    f = @. exp(-β*U) - 1.0
+    return f
 end
 
-function find_mayer_f_function(system::SimpleLiquid{dims, species, T1, T2, P}, r::AbstractArray, β::Number) where {dims, species, T1, T2, P}
-    return find_mayer_f_function.((system, ), r, β)
+function find_mayer_f_function(system::SimpleLiquid{dims, species, T1, T2, P}, r::AbstractArray) where {dims, species, T1, T2, P}
+    return find_mayer_f_function.((system, ), r)
+end
+
+function evaluate_potential(potential::Potential, r::AbstractArray)
+    return evaluate_potential.((potential, ), r)
 end
 
 evaluate_potential_derivative(potential::SingleComponentHardSpheres, r) = 0.0

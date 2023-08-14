@@ -2,15 +2,14 @@
 
 function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure, method::FourierIteration; init=nothing) where {dims, species, T1, T2, P}
     r, k = construct_r_and_k_grid(system, method)
-    β = 1.0/system.kBT
     ρ = system.ρ
     dr = r[2] - r[1]
     dk = k[2] - k[1]
-    mayer_f = find_mayer_f_function(system, r, β)
+    mayer_f = find_mayer_f_function(system, r)
     u_long_range = copy(mayer_f)*0.0
     Ĉ = copy(mayer_f) #ĉ*k
     Γ_new = copy(mayer_f) #γ̂ *k
-    Γ_old = copy(mayer_f) #γ*r
+    Γ_old = copy(mayer_f)*0.0 #γ*r
     if !(isnothing(init))
         Γ_old .= init .* r
     end
@@ -31,7 +30,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
         if iteration > max_iterations
             error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
         end
-        C .= cmulr_closure_from_Γmulr.((closure, ), r, mayer_f, Γ_old, u_long_range)
+        C .= closure_cmulr_from_Γmulr.((closure, ), r, mayer_f, Γ_old, u_long_range)
         if iteration != 0
             @. C = mixing_parameter * C + (1.0 - mixing_parameter) * C_old
         end

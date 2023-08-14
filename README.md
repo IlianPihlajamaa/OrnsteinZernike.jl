@@ -8,9 +8,9 @@ A generic solver for Ornstein-Zernike equations from liquid state theory
 
 One of the big triumphs in liquid state theory is the ability to approximate the structure of a liquid from the way its constituent particles interact. 
 This can be done using the exact Ornstein-Zernike equation: 
-$$g(r) - 1 = c(r) + \int d\textbf{r}' c(\textbf{r}')(g(\textbf{r}- \textbf{r}') - 1)$$
+$$g(r) - 1 = c(r) + \rho \int d\textbf{r}' c(\textbf{r}')(g(\textbf{r}- \textbf{r}') - 1)$$
 
-Here $g(r)$ is the radial distribution function, which describes the structure of a liquid and $c(r)$ is the direct correlation function. Together with an approximate closure relation, which links $c(r)$ to the interaction potential of the particles, this integral equation can be solved. 
+Here $g(r)$ is the radial distribution function, which describes the structure of a liquid, $\rho$ is the number density, and $c(r)$ is the direct correlation function. Together with an approximate closure relation, which links $c(r)$ to the interaction potential of the particles, this integral equation can be solved. 
 
 This package implements common solution methods for the Ornstein Zernike equation, for single component systems as well as mixtures. It implements many predefined closure relations and many interaction potentials. Moreover, extending the package to include other closure relations or interaction potentials takes minimal effort.
 

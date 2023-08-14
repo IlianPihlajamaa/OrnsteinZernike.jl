@@ -44,3 +44,37 @@ function OZSolution(r::T1, k::T1, gr::T, Sk::T, ck::T, cr::T) where {T1,T<:Vecto
     cr = convert_vecofmat_to_3darr(cr)
     OZSolution(r, k, gr, Sk, ck, cr)
 end
+
+function Base.show(io::IO, ::MIME"text/plain", p::OZSolution{T1,T2}) where {T1, T2<:AbstractVector}
+    println(io, "$(typeof(p)):")
+    print(io, " r = ")
+    show(io, p.r')
+    print(io, "'\n k = ")
+    show(io, p.k')
+    print(io, "'\n cr = ")
+    show(io, p.cr')
+    print(io, "'\n gr = ")
+    show(io, p.gr')
+    print(io, "'\n ck = ")
+    show(io, p.ck')
+    print(io, "'\n Sk = ")
+    show(io, p.Sk')
+    print("'\n")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", p::OZSolution{T1,T2}) where {T1,T2<:AbstractArray}
+    println(io, "$(typeof(p)):")
+    print(io, " r = ")
+    show(io, p.r')
+    print(io, "'\n k = ")
+    show(io, p.k')
+    print(io, "'\n cr = ")
+    show(io, p.cr)
+    print(io, "\n gr = ")
+    show(io, p.gr)
+    print(io, "\n ck = ")
+    show(io, p.ck)
+    print(io, "\n Sk = ")
+    show(io, p.Sk)
+    print("\n")
+end

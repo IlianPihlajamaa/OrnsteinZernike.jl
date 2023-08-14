@@ -10,11 +10,15 @@ makedocs(sitename="OrnsteinZernike.jl Documentation",
                             "HighDensities.md"],
             "Basics"=> ["GeneralWorkflow.md",
                         "Potentials.md",
+                        "Systems.md",
                         "Closures.md",
                         "Solvers.md"],
-            "Extending" => ["ExtendingPotentials.md",
-                            "ExtendingClosures.md"],
+            "Theory"=>"Theory.md",
+            "Extending" => ["ExtendingClosures.md", 
+                            "ExtendingPotentials.md"
+                            ],
             "API" => "API.md",
+            "From Python" => "FromPython.md"
          ],
          format = Documenter.HTML(prettyurls = false)
 )
