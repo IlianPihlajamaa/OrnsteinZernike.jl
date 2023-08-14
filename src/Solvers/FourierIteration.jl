@@ -30,7 +30,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
         if iteration > max_iterations
             error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
         end
-        C .= closure_cmulr_from_Γmulr.((closure, ), r, mayer_f, Γ_old, u_long_range)
+        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, Γ_old, u_long_range)
         if iteration != 0
             @. C = mixing_parameter * C + (1.0 - mixing_parameter) * C_old
         end
