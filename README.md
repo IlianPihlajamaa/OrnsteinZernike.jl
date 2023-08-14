@@ -39,7 +39,7 @@ Now that we have solved the equation, we can plot the solution:
 using Plots
 plot(sol.r, sol.gr, xlims=(0,5))
 ```
-![image](docs/Figs/example.png)
+![image](docs/src/Figs/example.png)
 
 See the <a href="https://ilianpihlajamaa.github.io/OrnsteinZernike.jl/dev/">Documentation</a> for more details.
 
