@@ -15,7 +15,7 @@ Everything above generalizes to the mixture case:
 
 The Ornstein zernike equation 
 
-$h_{ij}(r) = c_{ij}(r) + \sum_l \rho_l \int d\textbf{r}' c_{il}(\textbf{r}')h_{lj}(|\textbf{r} - \textbf{r}'|) $
+$h_{ij}(r) = c_{ij}(r) + \sum_l \rho_l \int d\textbf{r}' c_{il}(\textbf{r}')h_{lj}(|\textbf{r} - \textbf{r}'|)$
 
 links the pair correlation function $g_{ij}(r) = h_{ij}(r)+1$ to the species specific number density $\rho_{i}$ and the direct correlation function $c_{ij}(r)$. In order to solve it, a second relation between $h_{ij}(r)$ and $c_{ij}(r)$ must be specified. This is called the closure relation. 
 
