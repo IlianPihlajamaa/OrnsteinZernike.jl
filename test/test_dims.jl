@@ -1,8 +1,8 @@
 
 
 for dims = [2, 3, 4, 5] # dims = 1 does not converge
-    M = 2^10
-    ρ = 0.8
+    M = 2^8
+    ρ = 0.5
     kBT = 1.0
 
     pot = SingleComponentHardSpheres()

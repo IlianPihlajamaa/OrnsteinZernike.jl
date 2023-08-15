@@ -242,56 +242,60 @@ function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{
 end
 
 
-function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{Vector{T}}, dn::Vector{Vector{T}}, r) where T<:AbstractMatrix
-    Ns = size(d0n[1][1], 1)
-    for stage1= 1:N_stages
-        for stage2 = stage1:N_stages
-            Aij = inner(d0n[stage1], d0n[stage2],r)
-            A[stage1, stage2] = Aij
-            A[stage2, stage1] = Aij
-        end
-        b[stage1] = inner(dn[1], d0n[stage1], r)
-    end
-    #coeffs vector of matrix, each element is a matrix of the per species coeffs of that stage
-    coeffs = zeros(Ns, Ns, N_stages)
-    for species2 = 1:Ns
-        for species1 = 1:Ns
-            coeffs12 = getindex.(A, species1, species2)\getindex.(b, species1, species2)
-            coeffs[species1, species2, :] .= coeffs12
-        end
-    end
-    coeffs = reshape(coeffs, (Ns*Ns, N_stages))
-    coeffs = reinterpret(reshape, SMatrix{Ns, Ns, eltype(T), Ns*Ns}, coeffs)
-    coeffs = Vector(coeffs)
-    return coeffs
-end
-# function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{Vector{T}}, dn::Vector{Vector{T}}, equation) where T<:AbstractMatrix
-#     A2 = zeros(N_stages, N_stages)
-#     b2 = zeros(N_stages)
+# function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{Vector{T}}, dn::Vector{Vector{T}}, r) where T<:AbstractMatrix
+#     Ns = size(d0n[1][1], 1)
 #     for stage1= 1:N_stages
 #         for stage2 = stage1:N_stages
-#             Aij = sum(inner(d0n[stage1], d0n[stage2],equation))
-#             A2[stage1, stage2] = Aij
-#             A2[stage2, stage1] = Aij
+#             Aij = inner(d0n[stage1], d0n[stage2],r)
+#             println("3")
+
+#             A[stage1, stage2] = Aij
+#             A[stage2, stage1] = Aij
 #         end
-#         b2[stage1] = sum(inner(dn[1], d0n[stage1], equation))
+#         println("4")
+
+#         b[stage1] = inner(dn[1], d0n[stage1], r)
 #     end
-#     coeffs = A2\b2
+#     #coeffs vector of matrix, each element is a matrix of the per species coeffs of that stage
+#     coeffs = zeros(Ns, Ns, N_stages)
+#     for species2 = 1:Ns
+#         for species1 = 1:Ns
+#             coeffs12 = getindex.(A, species1, species2)\getindex.(b, species1, species2)
+#             coeffs[species1, species2, :] .= coeffs12
+#         end
+#     end
+#     coeffs = reshape(coeffs, (Ns*Ns, N_stages))
+#     coeffs = reinterpret(reshape, SMatrix{Ns, Ns, eltype(T), Ns*Ns}, coeffs)
+#     coeffs = Vector(coeffs)
 #     return coeffs
 # end
 
+
 function inner(u::Vector{T},v::Vector{T}, r) where T<:Number
-    S = zero(T)
-    for i in firstindex(u):(lastindex(u)-1)
-        S += u[i]*v[i]*(r[i+1]-r[i])
+    @assert length(u) == length(v)
+    if length(r) == length(u) #singlecomponent
+        S = zero(T)
+        for i in firstindex(u):(lastindex(u)-1)
+            S += u[i]*v[i]*(r[i+1]-r[i])
+        end
+        return S
+    else # multicomponent
+        S = zero(T)
+        Ns2 =  length(u)÷length(r)
+        for iss = 1:Ns2
+            for i in firstindex(r):(lastindex(r)-1)
+                idx = (i-1)*Ns2 + iss
+                S += u[idx]*v[idx]*(r[i+1]-r[i])
+            end
+        end
+        return S
     end
-    return S
 end
 
-function inner(u::Vector{T},v::Vector{T}, r) where T<:AbstractMatrix
-    S = zero(T)
-    for i in firstindex(u):(lastindex(u)-1)
-        S = S + u[i] .* v[i] .* (r[i+1]-r[i])
-    end
-    return S
-end
+# function inner(u::Vector{T},v::Vector{T}, r) where T<:AbstractMatrix
+#     S = zero(T)
+#     for i in firstindex(u):(lastindex(u)-1)
+#         S = S + u[i] .* v[i] .* (r[i+1]-r[i])
+#     end
+#     return S
+# end

@@ -33,41 +33,6 @@ function get_fourier_plan(::SimpleLiquid{3, species, T1, T2, P}, method, F) wher
     r = collect((1:M)*dr)
     k = collect((1:M)*dk)
     return My3DPlan(plan, r, k, dr, dk, M)
-struct My3DPlan{T1,T2,T3,T4, T5, T6}
-    plan::T1
-    r::T5
-    k::T6
-    dr::T2
-    dk::T3
-    M::T4
-end
-
-struct My1DPlan{T2,T3,T4, T5, T6}
-    r::T5
-    k::T6
-    dr::T2
-    dk::T3
-    M::T4
-end
-
-function get_fourier_plan(::SimpleLiquid{1, species, T1, T2, P}, method, F) where {species, T1, T2, P}
-    M = length(F)
-    dr = method.dr
-    dk =  π/((M+0.5)*dr)
-    r = [i*dr for i = 0.5:(M-0.5)]
-    k = [j*dk for j = 0.5:(M-0.5)]
-    return My1DPlan(r, k, dr, dk, M)
-end
-
-
-function get_fourier_plan(::SimpleLiquid{3, species, T1, T2, P}, method, F) where {species, T1, T2, P}
-    plan =  find_fourier_plan_3d(F)
-    M = length(F)
-    dr = method.dr
-    dk =  π/(M+1)/dr
-    r = collect((1:M)*dr)
-    k = collect((1:M)*dk)
-    return My3DPlan(plan, r, k, dr, dk, M)
 end
 
 function get_fourier_plan(system::SimpleLiquid{ndims, species, T1, T2, P}, method, F) where {ndims, species, T1, T2, P}
@@ -98,7 +63,7 @@ end
 
 function find_fourier_plan_nd(::SimpleLiquid{ndims, species, T1, T2, P}, F::Vector{T}, dr::Number) where {ndims, species, T1, T2, P, T}
     M = length(F)
-    plan = QDHT(Ndims/2-1, 1, M*dr, M)
+    plan = QDHT(ndims/2-1, 1, M*dr, M)
     return plan
 end
 
