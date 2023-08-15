@@ -1,9 +1,9 @@
 
+dims = 3
 
 M = 2^10
 ρ = 0.3
 kBT = 1.0
-dims = 3
 
 pot = SingleComponentHardSpheres()
 system = SimpleLiquid(dims, ρ, kBT, pot)

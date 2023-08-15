@@ -65,7 +65,7 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
             @. d0n[stage] = dn[1] - dn[stage+1]
         end
         
-        coefficients = find_Ng_coefficients(A, b, N_stages, d0n, dn, dr)
+        coefficients = find_Ng_coefficients(A, b, N_stages, d0n, dn, r)
         update_Γ_new_Ng!(Γ_new, coefficients, gn)
 
         for stage = reverse(1:N_stages)
@@ -107,7 +107,6 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     k = fourierplan.k
     mayer_f .= find_mayer_f_function(system, r) 
 
-    dr = r[2] - r[1]
     Ns = length(ρ.diag)
     Nr = length(r)
 
@@ -170,7 +169,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
             @. d0n[stage] = dn[1] - dn[stage+1]
         end
         
-        coefficients = find_Ng_coefficients(A, b, N_stages, d0n, dn, dr)
+        coefficients = find_Ng_coefficients(A, b, N_stages, d0n, dn, r)
         update_Γ_new_Ng!(Γ_new_full, coefficients, gn)
 
         for stage = reverse(1:N_stages)
@@ -222,29 +221,29 @@ end
 #     end
 # end
 
-function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{Vector{T}}, dn::Vector{Vector{T}}, dr) where T<:Number
+function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{Vector{T}}, dn::Vector{Vector{T}}, r) where T<:Number
     for stage1= 1:N_stages
         for stage2 = stage1:N_stages
-            Aij = inner(d0n[stage1],d0n[stage2],dr)
+            Aij = inner(d0n[stage1],d0n[stage2],r)
             A[stage1, stage2] = Aij
             A[stage2, stage1] = Aij
         end
-        b[stage1] = inner(dn[1], d0n[stage1], dr)
+        b[stage1] = inner(dn[1], d0n[stage1], r)
     end
     coeffs = A\b
     return coeffs
 end
 
 
-function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{Vector{T}}, dn::Vector{Vector{T}}, dr) where T<:AbstractMatrix
+function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{Vector{T}}, dn::Vector{Vector{T}}, r) where T<:AbstractMatrix
     Ns = size(d0n[1][1], 1)
     for stage1= 1:N_stages
         for stage2 = stage1:N_stages
-            Aij = inner(d0n[stage1], d0n[stage2],dr)
+            Aij = inner(d0n[stage1], d0n[stage2],r)
             A[stage1, stage2] = Aij
             A[stage2, stage1] = Aij
         end
-        b[stage1] = inner(dn[1], d0n[stage1], dr)
+        b[stage1] = inner(dn[1], d0n[stage1], r)
     end
     #coeffs vector of matrix, each element is a matrix of the per species coeffs of that stage
     coeffs = zeros(Ns, Ns, N_stages)
@@ -274,20 +273,18 @@ end
 #     return coeffs
 # end
 
-function inner(u::Vector{T},v::Vector{T}, dr) where T<:Number
+function inner(u::Vector{T},v::Vector{T}, r) where T<:Number
     S = zero(T)
-    for i in eachindex(u, v)
-        S += u[i]*v[i]
+    for i in firstindex(u):(lastindex(u)-1)
+        S += u[i]*v[i]*(r[i+1]-r[i])
     end
-    S *= dr
     return S
 end
 
-function inner(u::Vector{T},v::Vector{T}, dr) where T<:AbstractMatrix
+function inner(u::Vector{T},v::Vector{T}, r) where T<:AbstractMatrix
     S = zero(T)
-    for i in eachindex(u, v)
-        S = S + u[i] .* v[i]
+    for i in firstindex(u):(lastindex(u)-1)
+        S = S + u[i] .* v[i] .* (r[i+1]-r[i])
     end
-    S *= dr
     return S
 end

@@ -177,6 +177,8 @@ function fourier!(F̂::AbstractVector{T}, F::AbstractVector{T}, Q::Hankel.QDHT{p
     r = Q.r
     @. F = F * r^(halfdims-2)
     Hankel.mul!(F̂, Q, F)
+    @. F = F / r^(halfdims-2)
+
     @. F̂ = F̂ * (2π)^halfdims / k^(halfdims-2)
 end
 
@@ -193,6 +195,7 @@ function inverse_fourier!(F::AbstractVector{T}, F̂::AbstractVector{T}, Q::Hanke
     r = Q.r
     @. F̂ = F̂ * k^(halfdims-2)
     Hankel.mul!(F, Q, F̂)
+    @. F̂ = F̂ / k^(halfdims-2)
     @. F ./= Q.scaleRK^2
     @. F = F * (2π)^(-halfdims) / r^(halfdims-2)
 end
