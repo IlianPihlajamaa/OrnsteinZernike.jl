@@ -59,7 +59,6 @@ function SimpleLiquid(dims, ρ::AbstractVector, kBT, potential)
     Tρ = typeof(ρ)
     utest = evaluate_potential(potential, 1.2)
     @assert size(utest)==(Ns, Ns) "The density and potential must match sizes. Here the density has type $(typeof(ρ)), with length $(length(ρ)) and the potential returns type $(typeof(utest))."
-
     return SimpleLiquid{dims, Ns, Tρ, TkT, Tpot}(ρ, kBT, potential)
 end
 
