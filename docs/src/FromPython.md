@@ -20,7 +20,6 @@ from juliacall import Main as jl
 which will install the latest stable version of Julia the first time it is called. Now install `OrnsteinZernike.jl`, with
 
 ```python
-
 jl.Pkg.add("OrnsteinZernike")
 ```
 

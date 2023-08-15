@@ -1,11 +1,15 @@
 
 
 function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure, method::FourierIteration; init=nothing) where {dims, species, T1, T2, P}
-    r, k = construct_r_and_k_grid(system, method)
     ρ = system.ρ
-    dr = r[2] - r[1]
-    dk = k[2] - k[1]
+
+    r = method.dr * (1:method.M) |> collect
     mayer_f = find_mayer_f_function(system, r)
+    fourierplan = get_fourier_plan(system, method, mayer_f)
+    r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
+    k = fourierplan.k
+    mayer_f .= find_mayer_f_function(system, r) 
+
     u_long_range = copy(mayer_f)*0.0
     Ĉ = copy(mayer_f) #ĉ*k
     Γ_new = copy(mayer_f) #γ̂ *k
@@ -16,8 +20,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     Γhat = copy(mayer_f)
     C = copy(mayer_f) #c*r
     C_old = copy(mayer_f)
-    forwardplan, backwardplan = get_forward_and_backward_plan(system, mayer_f)
-
+        
     max_iterations = method.max_iterations
     tolerance = method.tolerance
     mixing_parameter = method.mixing_parameter
@@ -34,11 +37,11 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
         if iteration != 0
             @. C = mixing_parameter * C + (1.0 - mixing_parameter) * C_old
         end
-        fourier!(Ĉ, C, forwardplan, dr)
+        fourier!(Ĉ, C, fourierplan)
         for ik in eachindex(Γhat, Ĉ)
             Γhat[ik] = (k[ik] * I - Ĉ[ik]*ρ) \ (Ĉ[ik] * ρ * Ĉ[ik])
         end
-        inverse_fourier!(Γ_new, Γhat, backwardplan, dk)
+        inverse_fourier!(Γ_new, Γhat, fourierplan)
         err = compute_error(Γ_new, Γ_old)
         if method.verbose && iteration % 100 == 0
             println("After iteration $iteration, the error is $(round(err, digits=ceil(Int, 5-log10(tolerance)))).")
