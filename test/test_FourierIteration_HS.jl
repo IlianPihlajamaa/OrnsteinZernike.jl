@@ -1,6 +1,5 @@
 
 # Single Component
-
 M = 2^10
 ρ = 0.5
 kBT = 1.1
