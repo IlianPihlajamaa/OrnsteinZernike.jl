@@ -3,7 +3,14 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
     ρ = system.ρ
 
     r = method.dr * (1:method.M) |> collect
+    r = method.dr * (1:method.M) |> collect
     mayer_f = find_mayer_f_function(system, r)
+    fourierplan = get_fourier_plan(system, method, mayer_f)
+    r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
+    k = fourierplan.k
+    mayer_f .= find_mayer_f_function(system, r) 
+
+    dr = r[2] - r[1]
     fourierplan = get_fourier_plan(system, method, mayer_f)
     r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
     k = fourierplan.k
