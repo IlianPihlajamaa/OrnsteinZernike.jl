@@ -63,7 +63,7 @@ end
 
 function find_fourier_plan_nd(::SimpleLiquid{ndims, species, T1, T2, P}, F::Vector{T}, dr::Number) where {ndims, species, T1, T2, P, T}
     M = length(F)
-    plan = QDHT(Ndims/2-1, 1, M*dr, M)
+    plan = QDHT(ndims/2-1, 1, M*dr, M)
     return plan
 end
 
