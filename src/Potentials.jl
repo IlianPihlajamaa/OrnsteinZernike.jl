@@ -84,7 +84,7 @@ end
 function evaluate_potential(potential::SingleComponentLennardJones, r::Number)
     ϵ = potential.ϵ
     σ = potential.σ
-    return 4ϵ * ((σ/r)^12 - (σ/r)^6)
+    return @. 4ϵ * ((σ/r)^12 - (σ/r)^6)
 end
 
 
@@ -110,7 +110,7 @@ function evaluate_potential(potential::PowerLaw, r::Number)
     ϵ = potential.ϵ
     σ = potential.σ
     n = potential.n
-    return ϵ * (σ/r)^n 
+    return @. ϵ * (σ/r)^n 
 end
 
 """
@@ -133,11 +133,7 @@ end
 function evaluate_potential(potential::WCA, r::Number)
     ϵ = potential.ϵ
     σ = potential.σ
-    if r > σ * 2^(1/6)
-        return zero(ϵ)
-    else
-        return 4ϵ * ((σ/r)^12 - (σ/r)^6 - one(ϵ))  
-    end
+    return @. ifelse(r > σ * 2^(1/6), zero(ϵ), 4ϵ * ((σ/r)^12 - (σ/r)^6 - one(ϵ)) )
 end
 
 """
