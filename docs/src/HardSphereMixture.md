@@ -32,7 +32,7 @@ sol = solve(system, closure)
 
 For mixtures, the fields `sol.gr`, `sol.cr`, `sol.ck`, and `sol.Sk` are now three dimensional arrays with shape `(Nr, Ns, Ns)`. For example, $g_{12}(r_6)$ is stored in `sol.gr[6,1,2]`.
 
-We just solved the system using the default iterative solver introduced by Ng [`NgIteration`](@ref). However, in this specific case, an exact solution is implemented. To use this, we specify the method `Exact()`.
+We just solved the system using the default iterative solver [`NgIteration`](@ref) introduced by Ng. However, in this specific case, an exact solution is implemented. To use this, we specify the method `Exact()`.
 
 ```@example hs
 method = Exact()
