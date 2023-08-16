@@ -11,7 +11,7 @@ export SimpleLiquid
 export OZSolution
 export Exact, FourierIteration, NgIteration, DensityRamp
 export PercusYevick,  HypernettedChain, MeanSphericalApproximation
-export CustomPotential, PowerLaw, HardSpheres, SingleComponentLennardJones
+export CustomPotential, PowerLaw, HardSpheres, LennardJones
 export compute_compressibility, compute_excess_energy, compute_virial_pressure
 
 include("Systems.jl")

@@ -64,7 +64,7 @@ end
 
 
 """
-    SingleComponentLennardJones
+    LennardJones
 
 Implements the Lennard-Jones pair interaction \$u(r) = 4\\epsilon [(\\sigma/r)^{12} - (\\sigma/r)^6]\$.
 
@@ -75,13 +75,13 @@ Example:
 potential = SingleComponentLennardJones(1.0, 2.0)
 ```
 """
-struct SingleComponentLennardJones{T1, T2} <: Potential 
+struct LennardJones{T1, T2} <: Potential 
     ϵ::T1
     σ::T2
 end
 
 
-function evaluate_potential(potential::SingleComponentLennardJones, r::Number)
+function evaluate_potential(potential::LennardJones, r::Number)
     ϵ = potential.ϵ
     σ = potential.σ
     return @. 4ϵ * ((σ/r)^12 - (σ/r)^6)
