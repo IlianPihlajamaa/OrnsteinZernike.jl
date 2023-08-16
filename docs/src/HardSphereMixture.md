@@ -2,12 +2,12 @@
 
 The previous example showed the case of a 1-component system. Let's instead look at mixtures here. Consider a 3:1 mixture of hard spheres with sizes 0.5 and 1.0. We solve the system with the same three steps as before.
 
-First, we define the potential. Here, we must use `MultiComponentHardSpheres`, which takes a vector containing the diameters of each species.
+First, we define the potential. Here, we must use `HardSpheres`, which takes a vector containing the diameters of each species.
 
 ```@example hs
 using OrnsteinZernike
 D = [0.5, 1.0]
-potential = MultiComponentHardSpheres(D)
+potential = HardSpheres(D)
 ```
 
 Secondly, we define the system. In this example, the total number density is $\rho = 1.6$. For mixtures, the system expects a vector of individual densities. Those are computed by multiplying the total density with the concentration fraction vector.

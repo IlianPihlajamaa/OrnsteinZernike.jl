@@ -8,53 +8,59 @@ abstract type Potential end
 
 
 """
-    SingleComponentHardSpheres
-
-Implements the hard-sphere pair interaction \$ u(r) = \\infty\$ for \$r < 1\$ and \$u(r) = 0\$ for \$r > 1\$.
-
-Example:
-```julia
-closure = SingleComponentHardSpheres()
-```
-"""
-struct SingleComponentHardSpheres <: Potential end
-
-function evaluate_potential(::SingleComponentHardSpheres, r::Number)
-    return ifelse(r < oneunit(r), Inf64, 0.0)*oneunit(r)
-end
+HardSpheres
 
 
-"""
-    MultiComponentHardSpheres
-
-Implements the hard-sphere pair interaction \$u_{ij}(r) = \\infty\$ for \$r < D_{ij}\$ and \$u_{ij}(r) = 0\$ for \$r > D_{ij}\$.
-
-Expects a vector \$D_i\$ of diameters for each of the species. An additive mixing rule is used \$\\left(D_{ij} = (D_{i}+D_{j})/2\\right)\$.
+Implements the hard-sphere pair interaction for single component systems \$ u(r) = \\infty\$ for \$r < 1\$ and \$u(r) = 0\$ for \$r > 1\$.
 
 Example:
 ```julia
-closure = MultiComponentHardSpheres([0.8, 0.9, 1.0])
+potential = HardSpheres(1.0)
+
+or \$u_{ij}(r) = \\infty\$ for \$r < D_{ij}\$ and \$u_{ij}(r) = 0\$ for \$r > D_{ij}\$ for mixtures.
+
+Expects either a vector \$D_i\$ of diameters for each of the species in which case an additive mixing rule is used \$\\left(D_{ij} = (D_{i}+D_{j})/2\\right)\$.
+Or a matrix \$D_ij\$ of pair diameters.
+
+Example:
+```julia
+potential = HardSpheres([0.8, 0.9, 1.0])
+```
+
+```julia
+Dij = rand(3,3)
+potential = HardSpheres(Dij)
+```
+
 ```
 """
-struct MultiComponentHardSpheres{N_components, T} <: Potential 
-    D::SVector{N_components, T}
-end
+struct HardSpheres{T} <: Potential 
+    D::T
 
-function MultiComponentHardSpheres(D::AbstractVector{T}) where T<:Number
-    N = length(D)
-    return MultiComponentHardSpheres{N,T}(SVector{N,T}(D))
-end
+    HardSpheres(D::Number) = new{typeof(D)}(D)
 
-function evaluate_potential(potential::MultiComponentHardSpheres{N,T}, r::Number) where {N,T}
-    pot = MMatrix{N, N, T, N*N}(undef)
-    D = potential.D
-    for species1 = 1:N
-        for species2 = 1:N
-            pot[species2, species1] = ifelse(r < (D[species1]+D[species2])/2, Inf64, 0.0)*oneunit(r)
-        end
+    function HardSpheres(D::AbstractVector{T}) where T 
+        Ds = SVector{length(D),T}(D)
+        Dij = (Ds .+ Ds')/2
+        T2 = typeof(Dij)
+        new{T2}(Dij)
     end
-    return SMatrix(pot)
+    
+    function HardSpheres(D::AbstractMatrix{T}) where T 
+        @assert size(D, 1) == size(D, 2) "matrix of pair diameters must be square"
+        Ns = size(D, 1)
+        Ds = SMatrix{Ns, Ns}(D)
+        T2 = typeof(Ds)
+        new{T2}(Ds)
+    end
 end
+
+function evaluate_potential(potential::HardSpheres{T}, r::Number) where T
+    Dij = potential.D
+    pot = @. ifelse(r < Dij, Inf64, 0.0)
+    return pot
+end
+
 
 
 """
@@ -66,7 +72,7 @@ Expects values `ϵ` and `σ`, which respecively are the strength of the potentia
 
 Example:
 ```julia
-closure = SingleComponentLennardJones(1.0, 2.0)
+potential = SingleComponentLennardJones(1.0, 2.0)
 ```
 """
 struct SingleComponentLennardJones{T1, T2} <: Potential 
@@ -79,6 +85,83 @@ function evaluate_potential(potential::SingleComponentLennardJones, r::Number)
     ϵ = potential.ϵ
     σ = potential.σ
     return 4ϵ * ((σ/r)^12 - (σ/r)^6)
+end
+
+
+"""
+    PowerLaw
+
+Implements the power law pair interaction \$u(r) = \\epsilon (\\sigma/r)^{n} \$.
+
+Expects values `ϵ`, `σ`, and `n`, which respecively are the strength of the potential and particle size. 
+
+Example:
+```julia
+potential = PowerLaw(1.0, 2.0, 8)
+```
+"""
+struct PowerLaw{T1, T2, T3} <: Potential 
+    ϵ::T1
+    σ::T2
+    n::T3
+end
+
+function evaluate_potential(potential::PowerLaw, r::Number)
+    ϵ = potential.ϵ
+    σ = potential.σ
+    n = potential.n
+    return ϵ * (σ/r)^n 
+end
+
+"""
+    WCA
+
+Implements the Weeks-Chandler-Andersen pair interaction \$u(r) = 4\\epsilon [(\\sigma/r)^{12} - (\\sigma/r)^6 - 1]\$ for \$r>2^{1/2}\\sigma\$ and \$0\$ otherwise.
+
+Expects values `ϵ`, `σ`, and `n`, which respecively are the strength of the potential and particle size. 
+
+Example:
+```julia
+potential = WCA(1.0, 2.0)
+```
+"""
+struct WCA{T1, T2} <: Potential 
+    ϵ::T1
+    σ::T2
+end
+
+function evaluate_potential(potential::WCA, r::Number)
+    ϵ = potential.ϵ
+    σ = potential.σ
+    if r > σ * 2^(1/6)
+        return zero(ϵ)
+    else
+        return 4ϵ * ((σ/r)^12 - (σ/r)^6 - one(ϵ))  
+    end
+end
+
+"""
+    CustomPotential
+
+Implements a potential that evaluates a user defined function.
+
+Expects values `f`, and `p`, which respecively are a callable and a list of parameters.
+The function should be called `f(r::Number, p)` and it should produce either a `Number`,
+in the case of a single-component system, or an `SMatrix`, in the case of a multicomponent system. 
+
+Example:
+```julia
+f = (r, p) -> 4*p[1]*((p[2]/r)^12 -  (p[2]/r)^6)
+potential = CustomPotential(f, (1.0, 1.0))
+```
+"""
+struct CustomPotential{T1, T2} <: Potential 
+    f::T1
+    p::T2
+end
+
+function evaluate_potential(potential::CustomPotential, r::Number)
+    return potential.f(r, potential.p)
 end
 
 
@@ -100,7 +183,7 @@ function evaluate_potential(potential::Potential, r::AbstractArray)
     return evaluate_potential.((potential, ), r)
 end
 
-evaluate_potential_derivative(potential::SingleComponentHardSpheres, r) = 0.0
+evaluate_potential_derivative(potential::HardSpheres, r) = 0.0
 
 function evaluate_potential_derivative(potential::Potential, r)
     #check for discontinuities
@@ -126,18 +209,7 @@ function discontinuities(::Potential)
     return Float64[]
 end
 
-function discontinuities(::SingleComponentHardSpheres)
-    return [1.0]
+function discontinuities(p::HardSpheres)
+    return [p.D]
 end
 
-function discontinuities(potential::MultiComponentHardSpheres)
-    D = potential.D
-    T = eltype(D)
-    disc = MMatrix{N, N, T, N*N}(undef)
-    for species1 = 1:N
-        for species2 = 1:N
-            disc[species2, species1] =  (D[species1]+D[species2])/2
-        end
-    end
-    return [SMatrix(disc)]
-end
