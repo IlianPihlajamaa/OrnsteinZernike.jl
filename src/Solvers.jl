@@ -13,7 +13,8 @@ Solves the system exactly. This is only implemented for specific systems.
 
 Right now, the implemented exact methods are
 - three-dimensional single-component system of hard spheres with the Percus Yevick closure
-- three-dimensional multi-component system of hard spheres with the Percus Yevick closure
+- three-dimensional multi-component system of additive hard spheres with the Percus Yevick closure
+
 
 Construct using 
 

@@ -5,7 +5,7 @@ M = 1000
 kBT = 1.0
 dims = 3
 
-pot = SingleComponentHardSpheres()
+pot = HardSpheres(1.0)
 system = SimpleLiquid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = Exact(M=M)

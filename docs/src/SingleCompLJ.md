@@ -6,19 +6,20 @@ In order to solve an Ornstein-Zernike equation, there are a number of things tha
 3. The closure relation
 4. The solver
 
-Let's start with a very simple example: a three-dimensional 1-component Lennard-Jones system. For this potential, we can make use of the built-in potential 
+Let's start with a very simple example: a three-dimensional 1-component system, where the particles interact according to a power law potential. In this case, we can make use of the built-in potential 
 ```@example lj
 using OrnsteinZernike
 ϵ = 1.0
 σ = 1.0
-potential = SingleComponentLennardJones(ϵ, σ)
+n = 8
+potential = PowerLaw(ϵ, σ, n)
 ```
 
 Now that we have the potential, we define the system
 
 ```@example lj
 dims = 3 # we consider a 3D system
-ρ = 0.01 # number density
+ρ = 0.6 # number density
 kBT = 1.0 # thermal energy
 system = SimpleLiquid(dims, ρ, kBT, potential)
 ```
@@ -49,9 +50,10 @@ Full code:
 using OrnsteinZernike
 ϵ = 1.0
 σ = 1.0
-potential = SingleComponentLennardJones(ϵ, σ)
+n = 12
+potential = PowerLaw(ϵ, σ, n)
 dims = 3 # we consider a 3D system
-ρ = 0.01 # number density
+ρ = 0.6 # number density
 kBT = 1.0 # thermal energy
 system = SimpleLiquid(dims, ρ, kBT, potential)
 closure = HypernettedChain()
