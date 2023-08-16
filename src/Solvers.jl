@@ -32,7 +32,7 @@ Examples
 
 References
 [1] Wertheim, M. S. "Exact solution of the Percus-Yevick integral equation for hard spheres." Physical Review Letters 10.8 (1963): 321.
-[2]Baxter, R. J. "Ornstein–Zernike relation and Percus–Yevick approximation for fluid mixtures." The Journal of Chemical Physics 52.9 (1970): 4559-4562.
+[2] Baxter, R. J. "Ornstein–Zernike relation and Percus–Yevick approximation for fluid mixtures." The Journal of Chemical Physics 52.9 (1970): 4559-4562.
 """
 struct Exact <: Method 
     M::Int
