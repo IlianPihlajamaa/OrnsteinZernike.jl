@@ -90,7 +90,7 @@ end
 """
     PowerLaw
 
-Implements the power law pair interaction \$u(r) = \\epsilon (\\sigma/r)^{n} \$.
+Implements the power law pair interaction \$u(r) = \\epsilon (\\sigma/r)^{n}\$.
 
 Expects values `ϵ`, `σ`, and `n`, which respecively are the strength of the potential and particle size. 
 
