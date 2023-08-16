@@ -26,9 +26,9 @@ system = SimpleLiquid(dims, ρ, kBT, potential)
 
 The `SimpleLiquid` object is meant to be used when dealing with systems that have spherically symmetric interaction potentials and no external fields. 
 
-The third step is to define a closure relation. For now, let's stick to the simple hypernetted chain closure
+The third step is to define a closure relation. For now, let's stick to the simple Percus-Yevick closure
 ```@example lj
-closure = HypernettedChain()
+closure = PercusYevick()
 ```
 We can now solve the system. 
 ```@example lj
@@ -56,7 +56,7 @@ dims = 3 # we consider a 3D system
 ρ = 0.6 # number density
 kBT = 1.0 # thermal energy
 system = SimpleLiquid(dims, ρ, kBT, potential)
-closure = HypernettedChain()
+closure = PercusYevick()
 sol = solve(system, closure)
 using Plots
 plot(sol.r, sol.gr, xlims=(0,5), xlabel="r", ylabel="g(r)")
