@@ -43,10 +43,11 @@ Let's plot the resulting $g(r)$.
 
 ```@example hs
 using Plots
-plot(sol.r, sol.gr[:, 1, 1], xlims=(0,5), xlabel="r", ylabel="g(r)", lw=4, label="g11(r) iterative")
+p = plot(sol.r, sol.gr[:, 1, 1], xlims=(0,5), xlabel="r", ylabel="g(r)", lw=4, label="g11(r) iterative")
 plot!(sol.r, sol.gr[:, 1, 2], xlabel="r", ylabel="g(r)", lw=4, label="g12(r) iterative")
 plot!(sol.r, sol.gr[:, 2, 2], xlabel="r", ylabel="g(r)", lw=4, label="g22(r) iterative")
 plot!(sol_exact.r, sol_exact.gr[:, 1, 1], lw=2, c=:black, label="exact")
 plot!(sol_exact.r, sol_exact.gr[:, 1, 2], lw=2, c=:black, label=nothing)
 plot!(sol_exact.r, sol_exact.gr[:, 2, 2], lw=2, c=:black, label=nothing)
+p
 ```

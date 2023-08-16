@@ -35,7 +35,7 @@ plot(sol.r, sol.gr, xlims=(0,5), xlabel="r", ylabel="g(r)")
 
 ## Mixtures
 
-In the case of multicomponent systems, instead of a number the function should return a `StaticMatrix` from the `StaticArrays` package containing either values for $u_{ij}$. 
+In the case of multicomponent systems, instead of a number the function should return a `StaticMatrix` from the `StaticArrays` package containing values for $u_{ij}$. 
 
 ### Example
 
