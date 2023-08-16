@@ -11,3 +11,5 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 Hankel = "0.5"
+StaticArrays = "1"
+FFTW = "1"

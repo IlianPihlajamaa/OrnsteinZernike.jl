@@ -24,7 +24,7 @@ Example 1: a 3-dimensional 10-component hard-sphere system
 ```@example 1
 using OrnsteinZernike # hide 
 D = 0.1:0.1:1.0
-potential = MultiComponentHardSpheres(D)
+potential = HardSpheres(D)
 kBT = 1.0
 ρ = ones(10)/10
 dims = 3

@@ -23,5 +23,25 @@ In practise, the closure relation typically takes the form $c_{ij}(r) = f(\gamma
 
 ## Fourier Transforms
 
+The ability to numerically solve the Ornstein-Zernike equation relies heavily on doing repeated Fourier Transforms. In arbitrary dimensions, these Fourier transforms can be written as Hankel transforms in the case that the argument is a radially symmetric function. In particular, in $d$ dimensions, the radial Fourier transform and its inverse are given by
+
+$\hat{F}(k) = (2\pi)^{d/2} k ^{1-d/2}\int_0^\infty dr r^{d/2}J_{d/2-1}(kr)F(r)$
+
+$F(r) = (2\pi)^{-d/2} r ^{1-d/2}\int_0^\infty dk k^{d/2}J_{d/2-1}(kr)\hat{F}(k),$
+
+in which $J_{d/2-1}(x)$ is the bessel function of order $d/2-1$. In the special cases of 1 and 3 dimensions, the transform simplifies into:
+
+$\hat{F}(k) = 2\int_0^\infty dr \cos(kr)F(r)$
+
+$F(r) = \frac{1}{\pi}\int_0^\infty dk \cos(kr)\hat{F}(k),$
+
+in 1$d$, and 
+
+$\hat{F}(k) = \frac{4\pi}{k}\int_0^\infty dr r \sin(kr)F(r)$
+
+$F(r) = \frac{1}{2\pi^2r}\int_0^\infty dk k\sin(kr)\hat{F}(k),$
+
+in 3$d$. This package uses discrete versions of all of the above. 
+
 ## Thermodynamic properties
 
