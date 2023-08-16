@@ -25,7 +25,7 @@ function get_fourier_plan(::SimpleLiquid{1, species, T1, T2, P}, method, F) wher
 end
 
 
-function get_fourier_plan(::SimpleLiquid{3, species, T1, T2, P}, method, F::Vector{Float64}) where {species, T1, T2, P}
+function get_fourier_plan(::SimpleLiquid{3, species, T1, T2, P}, method, F::Vector{T}) where {species, T1, T2, P, T<:Union{Float64, AbstractMatrix{Float64}}}
     plan =  find_fourier_plan_3d(F)
     M = length(F)
     dr = method.dr

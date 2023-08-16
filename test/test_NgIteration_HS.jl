@@ -36,7 +36,10 @@ sol = solve(system, closure, method)
 method = Exact(M=M)
 sol2 = solve(system, closure, method)
 
+
 atol = 0.1
+
+
 @test all(maximum.(abs.(sol.cr .- sol2.cr)) .< 10atol) 
 @test all(maximum.(abs.(sol.gr .- sol2.gr)) .< atol) 
 @test all(maximum.(abs.(sol.ck .- sol2.ck)) .< 10atol) 
