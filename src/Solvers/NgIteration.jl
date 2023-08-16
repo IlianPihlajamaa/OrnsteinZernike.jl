@@ -2,21 +2,18 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
     N_stages = method.N_stages
     ρ = system.ρ
 
+
     r = method.dr * (1:method.M) |> collect
     r = method.dr * (1:method.M) |> collect
     mayer_f = find_mayer_f_function(system, r)
+    elementtype = promote_type(eltype(r), typeof(system.kBT), typeof(system.ρ), eltype(mayer_f))
+
+    mayer_f = elementtype.(mayer_f)
+
     fourierplan = get_fourier_plan(system, method, mayer_f)
     r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
     k = fourierplan.k
-    mayer_f .= find_mayer_f_function(system, r) 
-
-    dr = r[2] - r[1]
-    fourierplan = get_fourier_plan(system, method, mayer_f)
-    r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
-    k = fourierplan.k
-    mayer_f .= find_mayer_f_function(system, r) 
-
-    dr = r[2] - r[1]
+    mayer_f .= find_mayer_f_function(system, r)
     u_long_range = copy(mayer_f)*0.0
 
     Γhat = copy(mayer_f)
@@ -108,8 +105,9 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     ρ = system.ρ
 
     r = method.dr * (1:method.M) |> collect
-    mayer_f = find_mayer_f_function(system, r)
-    fourierplan = get_fourier_plan(system, method, mayer_f)
+    elementtype = promote_type(typeof(eltype(r)), typeof(system.kBT), typeof(system.ρ), eltype(mayer_f))
+    mayer_f = elementtype.(mayer_f)
+    fourierplan = get_fourier_plan(system, method, mayer_f .* (ρ * system.kBT))
     r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
     k = fourierplan.k
     mayer_f .= find_mayer_f_function(system, r) 

@@ -50,7 +50,7 @@ Full code:
 using OrnsteinZernike
 ϵ = 1.0
 σ = 1.0
-n = 12
+n = 8
 potential = PowerLaw(ϵ, σ, n)
 dims = 3 # we consider a 3D system
 ρ = 0.6 # number density
