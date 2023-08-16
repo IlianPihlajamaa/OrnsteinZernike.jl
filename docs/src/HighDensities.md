@@ -8,7 +8,7 @@ using OrnsteinZernike
 kBT = 1.0
 dims = 3
 
-pot = SingleComponentHardSpheres()
+pot = HardSpheres(1.0)
 system = SimpleLiquid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration()
@@ -90,7 +90,7 @@ using OrnsteinZernike # hide
 ρ = 1.2 # hide
 kBT = 1.0 # hide
 dims = 3 # hide
-pot = SingleComponentHardSpheres() # hide
+pot = HardSpheres(1.0) # hide
 system = SimpleLiquid(dims, ρ, kBT, pot) # hide
 closure = PercusYevick() # hide
 method = NgIteration() # hide

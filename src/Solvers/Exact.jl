@@ -17,8 +17,9 @@ function find_Cr_3dPYSC_exact(η, r)
     return Cr
 end
 
-function solve(system::SimpleLiquid{3, 1, T1, T2, SingleComponentHardSpheres}, ::PercusYevick, method::Exact) where {T1,T2}
+function solve(system::SimpleLiquid{3, 1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
     # D = 1 by definition
+    @assert system.potential.D == 1.0 "This method assumes that the hard sphere diameter D = 1.0"
     r, k = construct_r_and_k_grid(system, method)
 
     ρ = system.ρ
@@ -74,7 +75,7 @@ end
 # """
 # ref: Baxter, R.J. Ornstein–Zernike Relation and Percus–Yevick Approximation for Fluid Mixtures, J. Chem. Phys. 52, 4559 (1970)
 # """
-function solve(system::SimpleLiquid{3, species, T1, T2, MultiComponentHardSpheres{species, T3}}, ::PercusYevick, method::Exact) where {species, T1, T2, T3}
+function solve(system::SimpleLiquid{3, species, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {species, T1, T2, T3<:AbstractMatrix}
     r, k = construct_r_and_k_grid(system, method)
     ρ = (system.ρ).diag
     T = eltype(ρ)
@@ -85,7 +86,10 @@ function solve(system::SimpleLiquid{3, species, T1, T2, MultiComponentHardSphere
     Sk = zeros(length(k), length(ρ), length(ρ))
     gr = zeros(length(k), length(ρ), length(ρ))
     Cr = zeros(length(k), length(ρ), length(ρ))
-    diameters = system.potential.D
+    diameters = diag(system.potential.D)
+
+    @assert all((diameters .+ diameters')/2 .≈ system.potential.D) "This exact method does not work for non-additive diameters"
+
     p = length(diameters)
     @assert Ns == p
     d = (diameters .+ diameters') / 2

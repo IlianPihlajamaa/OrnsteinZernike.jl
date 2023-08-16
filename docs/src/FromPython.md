@@ -38,7 +38,7 @@ We can now use OrnsteinZernike.jl in Python:
 dims = 3
 kBT = 1.0
 rho = 0.5
-potential = jl.SingleComponentHardSpheres()
+potential = jl.HardSpheres(1.0)
 system = jl.SimpleLiquid(dims, rho, kBT, potential)
 closure = jl.PercusYevick()
 sol = jl.solve(system, closure)

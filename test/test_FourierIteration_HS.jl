@@ -5,7 +5,7 @@ M = 2^10
 kBT = 1.1
 dims = 3
 
-pot = SingleComponentHardSpheres()
+pot = HardSpheres(1.0)
 system = SimpleLiquid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = FourierIteration(M = M, tolerance=10^-10, mixing_parameter=0.8, verbose=false, max_iterations=10^4)
@@ -26,7 +26,7 @@ M = 2^10
 kBT = 1.0
 dims = 3
 
-pot = MultiComponentHardSpheres([1.0, 1.2, 0.8])
+pot = HardSpheres([1.0, 1.2, 0.8])
 system = SimpleLiquid(dims, ρ, kBT, pot)
 
 closure = PercusYevick()

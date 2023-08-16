@@ -44,10 +44,11 @@ Now we can use the closure as any other
 ```@example 1
 ϵ = 1.0
 σ = 1.0
-potential = SingleComponentLennardJones(ϵ, σ)
-dims = 3 # we consider a 3D system
-ρ = 0.01 # number density
-kBT = 1.0 # thermal energy
+n = 12
+potential = PowerLaw(ϵ, σ, n)
+dims = 3 
+ρ = 0.6 
+kBT = 1.0
 system = SimpleLiquid(dims, ρ, kBT, potential)
 closure = MyHNC()
 sol = solve(system, closure)
