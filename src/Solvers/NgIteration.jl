@@ -106,7 +106,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
 
     r = method.dr * (1:method.M) |> collect
     mayer_f = find_mayer_f_function(system, r)
-    elementtype = promote_type(typeof(eltype(r)), typeof(system.kBT), typeof(system.ρ), eltype(mayer_f))
+    elementtype = promote_type(eltype(r), typeof(system.kBT), typeof(system.ρ), eltype(mayer_f))
     mayer_f = elementtype.(mayer_f)
     fourierplan = get_fourier_plan(system, method, mayer_f .* (ρ * system.kBT))
     r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
