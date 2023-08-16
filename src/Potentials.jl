@@ -72,7 +72,7 @@ Expects values `ϵ` and `σ`, which respecively are the strength of the potentia
 
 Example:
 ```julia
-potential = SingleComponentLennardJones(1.0, 2.0)
+potential = LennardJones(1.0, 2.0)
 ```
 """
 struct LennardJones{T1, T2} <: Potential 

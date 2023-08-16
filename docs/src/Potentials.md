@@ -5,7 +5,7 @@ This package defines several potentials that can be used out of the box. It is s
 ```@example
 using OrnsteinZernike, Plots
 r = 0.9:0.01:4.0
-potential = SingleComponentLennardJones(1.0, 1.0)
+potential = LennardJones(1.0, 1.0)
 u = OrnsteinZernike.evaluate_potential(potential, r)
 plot(r, u, xlabel="r", ylabel="u(r)", ylims=(-1,1), label=nothing)
 ```

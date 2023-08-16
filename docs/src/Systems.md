@@ -12,7 +12,7 @@ Example 1: a 2-dimensional Lennard-Jones system
 
 ```@example 1
 using OrnsteinZernike 
-potential = SingleComponentLennardJones(1.0, 1.0)
+potential = LennardJones(1.0, 1.0)
 kBT = 1.0
 ρ = 0.5
 dims = 2
