@@ -32,10 +32,10 @@ Examples
 
 `method = Exact(M=1000, dr=0.01)`
 
-References
-[1] Wertheim, M. S. "Exact solution of the Percus-Yevick integral equation for hard spheres." Physical Review Letters 10.8 (1963): 321.
-[2] Baxter, R. J. "Ornstein–Zernike relation and Percus–Yevick approximation for fluid mixtures." The Journal of Chemical Physics 52.9 (1970): 4559-4562.
-[3] Leutheusser, E. "Exact solution of the Percus-Yevick equation for a hard-core fluid in odd dimensions." Physica A: Statistical Mechanics and its Applications 127.3 (1984): 667-676.
+References:
+1. Wertheim, M. S. "Exact solution of the Percus-Yevick integral equation for hard spheres." Physical Review Letters 10.8 (1963): 321.
+2. Baxter, R. J. "Ornstein–Zernike relation and Percus–Yevick approximation for fluid mixtures." The Journal of Chemical Physics 52.9 (1970): 4559-4562.
+3. Leutheusser, E. "Exact solution of the Percus-Yevick equation for a hard-core fluid in odd dimensions." Physica A: Statistical Mechanics and its Applications 127.3 (1984): 667-676.
 """
 struct Exact <: Method 
     M::Int
@@ -150,9 +150,19 @@ struct DensityRamp{T<:Method, T2<:AbstractVector} <: Method
     verbose::Bool
 end
 
-function DensityRamp(method, densities; verbose=true)
-    @assert issorted(sum.(densities))
-    DensityRamp(method, densities, verbose)
+function DensityRamp(method, densities::AbstractVector{T}; verbose=true) where T
+    if T isa Number
+        @assert issorted(densities)
+        return DensityRamp(method, densities, verbose)
+    elseif T isa AbstractVector
+        @assert issorted(sum.(densities))
+        densities = Diagonal.(SVector{Ns}.(densities))
+        return DensityRamp(method, densities, verbose)
+    elseif T isa AbstractMatrix
+        @assert issorted(sum.(densities))
+        @assert all(isdiag.(densities))
+        return DensityRamp(method, densities, verbose)
+    end
 end
 
 defaultsolver() = NgIteration()

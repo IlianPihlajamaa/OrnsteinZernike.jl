@@ -74,7 +74,7 @@ M = 2^8
 ρ = 0.3
 kBT = 1.0
 
-pot = HardSpheres(1.0)
+pot = HardSpheres([1.0])
 system = SimpleLiquid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method0 = NgIteration(tolerance=10^-10, N_stages=5, M=M, verbose=false, max_iterations=10^3)
