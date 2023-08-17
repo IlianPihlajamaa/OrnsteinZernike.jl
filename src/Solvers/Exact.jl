@@ -17,6 +17,63 @@ function find_Cr_3dPYSC_exact(η, r)
     return Cr
 end
 
+function find_Ck_1dPYSC_exact(η, k)
+    Q0 = -1/(1-η)
+    c0 = -Q0^2
+    c1 = η * Q0^2
+    Ck = @. (2*(-c1 + c1*cos(k) + (c0 + c1) * k* sin(k)))/k^2
+    return Ck
+end
+
+function find_Cr_1dPYSC_exact(η, r) 
+    Q0 = -1/(1-η)
+    c0 = -Q0^2
+    c1 = η * Q0^2
+    Cr = @. c0 + c1*r
+    Cr[r.>1.0] .= 0.0
+    return Cr
+end
+
+function find_Ck_5dPYSC_exact(η, k)
+    T = 1+18η+6η^2 
+    Q0 = 1/(120η*(1-η)^3)*(1-33η-87η^2-6η^3-T^(3/2))   
+    Q1 = -1/(12*(1-η)^3)*((3+2η)*T^(1/2) + 3+19η+3η^2)   
+    Q2 =-T^(1/2)/(24(1-η)^3)*(2+3η+T^(1/2))   
+
+    Q̃0 = -8Q2
+    c0 = -(Q̃0)^2
+    c1 = 120η*Q0^2
+    c3 = 20η*(8Q0*Q2-3Q1^2)
+    c5 = -3/8*η*c0
+    Ck = @. -(1/(k^10))*
+        8*π^2 * (8 * (720c5 - 18c3 * k^2 + c1 * k^4) + (-5760c5 + 
+        144*(c3 + 20c5) * k^2 - 8*(c1 + 9c3 + 30c5) * k^4 
+        + (3c0 + 4c1 + 6c3 + 8c5) * k^6)*cos(k) + 
+        k * (-5760c5 + 48*(3c3 + 20c5) * k^2 - 
+        (3c0 + 8*(c1 + 3c3 + 6c5)) * k^4 + 
+        (c0 + c1 + c3 + c5) * k^6) * sin(k))
+
+    return Ck
+end
+
+function find_Cr_5dPYSC_exact(η, r)
+    T = 1+18η+6η^2 
+    Q0 = 1/(120η*(1-η)^3)*(1-33η-87η^2-6η^3-T^(3/2))   
+    Q1 = -1/(12*(1-η)^3)*((3+2η)*T^(1/2) + 3+19η+3η^2)   
+    Q2 =-T^(1/2)/(24(1-η)^3)*(2+3η+T^(1/2))   
+
+    Q̃0 = -8Q2
+    c0 = -(Q̃0)^2
+    c1 = 120η*Q0^2
+    c3 = 20η*(8Q0*Q2-3Q1^2)
+    c5 = -3/8*η*c0
+    Cr = @. c0 + c1*r + c3*r^3 + c5*r^5
+    Cr[r.>1.0] .= 0.0
+    return Cr
+end
+
+
+
 function solve(system::SimpleLiquid{3, 1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
     # D = 1 by definition
     @assert system.potential.D == 1.0 "This method assumes that the hard sphere diameter D = 1.0"
@@ -35,7 +92,72 @@ function solve(system::SimpleLiquid{3, 1, T1, T2, HardSpheres{T3}}, ::PercusYevi
 
     # γ is a smooth function, therefore it has a nicer transform
     γmulk = @. ρ * (Ck * k)^2 / (k - ρ * Ck * k)
+
     γmulr = inverse_radial_fourier_transform_3d(γmulk, r, k)
+
+    gr = @. Cr + γmulr / r + 1
+    gr[r.<1.0] .= 0.0
+    return OZSolution(r, k, gr, Sk, Ck, Cr)
+end
+
+function solve(system::SimpleLiquid{1, 1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
+    # D = 1 by definition
+    @assert system.potential.D == 1.0 "This method assumes that the hard sphere diameter D = 1.0"
+    r = rand(method.M)
+    mayer_f = find_mayer_f_function(system, r)
+    elementtype = typeof(r[1] .* (system.kBT) .* system.ρ * (mayer_f[1]))
+    mayer_f = elementtype.(mayer_f)
+    fourierplan = get_fourier_plan(system, method, mayer_f)
+
+    r, k = fourierplan.r, fourierplan.k
+
+    ρ = system.ρ
+    η = ρ 
+
+    # baxter
+    Cr = find_Cr_1dPYSC_exact(η, r)
+
+    # analytical tranform of the above:
+    Ck = find_Ck_1dPYSC_exact(η, k)
+
+    Sk = @. 1.0 + ρ * Ck / (1 - ρ * Ck)
+
+    # γ is a smooth function, therefore it has a nicer transform
+    γmulk = @. ρ * (Ck * k)^2 / (k - ρ * Ck * k)
+    γmulr = similar(γmulk)
+    inverse_fourier!(γmulr, γmulk, fourierplan)
+
+    gr = @. Cr + γmulr / r + 1
+    gr[r.<1.0] .= 0.0
+    return OZSolution(r, k, gr, Sk, Ck, Cr)
+end
+
+function solve(system::SimpleLiquid{5, 1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
+    # D = 1 by definition
+    @assert system.potential.D == 1.0 "This method assumes that the hard sphere diameter D = 1.0"
+    r = rand(method.M)
+    mayer_f = find_mayer_f_function(system, r)
+    elementtype = typeof(r[1] .* (system.kBT) .* system.ρ * (mayer_f[1]))
+    mayer_f = elementtype.(mayer_f)
+    fourierplan = get_fourier_plan(system, method, mayer_f)
+
+    r, k = fourierplan.r, fourierplan.k
+
+    ρ = system.ρ
+    η = ρ * 8π^2 / (15 * 2^5)
+
+    # baxter
+    Cr = find_Cr_5dPYSC_exact(η, r)
+
+    # analytical tranform of the above:
+    Ck = find_Ck_5dPYSC_exact(η, k)
+
+    Sk = @. 1.0 + ρ * Ck / (1 - ρ * Ck)
+
+    # γ is a smooth function, therefore it has a nicer transform
+    γmulk = @. ρ * (Ck * k)^2 / (k - ρ * Ck * k)
+    γmulr = similar(γmulk)
+    inverse_fourier!(γmulr, γmulk, fourierplan)
 
     gr = @. Cr + γmulr / r + 1
     gr[r.<1.0] .= 0.0
