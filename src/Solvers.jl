@@ -151,14 +151,14 @@ struct DensityRamp{T<:Method, T2<:AbstractVector} <: Method
 end
 
 function DensityRamp(method, densities::AbstractVector{T}; verbose=true) where T
-    if T isa Number
+    if T <: Number
         @assert issorted(densities)
         return DensityRamp(method, densities, verbose)
-    elseif T isa AbstractVector
+    elseif T <: AbstractVector
         @assert issorted(sum.(densities))
         densities = Diagonal.(SVector{Ns}.(densities))
         return DensityRamp(method, densities, verbose)
-    elseif T isa AbstractMatrix
+    elseif T <: AbstractMatrix
         @assert issorted(sum.(densities))
         @assert all(isdiag.(densities))
         return DensityRamp(method, densities, verbose)
@@ -185,7 +185,7 @@ end
 
 ndims(::SimpleLiquid{Ndims, species, T1, T2, P}) where {Ndims, species, T1, T2, P} = Ndims
 
-function solve(system::SimpleLiquid, closure::Closure, ::Exact)
+function solve(system::SimpleLiquid, closure::Closure,  ::Exact)
     P = typeof(system.potential)
     error("The potential $(P) with closure $(typeof(closure)) has no implemented exact solution in $(ndims(system)) dimensions.")
 end
