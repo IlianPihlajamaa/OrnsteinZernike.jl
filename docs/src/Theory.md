@@ -45,3 +45,14 @@ in 3$d$. This package uses discrete versions of all of the above.
 
 ## Thermodynamic properties
 
+Using the structure as determined by this package, several thermodynamic properies can be computed. In particular, this package contains methods to compute the (virial) pressure $p$, the isothermal compressibility $\chi$, and the excess internal energy per particle $E_x$.
+
+For mixtures, they are computed respectively from the following definitions
+
+$$p =  k_BT \rho_0\sum_i x_i - 1/6 \rho_0^2 \sum_{ij} x_i x_j \int d\textbf{r} r g_{ij}(r) u'_{ij}(r)$$
+
+$$1/χ = 1 - ρ_0 \sum_{ij} x_i x_j \hat{c}_{ij}(k\to0)$$,
+
+$$E_x =   1/2 \rho_0 \sum_{ij} x_i x_j  \int d\textbf{r}  g_{ij}(r) u_{ij}(r)$$
+
+in which $\rho_0=N/V$. The functions to use are [`compute_virial_pressure`](@ref), [`compute_compressibility`](@ref), and, [`compute_excess_energy`](@ref).

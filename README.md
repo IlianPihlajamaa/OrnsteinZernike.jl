@@ -12,7 +12,7 @@ $$g(r) - 1 = c(r) + \rho \int d\textbf{r}' c(\textbf{r}')(g(\textbf{r}- \textbf{
 
 Here $g(r)$ is the radial distribution function, which describes the structure of a liquid, $\rho$ is the number density, and $c(r)$ is the direct correlation function. Together with an approximate closure relation, which links $c(r)$ to the interaction potential of the particles, this integral equation can be solved. 
 
-This package implements common solution methods for the Ornstein Zernike equation, for single component systems as well as mixtures, in any dimension. It implements many predefined closure relations and many interaction potentials. Moreover, it let's you easily use your own clusures and interaction potentials.
+This package implements common solution methods for the Ornstein Zernike equation, for single component systems as well as mixtures, in any dimension. It implements many predefined closure relations and many interaction potentials. Moreover, it let's you easily use your own closures and interaction potentials.
 
 ## Example use
 
@@ -28,11 +28,11 @@ sol = @time solve(system, closure);
 ```
 which prints
 ```
-After iteration 0, the error is 10.4396417.
-After iteration 10, the error is 1.2794593.
-After iteration 20, the error is 1.1e-6.
-Converged after 22 iterations, the error is 2.0e-7.
-0.006574 seconds (176 allocations: 254.781 KiB)
+After iteration 0, the error is 10.43964167059.
+After iteration 10, the error is 1.27945927883.
+After iteration 20, the error is 1.1281e-6.
+Converged after 26 iterations, the error is 6.0e-11.
+  0.004079 seconds (1.70 k allocations: 318.656 KiB)
 ```
 Now that we have solved the equation, we can plot the solution:
 ```julia

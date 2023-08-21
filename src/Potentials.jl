@@ -178,9 +178,13 @@ function evaluate_potential(potential::Potential, r::AbstractArray)
     return evaluate_potential.((potential, ), r)
 end
 
-evaluate_potential_derivative(potential::HardSpheres, r) = 0.0
+evaluate_potential_derivative(potential::HardSpheres, r::Number) = 0.0
 
-function evaluate_potential_derivative(potential::Potential, r)
+function evaluate_potential_derivative(potential::Potential, r::AbstractVector)
+    return evaluate_potential_derivative.((potential, ), r)
+end
+
+function evaluate_potential_derivative(potential::Potential, r::Number)
     #check for discontinuities
     ϵ = sqrt(eps(r))
 
@@ -204,7 +208,9 @@ function discontinuities(::Potential)
     return Float64[]
 end
 
-function discontinuities(p::HardSpheres)
+function discontinuities(p::HardSpheres{T}) where T<:AbstractArray
+    return p.D[:]
+end
+function discontinuities(p::HardSpheres{T}) where T<:Number
     return [p.D]
 end
-

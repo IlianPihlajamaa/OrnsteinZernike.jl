@@ -4,7 +4,7 @@ A generic solver package for Ornstein-Zernike equations from liquid state theory
 
 """
 module OrnsteinZernike
-using FFTW, StaticArrays, LinearAlgebra, Hankel
+using FFTW, StaticArrays, LinearAlgebra, Hankel, SpecialFunctions
 
 export solve
 export SimpleLiquid
