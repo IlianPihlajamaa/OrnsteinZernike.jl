@@ -6,5 +6,5 @@
 To install the package run 
 ```julia
 import Pkg
-Pkg.add("https://github.com/IlianPihlajamaa/OrnsteinZernike.jl")
+Pkg.add("OrnsteinZernike")
 ```

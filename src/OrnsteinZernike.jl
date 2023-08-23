@@ -10,7 +10,9 @@ export solve
 export SimpleLiquid
 export OZSolution
 export Exact, FourierIteration, NgIteration, DensityRamp
-export PercusYevick,  HypernettedChain, MeanSphericalApproximation
+export PercusYevick,  HypernettedChain, MeanSpherical, ReferenceHypernettedChain, Verlet, MartynovSarkisov
+export SoftCoreMeanSpherical, RogersYoung, ZerahHansen, DuhHaymet, Lee, ChoudhuryGhosh, BallonePastoreGalliGazzillo
+export VompeMartynov, CharpentierJackse, BomontBretonnet, Khanpour
 export CustomPotential, PowerLaw, HardSpheres, LennardJones
 export compute_compressibility, compute_excess_energy, compute_virial_pressure
 
