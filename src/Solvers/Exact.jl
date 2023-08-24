@@ -77,7 +77,9 @@ end
 function solve(system::SimpleLiquid{3, 1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
     # D = 1 by definition
     @assert system.potential.D == 1.0 "This method assumes that the hard sphere diameter D = 1.0"
-    r, k = construct_r_and_k_grid(system, method)
+    dk = π  ./ (method.dr * (method.M))
+    r = [i*method.dr for i = 0.5:(method.M-0.5)]
+    k = [j*dk for j = 0.5:(method.M-0.5)]
 
     ρ = system.ρ
     η = ρ * π / 6
@@ -103,7 +105,9 @@ end
 function solve(system::SimpleLiquid{1, 1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
     # D = 1 by definition
     @assert system.potential.D == 1.0 "This method assumes that the hard sphere diameter D = 1.0"
-    r = rand(method.M)
+    r = method.dr * (1:method.M) |> collect
+    dk = π  ./ (method.dr * (method.M))
+    k = dk * (1:method.M) |> collect
     mayer_f = find_mayer_f_function(system, r)
     elementtype = typeof(r[1] .* (system.kBT) .* system.ρ * (mayer_f[1]))
     mayer_f = elementtype.(mayer_f)
@@ -198,7 +202,9 @@ end
 # ref: Baxter, R.J. Ornstein–Zernike Relation and Percus–Yevick Approximation for Fluid Mixtures, J. Chem. Phys. 52, 4559 (1970)
 # """
 function solve(system::SimpleLiquid{3, species, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {species, T1, T2, T3<:AbstractMatrix}
-    r, k = construct_r_and_k_grid(system, method)
+    dk = π  ./ (method.dr * (method.M))
+    r = [i*method.dr for i = 0.5:(method.M-0.5)]
+    k = [j*dk for j = 0.5:(method.M-0.5)]
     ρ = (system.ρ).diag
     T = eltype(ρ)
     Ns = species

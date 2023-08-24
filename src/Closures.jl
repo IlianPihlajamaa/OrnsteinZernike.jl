@@ -6,7 +6,7 @@ Abstract closure type
 abstract type Closure end
 
 function closure_c_from_gamma(closure, r, mayer_f, γ, βu_long_range)
-    B = bridge_function(closure, r, γ, βu_long_range, r)
+    B = bridge_function(closure, r, mayer_f, γ, βu_long_range)
     myone = one.(B)
     c = @. -myone - γ + (mayer_f + myone)*exp(γ)*real(exp(B))
     return c
@@ -65,7 +65,7 @@ struct MeanSpherical <: Closure end
 
 function bridge_function(::MeanSpherical, _, mayer_f, γ, _) 
     oneunit = one.(γ)
-    βu = @. ln(mayer_f+oneunit)
+    βu = @. log(mayer_f+oneunit)
     s = @. γ - βu 
     B = @. log(oneunit + s) - s
     return B
@@ -144,7 +144,7 @@ struct SoftCoreMeanSpherical <: Closure end
 function bridge_function(::SoftCoreMeanSpherical, _, _, γ, βu_long_range)
     oneunit = one.(γ)
     γstar = γ - βu_long_range
-    return @. -γstar + ln(oneunit + γstar)
+    return @. -γstar + log(oneunit + γstar)
 end
 
 """
@@ -169,8 +169,9 @@ end
 function bridge_function(closure::RogersYoung, r, _, γ, _)
     oneunit = one.(γ)
     α = closure.α
+    @assert α > 0 
     f = 1.0 - exp(-α*r)
-    return @. -γ + ln(oneunit + (exp(f*γ)-1)/f)
+    return @. -γ + log(oneunit + (exp(f*γ)-1)/f)
 end
 
 """
@@ -200,7 +201,7 @@ function bridge_function(closure::ZerahHansen, r, _, γ, βu_long_range)
     γstar = γ - βu_long_range
     α = closure.α
     f = 1.0 - exp(-α*r)
-    return @. -γstar + ln(oneunit + (exp(f*γstar)-1)/f)
+    return @. -γstar + log(oneunit + (exp(f*γstar)-1)/f)
 end
 
 """
@@ -412,7 +413,7 @@ end
 function bridge_function(closure::Khanpour, _, _, γ, _)
     oneunit = one.(γ)
     α = closure.α
-    return @. ln(oneunit + α*γ)/α - γ
+    return @. log(oneunit + α*γ)/α - γ
 end
 
 """

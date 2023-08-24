@@ -27,11 +27,11 @@ end
 
 function get_fourier_plan(::SimpleLiquid{3, species, T1, T2, P}, method, F::Vector{T}) where {species, T1, T2, P, T<:Union{Float64, AbstractMatrix{Float64}}}
     plan =  find_fourier_plan_3d(F)
-    M = length(F)
+    M = method.M
     dr = method.dr
-    dk =  π/(M+1)/dr
-    r = collect((1:M)*dr)
-    k = collect((1:M)*dk)
+    dk =  π/(M*dr)
+    r = [i*dr for i = 0.5:(M-0.5)]
+    k = [j*dk for j = 0.5:(M-0.5)]
     return My3DPlan(plan, r, k, dr, dk, M)
 end
 
@@ -42,7 +42,7 @@ end
 
 function find_fourier_plan_3d(F::Vector{T}) where T
     if T <: Number
-        plan = FFTW.plan_r2r!(copy(F), FFTW.RODFT00; flags=FFTW.ESTIMATE)
+        plan = FFTW.plan_r2r!(copy(F), FFTW.RODFT11; flags=FFTW.ESTIMATE)
         return plan
     elseif T <: AbstractArray
         F2 = copy(F)
@@ -50,10 +50,10 @@ function find_fourier_plan_3d(F::Vector{T}) where T
         elT = eltype(T)
         F2 = reinterpret(reshape, elT, F2)
         if Nspecies == 1
-            plan = FFTW.plan_r2r!(F2, FFTW.RODFT00; flags=FFTW.ESTIMATE)
+            plan = FFTW.plan_r2r!(F2, FFTW.RODFT11; flags=FFTW.ESTIMATE)
             return plan 
         else
-            plan = FFTW.plan_r2r!(F2, FFTW.RODFT00, 2, flags=FFTW.ESTIMATE)
+            plan = FFTW.plan_r2r!(F2, FFTW.RODFT11, 2, flags=FFTW.ESTIMATE)
             return plan
         end
     end
@@ -73,7 +73,7 @@ function inverse_radial_fourier_transform_3d(F̂, r, k)
     dk = k[2] - k[1]
     dr = r[2] - r[1]
     # @assert dk*dr ≈ π/(M+1)
-    F = FFTW.r2r(F̂, FFTW.RODFT00)*dk/(4π^2)
+    F = FFTW.r2r(F̂, FFTW.RODFT11)*dk/(4π^2)
     # same as F = dk/(2π^2)*sum(F̂ .* sin.((1:M).*(1:M)'*pi/(M+1)), dims=1)'
     return F
 end
@@ -84,7 +84,7 @@ function radial_fourier_transform_3d(F, r, k)
     dk = k[2] - k[1]
     dr = r[2] - r[1]
     # @assert dk*dr ≈ π/(M+1)
-    F̂ = FFTW.r2r(F, FFTW.RODFT00)*2π*dr
+    F̂ = FFTW.r2r(F, FFTW.RODFT11)*2π*dr 
     # same as F̂ = 4π*dr*sum(F .* sin.((1:M).*(1:M)'*pi/(M+1)), dims=1)'
     return F̂ 
 end
@@ -117,6 +117,7 @@ it uses the discrete sine tranform provided by the r2r function of FFTW internal
 function inverse_fourier!(F::AbstractVector{T}, F̂::AbstractVector{T}, myplan::My3DPlan) where T
     dk = myplan.dk
     plan = myplan.plan
+    M = myplan.M
     @. F = F̂ * dk/(4π^2)
     if T <: Number
         plan*F

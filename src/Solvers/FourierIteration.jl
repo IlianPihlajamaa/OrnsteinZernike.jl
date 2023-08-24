@@ -1,5 +1,3 @@
-
-
 function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure, method::FourierIteration; init=nothing) where {dims, species, T1, T2, P}
     ρ = system.ρ
 
@@ -8,6 +6,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     elementtype = typeof(r[1] .* (system.kBT) .* system.ρ * (mayer_f[1]))
     mayer_f = elementtype.(mayer_f)
     fourierplan = get_fourier_plan(system, method, mayer_f)
+
     r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
     k = fourierplan.k
     mayer_f .= find_mayer_f_function(system, r) 
@@ -17,7 +16,9 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     Γ_new = copy(mayer_f) #γ̂ *k
     Γ_old = copy(mayer_f)*0.0 #γ*r
     if !(isnothing(init))
-        Γ_old .= init .* r
+        Γ_old .= init.*r
+    else
+        Γ_old .= (zero(eltype(Γ_old)), )
     end
     Γhat = copy(mayer_f)
     C = copy(mayer_f) #c*r

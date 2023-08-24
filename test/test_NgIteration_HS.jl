@@ -1,16 +1,17 @@
 
 dims = 3
 
-M = 2^10
+M = 1000
+dr = 10/M
 ρ = 0.3
 kBT = 1.0
 
 pot = HardSpheres(1.0)
 system = SimpleLiquid(dims, ρ, kBT, pot)
 closure = PercusYevick()
-method = NgIteration(tolerance=10^-10, N_stages=5, M=M, verbose=false, max_iterations=10^3)
+method = NgIteration(tolerance=10^-10, N_stages=5, M=M, dr=dr, verbose=false, max_iterations=10^3)
 sol = solve(system, closure, method)
-sol2 = solve(system, closure, Exact(M=M))
+sol2 = solve(system, closure, Exact(M=M, dr=dr))
 
 atol = 0.1
 
@@ -20,7 +21,8 @@ atol = 0.1
 @test all((abs.(sol.Sk .- sol2.Sk)) .< atol) 
 
 
-M = 1000
+M = 2000
+dr = 5.0/M
 ρ = [0.08568282994118655,0.14359889826470624,0.056859386188983715,0.2203848611614371,0.26961494833839134]
 kBT = 1.1
 dims = 3
@@ -29,11 +31,11 @@ D = [0.40402349270703586,1.243480095653075,0.1173675810956587,1.327361311444319,
 pot = HardSpheres(D)
 system = SimpleLiquid(dims, ρ, kBT, pot)
 closure = PercusYevick()
-method = NgIteration(tolerance=10^-10, N_stages=5, M=M, verbose=false, max_iterations=10^3)
+method = NgIteration(tolerance=10^-10,dr=dr, N_stages=5, M=M, verbose=false, max_iterations=10^3)
 
 sol = solve(system, closure, method)
 
-method = Exact(M=M)
+method = Exact(M=M, dr=dr,)
 sol2 = solve(system, closure, method)
 
 

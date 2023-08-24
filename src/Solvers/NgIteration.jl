@@ -2,8 +2,6 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
     N_stages = method.N_stages
     ρ = system.ρ
 
-
-    r = method.dr * (1:method.M) |> collect
     r = method.dr * (1:method.M) |> collect
     mayer_f = find_mayer_f_function(system, r)
     elementtype = typeof(r[1] .* (system.kBT) .* system.ρ * (mayer_f[1]))
@@ -26,6 +24,8 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
     d0n = [copy(mayer_f) for _ in 1:N_stages] # first element is d01 second is d02 etc
     if !(isnothing(init))
         fn[end] .= init.*r
+    else
+        fn[end] .= zero(eltype(eltype(fn)))
     end
     T = eltype(mayer_f)
     A = zeros(T, N_stages, N_stages)
@@ -130,6 +130,8 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     d0n = initialize_vector_of_vectors(TT, N_stages, Ns*Ns*Nr) # first element is d01 second is d02 etc
     if !(isnothing(init))
         fn[end] .= init.*r
+    else
+        fn[end] .= zero(eltype(eltype(fn)))
     end
     A = zeros(TT, N_stages, N_stages)
     b = zeros(TT, N_stages)

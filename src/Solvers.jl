@@ -227,15 +227,6 @@ function find_S_from_ĉ_and_ρ(ĉ::Vector{T}, ρ) where T<:AbstractMatrix
 end
 
 
-function construct_r_and_k_grid(::SimpleLiquid{3, species, T1, T2, P}, method::Union{Exact, NgIteration, FourierIteration}) where {species, T1, T2, P}
-    M = method.M
-    dr = method.dr
-    dk = π/(M+1)/dr
-    r = collect((1:M)*dr)
-    k = collect((1:M)*dk)
-    return r, k
-end
-
 
 include("Solvers/Exact.jl")
 include("Solvers/FourierIteration.jl")
