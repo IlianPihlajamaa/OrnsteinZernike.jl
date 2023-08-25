@@ -67,7 +67,7 @@ function bridge_function(::MeanSpherical, _, mayer_f, γ, _)
     oneunit = one.(γ)
     βu = @. log(mayer_f+oneunit)
     s = @. γ - βu 
-    B = @. log(oneunit + s) - s
+    B = @. log1p(s) - s
     return B
 end
 
@@ -142,9 +142,8 @@ References:
 struct SoftCoreMeanSpherical <: Closure end
 
 function bridge_function(::SoftCoreMeanSpherical, _, _, γ, βu_long_range)
-    oneunit = one.(γ)
     γstar = γ - βu_long_range
-    return @. -γstar + log(oneunit + γstar)
+    return @. -γstar + log1p(γstar)
 end
 
 """
@@ -171,7 +170,7 @@ function bridge_function(closure::RogersYoung, r, _, γ, _)
     α = closure.α
     @assert α > 0 
     f = 1.0 - exp(-α*r)
-    b = @. -γ + log(oneunit + (exp(f*γ)-oneunit)/f)
+    b = @. -γ + log1p((exp(f*γ)-oneunit)/f)
     return b
 end
 
@@ -198,11 +197,10 @@ struct ZerahHansen{T<:Number} <: Closure
 end
 
 function bridge_function(closure::ZerahHansen, r, _, γ, βu_long_range)
-    oneunit = one.(γ)
     γstar = γ - βu_long_range
     α = closure.α
     f = 1.0 - exp(-α*r)
-    return @. -γstar + log(oneunit + (exp(f*γstar)-1)/f)
+    return @. -γstar + log1p((exp(f*γstar)-1)/f)
 end
 
 """
@@ -412,9 +410,8 @@ struct Khanpour{T} <: Closure
 end
 
 function bridge_function(closure::Khanpour, _, _, γ, _)
-    oneunit = one.(γ)
     α = closure.α
-    return @. log(oneunit + α*γ)/α - γ
+    return @. log1p(α*γ)/α - γ
 end
 
 """

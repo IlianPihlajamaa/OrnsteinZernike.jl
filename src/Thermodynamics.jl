@@ -14,23 +14,28 @@ function compute_excess_energy(sol::OZSolution, system::SimpleLiquid{dims, speci
     ρ = system.ρ
     ρ0 = sum(ρ)
     x = get_concentration_fraction(system)
-    dr = r[1] - r[2]
+    dr = r[2] - r[1]
     gr = sol.gr
     u = evaluate_potential.(Ref(system.potential), r)
     E = zero(eltype(eltype(gr)))
 
     rpow = dims-1
     sphere_surface = surface_N_sphere(dims)
+    fraction_matrix = (x*x')
 
-    for i in eachindex(r)
-        if any( isinf.(u[i]) .& .!(iszero.(gr[i, :, :])))
-            error("Inconsistency: g(r) is finite where u(r) is infinite.")
+    for s1 = axes(gr,2)
+        for s2 = axes(gr,3)
+            for i in eachindex(r)
+                if gr[i, s1, s2] < 10^-6 
+                    # because here, gr might not have converged to zero properly, 
+                    # and u can be huge, leading to completely wrong results
+                    continue
+                end
+                E += fraction_matrix[s1,s2] * gr[i, s1, s2] * u[i][s1,s2] * r[i]^rpow 
+            end
         end
-        if any(isinf.(u[i]))
-            continue
-        end
-        E += sum((x*x') .* gr[i, :, :] .* u[i])*r[i]^rpow
     end
+
     E *= sphere_surface*ρ0*dr/2
     return E
 end
@@ -103,18 +108,29 @@ function compute_virial_pressure(sol::OZSolution, system::SimpleLiquid{dims, Nsp
     x = get_concentration_fraction(system)
     kBT = system.kBT
     β = 1/kBT
-    dr = r[1] - r[2]
+    dr = r[2] - r[1]
     gr = sol.gr
     potential = system.potential
     dudr = evaluate_potential_derivative(potential, r)
     rpow = dims
-    p = zero(eltype(gr))
-    for i in eachindex(r)
-        p += sum((x*x') .* gr[i, :, :] .* dudr[i, :, :])*r[i]^rpow 
+    p1 = zero(eltype(gr))
+    fraction_matrix = (x*x')
+    for s1 = axes(gr,2)
+        for s2 = axes(gr,3)
+            for i in eachindex(r)
+                if gr[i, s1, s2] < 10^-6 
+                    # because here, gr might not have converged to zero properly, 
+                    # and dudr can be huge
+                    continue
+                end
+                p1 += (fraction_matrix[s1,s2] * gr[i, s1, s2] * dudr[i][s1,s2])*r[i]^rpow 
+            end
+        end
     end
-
     sphere_surface = surface_N_sphere(dims)
-    p = kBT*ρ0 - sphere_surface/6 * ρ0^2 * dr * p
+    p = kBT*ρ0 - sphere_surface/6 * ρ0^2 * dr * p1
+
+
     ## now add the terms for the discontinuities
 
     discs = unique(discontinuities(system.potential))

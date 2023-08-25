@@ -8,8 +8,7 @@ function dimstest()
         pot = HardSpheres(1.0)
         system = SimpleLiquid(dims, ρ, kBT, pot)
         closure = PercusYevick()
-        ramp = (0.001:0.1:0.9)*ρ
-        method = DensityRamp(NgIteration(tolerance=10^-10, N_stages=5, M=M, verbose=false, max_iterations=10^3), ramp; verbose=false)
+        method = NgIteration(tolerance=10^-10, N_stages=5, M=M, verbose=false, max_iterations=10^3)
         sol = solve(system, closure, method)
         @test all(isfinite.(sol.gr)) # should test with exact method
     end
