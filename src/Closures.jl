@@ -5,14 +5,14 @@ Abstract closure type
 """
 abstract type Closure end
 
-function closure_c_from_gamma(closure, r::Number, mayer_f, γ, βu_long_range)
+function closure_c_from_gamma(closure::Closure, r, mayer_f, γ, βu_long_range)
     B = bridge_function(closure, r, mayer_f, γ, βu_long_range)
     myone = one.(B)
     c = @. -myone - γ + (mayer_f + myone)*exp(γ)*real(exp(B))
     return c
 end
 
-function closure_cmulr_from_gammamulr(closure::Closure, r::Number, mayer_f::T, Γmulr::T, βu_long_range::T) where T
+function closure_cmulr_from_gammamulr(closure::Closure, r, mayer_f, Γmulr, βu_long_range)
     γ = Γmulr/r
     return r*closure_c_from_gamma(closure, r, mayer_f, γ, βu_long_range) 
 end

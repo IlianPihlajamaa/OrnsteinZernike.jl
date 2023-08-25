@@ -11,7 +11,9 @@ makedocs(sitename="OrnsteinZernike.jl Documentation",
             "Tutorials" => ["SingleCompLJ.md",
                             "HardSphereMixture.md",
                             "HighDensities.md",
-                            "OtherDimensions.md"
+                            "OtherDimensions.md",
+                            "Accuracy.md",
+                            "ThermodynamicConsistency.md"
                             ],
             "Basics"=> ["GeneralWorkflow.md",
                         "Potentials.md",
