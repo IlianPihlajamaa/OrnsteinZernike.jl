@@ -4,8 +4,15 @@ using Hankel
 using Random
 Random.seed!(523)
 
-for target in ["Fourier", "FourierIteration_HS", "NgIteration_HS", "thermodynamics", "DensityRamp", "dims"]
+function main_test(target)
     @testset "$target" begin
         include("test_$target.jl")
     end
 end
+
+
+for target in ["Fourier", "FourierIteration_HS", "NgIteration_HS", "thermodynamics", "DensityRamp", "dims"]
+    main_test(target)
+end
+
+

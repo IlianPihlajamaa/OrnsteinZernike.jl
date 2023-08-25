@@ -148,7 +148,6 @@ uses the formula 1/χ = 1 - ρ ĉ(k=0) for single component systems and
 1/χ = 1 - ρ Σᵢⱼ xᵢxⱼ ĉᵢⱼ(k=0) for mixtures. 
 """
 function compute_compressibility(sol::OZSolution, system::SimpleLiquid{dims, species, T1, T2, P}) where {dims, species, T1, T2, P}
-    @assert species == 1
     ρ = system.ρ
     kBT = system.kBT
 
@@ -162,5 +161,4 @@ function compute_compressibility(sol::OZSolution, system::SimpleLiquid{dims, spe
     invρkBTχ = one(T) - ρ0 * sum((x*x') .* ĉ0)
     χ = (one(T)/invρkBTχ)/(kBT*ρ0)
     return χ
-
 end

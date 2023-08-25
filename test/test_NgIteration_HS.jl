@@ -1,4 +1,4 @@
-
+function test2()
 dims = 3
 
 M = 1000
@@ -92,3 +92,6 @@ atol = 0.1
 @test all((abs.(sol.Sk .- sol2.Sk)) .< atol) 
 
 
+end 
+
+test2()

@@ -5,14 +5,14 @@ Abstract closure type
 """
 abstract type Closure end
 
-function closure_c_from_gamma(closure, r, mayer_f, γ, βu_long_range)
+function closure_c_from_gamma(closure, r::Number, mayer_f, γ, βu_long_range)
     B = bridge_function(closure, r, mayer_f, γ, βu_long_range)
     myone = one.(B)
     c = @. -myone - γ + (mayer_f + myone)*exp(γ)*real(exp(B))
     return c
 end
 
-function closure_cmulr_from_gammamulr(closure::Closure, r, mayer_f, Γmulr, βu_long_range)
+function closure_cmulr_from_gammamulr(closure::Closure, r::Number, mayer_f::T, Γmulr::T, βu_long_range::T) where T
     γ = Γmulr/r
     return r*closure_c_from_gamma(closure, r, mayer_f, γ, βu_long_range) 
 end
@@ -29,7 +29,7 @@ closure = PercusYevick()
 """
 struct PercusYevick <: Closure end
 
-function closure_cmulr_from_gammamulr(::PercusYevick, r, mayer_f::T, Γmulr::T, _::T) where T
+function closure_cmulr_from_gammamulr(::PercusYevick, r::Number, mayer_f::T, Γmulr::T, _::T) where T
     return  @. mayer_f*(r + Γmulr)
 end
 
@@ -171,7 +171,8 @@ function bridge_function(closure::RogersYoung, r, _, γ, _)
     α = closure.α
     @assert α > 0 
     f = 1.0 - exp(-α*r)
-    return @. -γ + log(oneunit + (exp(f*γ)-1)/f)
+    b = @. -γ + log(oneunit + (exp(f*γ)-oneunit)/f)
+    return b
 end
 
 """

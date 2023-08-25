@@ -1,3 +1,4 @@
+function fouriertest()
 
 for M = [2^8]
     F = rand(M)
@@ -131,3 +132,5 @@ for M = [100, 200, 300]
     F2 ./= r
     @test F ≈ F2
 end
+end
+fouriertest()
