@@ -29,7 +29,7 @@ Here, we can see, that indeed, the Rogers-Young closure finds a middle ground be
 
 ## Using thermodynamics
 
-There are a number of thermodynamic relations that allow a consistent choice of $\alpha$. Here we opt for $\frac{1}{\beta \chi_T}=\left(\frac{\partial p}{\partial \rho}\right)_T$. For simplicity, we use finite differences to obtain the derivative of the pressure. See the [Theory](@ref) section for more details. Subsequently, we use the bisection method from `Roots.jl` to find the optimal parameter. The results can be compared to Table 1 in Ref. 1. 
+There are a number of thermodynamic relations that allow a consistent choice of $\alpha$. Here we opt for the requirement $\frac{1}{\rho\chi_T}=\left(\frac{\partial p}{\partial \rho}\right)_T$, which physically means that we require the virial and compressibility route of obtaining the pressure to give the same results. For simplicity, we use finite differences to obtain the derivative of the pressure. See the [Theory](@ref) section for more details. Subsequently, we use the bisection method from `Roots.jl` to find the optimal parameter. The results can be compared to Table 1 in Ref. 1. 
 
 
 
@@ -51,10 +51,11 @@ function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
         dpdρ = (p2-p1)/dρ
 
         χ = compute_compressibility(sol1, system1)
-        inconsistency = dpdρ/kBT - 1/(ρ*kBT*χ)
+        inconsistency = dpdρ - 1/(ρ*χ)
         return inconsistency
     end
 
+    # we need to find α such that the inconsistency is zero.
     func = α ->  RY_inconsistency(ρ, α)
     α =  Roots.find_zero(func, (0.001,50.0), Roots.Bisection(), atol=0.0001)
     system = SimpleLiquid(dims, ρ, kBT, pot)

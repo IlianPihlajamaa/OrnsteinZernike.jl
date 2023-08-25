@@ -52,6 +52,7 @@ E = compute_excess_energy(sol, system)
 η = sum(ρ)/6*π
 pexact = sum(ρ)*kBT*(1+2η+3η^2)/(1-η)^2 
 tol = 0.1
+
 @test abs(pexact - p)/pexact < tol
 @test abs(pexact - p2)/pexact < tol
 @test abs(χ - χmix)/χ < tol

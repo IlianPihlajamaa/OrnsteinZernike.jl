@@ -23,13 +23,13 @@ function compute_excess_energy(sol::OZSolution, system::SimpleLiquid{dims, speci
     sphere_surface = surface_N_sphere(dims)
 
     for i in eachindex(r)
-        if any( isinf.(u[i]) .& .!(iszero.(gr[i])))
+        if any( isinf.(u[i]) .& .!(iszero.(gr[i, :, :])))
             error("Inconsistency: g(r) is finite where u(r) is infinite.")
         end
         if any(isinf.(u[i]))
             continue
         end
-        E += sum((x*x') .* gr[i] .* u[i])*r[i]^rpow
+        E += sum((x*x') .* gr[i, :, :] .* u[i])*r[i]^rpow
     end
     E *= sphere_surface*ρ0*dr/2
     return E
@@ -40,14 +40,14 @@ function find_left_and_right_lim_y(potential, β, gr, r::AbstractArray, r0::Numb
     index = searchsortedfirst(r, r0) # first index >= disc
     rmin1 = r[index-1]
     rmin2 = r[index-2]
-    ymin1 = exp.(β*evaluate_potential(potential, rmin1)).*gr[index-1]
-    ymin2 = exp.(β*evaluate_potential(potential, rmin2)).*gr[index-2]
+    ymin1 = exp.(β*evaluate_potential(potential, rmin1)).*gr[index-1, :, :]
+    ymin2 = exp.(β*evaluate_potential(potential, rmin2)).*gr[index-2, :, :]
     yleft = ymin1 + (r0 - rmin1) * (ymin2 - ymin1) / (rmin2 - rmin1)
     
     r1 = r[index+1]
     r2 = r[index+2]
-    y1 = exp.(β*evaluate_potential(potential, r1)).*gr[index+1]
-    y2 = exp.(β*evaluate_potential(potential, r2)).*gr[index+2]
+    y1 = exp.(β*evaluate_potential(potential, r1)).*gr[index+1, :, :]
+    y2 = exp.(β*evaluate_potential(potential, r2)).*gr[index+2, :, :]
     yright = y1 + (r0 - r1) * (y2 - y1) / (r2 - r1)
     return yleft, yright
 end
@@ -110,7 +110,7 @@ function compute_virial_pressure(sol::OZSolution, system::SimpleLiquid{dims, Nsp
     rpow = dims
     p = zero(eltype(gr))
     for i in eachindex(r)
-        p += sum((x*x') .* gr[i] .* dudr[i])*r[i]^rpow 
+        p += sum((x*x') .* gr[i, :, :] .* dudr[i, :, :])*r[i]^rpow 
     end
 
     sphere_surface = surface_N_sphere(dims)
@@ -144,20 +144,20 @@ end
 
 Computes the isothermal compressibility χ of the system
 
-uses the formula 1/χ = 1 - ρ ĉ(k=0) for single component systems and
-1/χ = 1 - ρ Σᵢⱼ xᵢxⱼ ĉᵢⱼ(k=0) for mixtures. 
+uses the formula 1/ρkBTχ = 1 - ρ ĉ(k=0) for single component systems and
+1/ρkBTχ = 1 - ρ Σᵢⱼ ĉᵢⱼ(k=0) for mixtures. 
+Eq. (3.6.16) in Hansen and McDonald
 """
 function compute_compressibility(sol::OZSolution, system::SimpleLiquid{dims, species, T1, T2, P}) where {dims, species, T1, T2, P}
     ρ = system.ρ
     kBT = system.kBT
-
-    ρ0 = sum(ρ)
     x = get_concentration_fraction(system)
+    ρ0 = sum(ρ)
     ĉ = sol.ck
     T = typeof(ρ0)
     k = sol.k
-    dcdk = (ĉ[2]-ĉ[1])/(k[2]-k[1])
-    ĉ0 = ĉ[1] - k[1] * dcdk
+    dcdk = (ĉ[2, :, :]-ĉ[1, :, :]) ./ (k[2]-k[1])
+    ĉ0 = ĉ[1, :, :] - k[1] * dcdk
     invρkBTχ = one(T) - ρ0 * sum((x*x') .* ĉ0)
     χ = (one(T)/invρkBTχ)/(kBT*ρ0)
     return χ
