@@ -33,7 +33,8 @@ There are a number of thermodynamic relations that allow a consistent choice of 
 
 
 
-```@example 1
+```@example 2
+using OrnsteinZernike, Plots
 import Roots
 function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
 
