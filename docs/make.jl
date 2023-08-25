@@ -21,8 +21,8 @@ makedocs(sitename="OrnsteinZernike.jl Documentation",
                         "Closures.md",
                         "Solvers.md"],
             "Theory"=>"Theory.md",
-            "Extending" => ["ExtendingClosures.md", 
-                            "ExtendingPotentials.md"
+            "Extending" => ["ExtendingPotentials.md", 
+                            "ExtendingClosures.md", 
                             ],
             "API" => "API.md",
             "From Python" => "FromPython.md"

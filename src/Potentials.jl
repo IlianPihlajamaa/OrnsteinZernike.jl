@@ -178,7 +178,7 @@ function evaluate_potential(potential::Potential, r::AbstractArray)
     return evaluate_potential.((potential, ), r)
 end
 
-evaluate_potential_derivative(potential::HardSpheres, r::Number) = 0.0
+evaluate_potential_derivative(potential::HardSpheres, ::Number) = zero(typeof(potential.D))
 
 function evaluate_potential_derivative(potential::Potential, r::AbstractVector)
     return evaluate_potential_derivative.((potential, ), r)
