@@ -161,7 +161,7 @@ References:
 
 
 """
-struct RogersYoung{T<:Number} <: Closure 
+struct RogersYoung{T} <: Closure 
     α::T
 end
 
@@ -169,7 +169,7 @@ function bridge_function(closure::RogersYoung, r, _, γ, _)
     oneunit = one.(γ)
     α = closure.α
     @assert α > 0 
-    f = 1.0 - exp(-α*r)
+    f = @. 1.0 - exp(-α*r)
     b = @. -γ + log1p((exp(f*γ)-oneunit)/f)
     return b
 end

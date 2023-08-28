@@ -60,7 +60,9 @@ function evaluate_potential(potential::HardSpheres{T}, r::Number) where T
     return pot
 end
 
-
+function Base.show(io::IO, ::MIME"text/plain", p::HardSpheres)
+    println(io, "HardSpheres($(p.D))")
+end
 
 """
     LennardJones
