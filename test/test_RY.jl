@@ -26,7 +26,6 @@ function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
     return system, sol, α
 end
 
-println("Hard Spheres")
 for ρstar = [0.3]
     ρ = ρstar*sqrt(2)
     M = 1000
