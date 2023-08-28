@@ -28,6 +28,7 @@ ERROR: Recursive iteration did not converge within 1001 steps. Current error = 0
 ```
 
 Instead, we can try to change some solver settings (see [`NgIteration`](@ref) for detailed descriptions):
+
 ```@example pyhd
 using OrnsteinZernike
 ρ = 1.5 # hide
@@ -44,8 +45,8 @@ N_stages = 8 # number of previous iterations to use for the next guess
 
 method = NgIteration(M=M; dr=dr, max_iterations=max_iterations, N_stages=N_stages)
 sol = solve(system, closure, method);
-```@example pyhd
 ```
+```@example pyhd
 using Plots
 plot(sol.r, sol.gr, xlims=(0,5), xlabel="r", ylabel="g(r)", lw=4, label="iterative")
 sol2 = solve(system, closure, Exact(M=M; dr=dr));

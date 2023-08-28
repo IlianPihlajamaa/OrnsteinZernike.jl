@@ -20,7 +20,7 @@ Now we can instantiate the `CustomPotential`, using e.g. a `NamedTuple` to pass 
 ```@example 1
 using OrnsteinZernike
 p = (ϵ = 1.0, σ = 1.0)
-potential = CustomPotential(u, p)
+potential = CustomPotential(my_pot, p)
 ```
 
 And use the potential as any other 
