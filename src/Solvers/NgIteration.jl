@@ -3,16 +3,14 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
     ρ = system.ρ
 
     r = method.dr * (1:method.M) |> collect
-    mayer_f = find_mayer_f_function(system, r)
-    elementtype = typeof(r[1] .* (system.kBT) .* system.ρ * (mayer_f[1]))
-
-    mayer_f = elementtype.(mayer_f)
-
+    βu1, _ = evalutate_long_range_potential(system.potential, system.kBT, r[1])
+    elementtype = typeof(r[1] .* system.kBT .* system.ρ .* βu1)
+    mayer_f = zeros(elementtype, length(r))
     fourierplan = get_fourier_plan(system, method, mayer_f)
     r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
     k = fourierplan.k
-    mayer_f .= find_mayer_f_function(system, r)
-    u_long_range = copy(mayer_f)*0.0
+    βu, βu_long_range = evalutate_long_range_potential(system.potential, system.kBT, r)
+    mayer_f .= find_mayer_f_function.((system,), βu)
 
     Γhat = copy(mayer_f)
     C = copy(mayer_f)
@@ -39,7 +37,7 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
 
     # first bootstrapping steps 
     for stage = reverse(1:N_stages)
-        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, fn[stage+1], u_long_range)
+        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, fn[stage+1], βu_long_range)
         fourier!(Ĉ, C, fourierplan)
         @. Γhat = (k - Ĉ*ρ) \ (Ĉ * ρ * Ĉ)
         inverse_fourier!(gn[stage+1], Γhat, fourierplan)
@@ -52,7 +50,7 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
             error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
         end
         Γold = fn[1]  
-        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, Γold, u_long_range)
+        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, Γold, βu_long_range)
         fourier!(Ĉ, C, fourierplan)
         @. Γhat = (k - Ĉ*ρ) \ (Ĉ * ρ * Ĉ)
 
@@ -105,18 +103,18 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     ρ = system.ρ
 
     r = method.dr * (1:method.M) |> collect
-    mayer_f = find_mayer_f_function(system, r)
-    elementtype = typeof(r[1] .* (system.kBT) .* system.ρ * (mayer_f[1]))
-    mayer_f = elementtype.(mayer_f)
+    βu1, _ = evalutate_long_range_potential(system.potential, system.kBT, r[1])
+    elementtype = typeof(r[1] .* system.kBT .* system.ρ .* βu1)
+    mayer_f = zeros(elementtype, length(r))
     fourierplan = get_fourier_plan(system, method, mayer_f)
     r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
     k = fourierplan.k
-    mayer_f .= find_mayer_f_function(system, r) 
+    βu, βu_long_range = evalutate_long_range_potential(system.potential, system.kBT, r)
+    mayer_f .= find_mayer_f_function.((system,), βu)
 
     Ns = length(ρ.diag)
     Nr = length(r)
 
-    u_long_range = copy(mayer_f)*0.0
     T = eltype(mayer_f)
     TT = eltype(T)
     Γhat = copy(mayer_f)
@@ -146,7 +144,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     iteration = 0
     # first bootstrapping steps 
     for stage = reverse(1:N_stages)
-        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, fn_red[stage+1], u_long_range)
+        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, fn_red[stage+1], βu_long_range)
         fourier!(Ĉ, C, fourierplan)
         for ik in eachindex(Γhat, Ĉ)
             Γhat[ik] = (k[ik] * I - Ĉ[ik]*ρ) \ (Ĉ[ik] * ρ * Ĉ[ik])
@@ -159,7 +157,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
         if iteration > max_iterations
             error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
         end
-        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, fn_red[1], u_long_range)
+        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, fn_red[1], βu_long_range)
         fourier!(Ĉ, C, fourierplan)
         for ik in eachindex(Γhat, Ĉ)
             Γhat[ik] = (k[ik] * I - Ĉ[ik]*ρ) \ (Ĉ[ik] * ρ * Ĉ[ik])
@@ -218,16 +216,6 @@ function update_Γ_new_Ng!(Γ_new::Vector{T}, coeffs, gn::Vector{Vector{T}}) whe
         end
     end
 end
-# function update_Γ_new_Ng!(Γ_new::Vector{T}, coeffs, gn::Vector{Vector{T}}) where T<:AbstractMatrix
-#     #coeffs is vector of matrix
-#     N_stages = length(gn)-1
-#     for i in eachindex(Γ_new)
-#         Γ_new[i] = (1.0 - sum(coeffs)) * gn[1][i] 
-#         for stage = 1:N_stages
-#             Γ_new[i] += coeffs[stage] * gn[stage+1][i]
-#         end
-#     end
-# end
 
 function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{Vector{T}}, dn::Vector{Vector{T}}, r) where T<:Number
     for stage1= 1:N_stages
@@ -241,36 +229,6 @@ function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{
     coeffs = A\b
     return coeffs
 end
-
-
-# function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{Vector{T}}, dn::Vector{Vector{T}}, r) where T<:AbstractMatrix
-#     Ns = size(d0n[1][1], 1)
-#     for stage1= 1:N_stages
-#         for stage2 = stage1:N_stages
-#             Aij = inner(d0n[stage1], d0n[stage2],r)
-#             println("3")
-
-#             A[stage1, stage2] = Aij
-#             A[stage2, stage1] = Aij
-#         end
-#         println("4")
-
-#         b[stage1] = inner(dn[1], d0n[stage1], r)
-#     end
-#     #coeffs vector of matrix, each element is a matrix of the per species coeffs of that stage
-#     coeffs = zeros(Ns, Ns, N_stages)
-#     for species2 = 1:Ns
-#         for species1 = 1:Ns
-#             coeffs12 = getindex.(A, species1, species2)\getindex.(b, species1, species2)
-#             coeffs[species1, species2, :] .= coeffs12
-#         end
-#     end
-#     coeffs = reshape(coeffs, (Ns*Ns, N_stages))
-#     coeffs = reinterpret(reshape, SMatrix{Ns, Ns, eltype(T), Ns*Ns}, coeffs)
-#     coeffs = Vector(coeffs)
-#     return coeffs
-# end
-
 
 function inner(u::Vector{T},v::Vector{T}, r) where T<:Number
     @assert length(u) == length(v)
@@ -293,10 +251,3 @@ function inner(u::Vector{T},v::Vector{T}, r) where T<:Number
     end
 end
 
-# function inner(u::Vector{T},v::Vector{T}, r) where T<:AbstractMatrix
-#     S = zero(T)
-#     for i in firstindex(u):(lastindex(u)-1)
-#         S = S + u[i] .* v[i] .* (r[i+1]-r[i])
-#     end
-#     return S
-# end

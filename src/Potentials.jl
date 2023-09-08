@@ -165,15 +165,13 @@ end
 """
 exp(- beta * u) - 1.
 """
-function find_mayer_f_function(system::SimpleLiquid{dims, species, T1, T2, P}, r::Number) where {dims, species, T1, T2, P}
-    U = evaluate_potential(system.potential, r)
-    β = 1/system.kBT
-    f = @. exp(-β*U) - 1.0
+function find_mayer_f_function(system::SimpleLiquid{dims, species, T1, T2, P}, βU) where {dims, species, T1, T2, P}
+    f = @. exp(-βU) - 1.0
     return f
 end
 
-function find_mayer_f_function(system::SimpleLiquid{dims, species, T1, T2, P}, r::AbstractArray) where {dims, species, T1, T2, P}
-    return find_mayer_f_function.((system, ), r)
+function find_mayer_f_function(system::SimpleLiquid{dims, species, T1, T2, P}, r::AbstractArray, βU::AbstractArray) where {dims, species, T1, T2, P}
+    return find_mayer_f_function.((system, ), r, βU)
 end
 
 function evaluate_potential(potential::Potential, r::AbstractArray)

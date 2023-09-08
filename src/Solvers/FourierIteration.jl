@@ -2,16 +2,16 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     ρ = system.ρ
 
     r = method.dr * (1:method.M) |> collect
-    mayer_f = find_mayer_f_function(system, r)
-    elementtype = typeof(r[1] .* (system.kBT) .* system.ρ * (mayer_f[1]))
-    mayer_f = elementtype.(mayer_f)
-    fourierplan = get_fourier_plan(system, method, mayer_f)
 
+    βu1, _ = evalutate_long_range_potential(system.potential, system.kBT, r[1])
+    elementtype = typeof(r[1] .* system.kBT .* system.ρ .* βu1)
+    mayer_f = zeros(elementtype, length(r))
+    fourierplan = get_fourier_plan(system, method, mayer_f)
     r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
     k = fourierplan.k
-    mayer_f .= find_mayer_f_function(system, r) 
+    βu, βu_long_range = evalutate_long_range_potential(system.potential, system.kBT, r)
+    mayer_f .= find_mayer_f_function.((system,), βu)
 
-    u_long_range = copy(mayer_f)*0.0
     Ĉ = copy(mayer_f) #ĉ*k
     Γ_new = copy(mayer_f) #γ̂ *k
     Γ_old = copy(mayer_f)*0.0 #γ*r
@@ -36,7 +36,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
         if iteration > max_iterations
             error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
         end
-        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, Γ_old, u_long_range)
+        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, Γ_old, βu_long_range)
         if iteration != 0
             @. C = mixing_parameter * C + (1.0 - mixing_parameter) * C_old
         end
