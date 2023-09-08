@@ -8,19 +8,22 @@ We want to implement the interaction potential
 $$u(r) = \epsilon \left(\frac{\sigma}{r}\right)^6.$$
 
 To do this, first we define the function. This function should take two arguments, `r::Number` and `p`, the latter of which contains optional parameters that the function uses. For example:
+
 ```@example 1
-u = (r, p) ->p.ϵ*(p.σ/r)^6
+function my_pot(r, p)
+    return p.ϵ * (p.σ / r)^6
+end
 ```
 
-Now we can instantiate the `CustomPotential`
+Now we can instantiate the `CustomPotential`, using e.g. a `NamedTuple` to pass in the parameters:
 
 ```@example 1
 using OrnsteinZernike
 p = (ϵ = 1.0, σ = 1.0)
-potential = CustomPotential(u, p)
+potential = CustomPotential(my_pot, p)
 ```
 
-Now we can use the potential as any other 
+And use the potential as any other 
 
 ```@example 1
 dims = 3 # we consider a 3D system

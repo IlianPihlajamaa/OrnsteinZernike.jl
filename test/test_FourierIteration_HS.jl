@@ -1,4 +1,4 @@
-
+function test1()
 # Single Component
 M = 1000
 dr = 10/M
@@ -41,3 +41,5 @@ atol = 0.3
 @test all((abs.(sol.gr .- sol2.gr)) .< atol) 
 @test all((abs.(sol.ck .- sol2.ck)) .< atol) 
 @test all((abs.(sol.Sk .- sol2.Sk)) .< atol) 
+end 
+test1()

@@ -11,7 +11,9 @@ makedocs(sitename="OrnsteinZernike.jl Documentation",
             "Tutorials" => ["SingleCompLJ.md",
                             "HardSphereMixture.md",
                             "HighDensities.md",
-                            "OtherDimensions.md"
+                            "OtherDimensions.md",
+                            "Accuracy.md",
+                            "ThermodynamicConsistency.md"
                             ],
             "Basics"=> ["GeneralWorkflow.md",
                         "Potentials.md",
@@ -19,8 +21,8 @@ makedocs(sitename="OrnsteinZernike.jl Documentation",
                         "Closures.md",
                         "Solvers.md"],
             "Theory"=>"Theory.md",
-            "Extending" => ["ExtendingClosures.md", 
-                            "ExtendingPotentials.md"
+            "Extending" => ["ExtendingPotentials.md", 
+                            "ExtendingClosures.md", 
                             ],
             "API" => "API.md",
             "From Python" => "FromPython.md"

@@ -1,5 +1,46 @@
 ## Single component
 
+
+"""
+    integrate(x::AbstractVector, y::AbstractVector, ::SimpsonFast)
+
+Use Simpson's rule on an irregularly spaced grid x.
+"""
+function simpsons_rule(x::AbstractVector, y::AbstractVector)
+    length(x) == length(y) || error("x and y vectors must be of the same length!")
+    length(x) ≥ 2 || error("vectors must contain at least 3 elements")
+    N = length(x)
+    retval = zero(eltype(y))*x[1]
+    yjp2 = y[1]
+    for i in 0:floor(Int64, (N-1)/2)-1
+        j = 2i+1
+        jp1 = j+1
+        jp2 = jp1+1
+
+        dxj = x[jp1] - x[j]
+        dxjp1 = x[jp2] - x[jp1]
+
+        yj = yjp2
+        yjp1 = y[jp1]
+        yjp2 = y[jp2]
+
+        term1 = (2 - dxjp1/dxj) * yj
+        term2 = (dxjp1 + dxj)^2 / (dxjp1*dxj) * yjp1
+        term3 = (2 - dxj/dxjp1) * yjp2
+
+        retval += (dxj+dxjp1)*(term1+term2+term3)/6
+    end
+    if iseven(N)
+        dxNm1 = x[N] - x[N-1]
+        dxNm2 = x[N-1] - x[N-2]
+        retval += (2dxNm1^2+3dxNm1*dxNm2) / (6(dxNm1+dxNm2)) * y[N]
+        retval += (dxNm1^2+3dxNm1*dxNm2) / (6dxNm2) * y[N-1]
+        retval -= (dxNm1^3) / (6dxNm2*(dxNm2+dxNm1)) * y[N-2]
+    end
+    return retval
+end
+
+
 """
     compute_excess_energy(sol::OZSolution, system::SimpleLiquid)
 
@@ -14,24 +55,28 @@ function compute_excess_energy(sol::OZSolution, system::SimpleLiquid{dims, speci
     ρ = system.ρ
     ρ0 = sum(ρ)
     x = get_concentration_fraction(system)
-    dr = r[1] - r[2]
     gr = sol.gr
     u = evaluate_potential.(Ref(system.potential), r)
     E = zero(eltype(eltype(gr)))
 
     rpow = dims-1
     sphere_surface = surface_N_sphere(dims)
+    fraction_matrix = (x*x')
 
-    for i in eachindex(r)
-        if any( isinf.(u[i]) .& .!(iszero.(gr[i])))
-            error("Inconsistency: g(r) is finite where u(r) is infinite.")
+    for s1 = axes(gr,2)
+        for s2 = axes(gr,3)
+            integrand = gr[:, s1, s2] .* getindex.(u, s1, s2) .* r[:] .^ rpow 
+            for i in eachindex(integrand) # if u is inf or gr is very small, set contribution to zero 
+                if isnan(integrand[i]) || gr[i, s1, s2] < 10^-6
+                    integrand[i] = zero(eltype(integrand))
+                end
+            end
+            integral = simpsons_rule(r, integrand)
+            E += fraction_matrix[s1,s2] * integral
         end
-        if any(isinf.(u[i]))
-            continue
-        end
-        E += sum((x*x') .* gr[i] .* u[i])*r[i]^rpow
     end
-    E *= sphere_surface*ρ0*dr/2
+
+    E *= sphere_surface*ρ0/2
     return E
 end
 
@@ -40,14 +85,14 @@ function find_left_and_right_lim_y(potential, β, gr, r::AbstractArray, r0::Numb
     index = searchsortedfirst(r, r0) # first index >= disc
     rmin1 = r[index-1]
     rmin2 = r[index-2]
-    ymin1 = exp.(β*evaluate_potential(potential, rmin1)).*gr[index-1]
-    ymin2 = exp.(β*evaluate_potential(potential, rmin2)).*gr[index-2]
+    ymin1 = exp.(β*evaluate_potential(potential, rmin1)).*gr[index-1, :, :]
+    ymin2 = exp.(β*evaluate_potential(potential, rmin2)).*gr[index-2, :, :]
     yleft = ymin1 + (r0 - rmin1) * (ymin2 - ymin1) / (rmin2 - rmin1)
     
     r1 = r[index+1]
     r2 = r[index+2]
-    y1 = exp.(β*evaluate_potential(potential, r1)).*gr[index+1]
-    y2 = exp.(β*evaluate_potential(potential, r2)).*gr[index+2]
+    y1 = exp.(β*evaluate_potential(potential, r1)).*gr[index+1, :, :]
+    y2 = exp.(β*evaluate_potential(potential, r2)).*gr[index+2, :, :]
     yright = y1 + (r0 - r1) * (y2 - y1) / (r2 - r1)
     return yleft, yright
 end
@@ -103,18 +148,27 @@ function compute_virial_pressure(sol::OZSolution, system::SimpleLiquid{dims, Nsp
     x = get_concentration_fraction(system)
     kBT = system.kBT
     β = 1/kBT
-    dr = r[1] - r[2]
     gr = sol.gr
     potential = system.potential
     dudr = evaluate_potential_derivative(potential, r)
     rpow = dims
-    p = zero(eltype(gr))
-    for i in eachindex(r)
-        p += sum((x*x') .* gr[i] .* dudr[i])*r[i]^rpow 
+    p1 = zero(eltype(gr))
+    fraction_matrix = (x*x')
+    for s1 = axes(gr,2)
+        for s2 = axes(gr,3)
+            integrand = gr[:, s1, s2] .* getindex.(dudr, s1, s2) .* r[:] .^ rpow 
+            for i in eachindex(integrand) # if u is inf or gr is very small, set contribution to zero 
+                if isnan(integrand[i]) || gr[i, s1, s2] < 10^-6
+                    integrand[i] = zero(eltype(integrand))
+                end
+            end
+            integral = simpsons_rule(r, integrand)
+            p1 += fraction_matrix[s1,s2]*integral
+        end
     end
-
     sphere_surface = surface_N_sphere(dims)
-    p = kBT*ρ0 - sphere_surface/6 * ρ0^2 * dr * p
+    p = kBT*ρ0 - sphere_surface/6 * ρ0^2 * p1
+
     ## now add the terms for the discontinuities
 
     discs = unique(discontinuities(system.potential))
@@ -144,22 +198,21 @@ end
 
 Computes the isothermal compressibility χ of the system
 
-uses the formula 1/χ = 1 - ρ ĉ(k=0) for single component systems and
-1/χ = 1 - ρ Σᵢⱼ xᵢxⱼ ĉᵢⱼ(k=0) for mixtures. 
+uses the formula 1/ρkBTχ = 1 - ρ ĉ(k=0) for single component systems and
+1/ρkBTχ = 1 - ρ Σᵢⱼ ĉᵢⱼ(k=0) for mixtures. 
+Eq. (3.6.16) in Hansen and McDonald
 """
 function compute_compressibility(sol::OZSolution, system::SimpleLiquid{dims, species, T1, T2, P}) where {dims, species, T1, T2, P}
     ρ = system.ρ
     kBT = system.kBT
-
-    ρ0 = sum(ρ)
     x = get_concentration_fraction(system)
+    ρ0 = sum(ρ)
     ĉ = sol.ck
     T = typeof(ρ0)
     k = sol.k
-    dcdk = (ĉ[2]-ĉ[1])/(k[2]-k[1])
-    ĉ0 = ĉ[1] - k[1] * dcdk
+    dcdk = (ĉ[2, :, :]-ĉ[1, :, :]) ./ (k[2]-k[1])
+    ĉ0 = ĉ[1, :, :] - k[1] * dcdk
     invρkBTχ = one(T) - ρ0 * sum((x*x') .* ĉ0)
     χ = (one(T)/invρkBTχ)/(kBT*ρ0)
     return χ
-
 end

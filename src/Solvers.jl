@@ -179,8 +179,8 @@ Solves the system `system` using the closure `closure` with the default method `
 """
 function solve end
 
-function solve(system::SimpleLiquid, closure::Closure)
-    solve(system, closure, defaultsolver())
+function solve(system::SimpleLiquid, closure::Closure; init=nothing)
+    solve(system, closure, defaultsolver(); init=init)
 end
 
 ndims(::SimpleLiquid{Ndims, species, T1, T2, P}) where {Ndims, species, T1, T2, P} = Ndims

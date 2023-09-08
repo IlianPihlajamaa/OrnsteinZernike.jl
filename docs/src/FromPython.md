@@ -17,12 +17,11 @@ In `Python` (only versions $\geq$ 3 are supported), run:
 from juliacall import Main as jl
 ```
 
-which will install the latest stable version of Julia the first time it is called. Now install `OrnsteinZernike.jl`, with
+which will install the latest stable version of Julia the first time it is called. Now install `OrnsteinZernike.jl` with 
 
 ```python
 jl.Pkg.add("OrnsteinZernike")
 ```
-
 To import this package in order to use it we need to run:
 
 ```python
@@ -35,6 +34,8 @@ The `jl.seval` function let's us evaluate any julia code from within Python.
 We can now use OrnsteinZernike.jl in Python:
 
 ```python
+from juliacall import Main as jl
+jl.seval("using OrnsteinZernike")
 dims = 3
 kBT = 1.0
 rho = 0.5

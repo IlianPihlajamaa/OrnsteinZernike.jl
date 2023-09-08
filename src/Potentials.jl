@@ -60,7 +60,9 @@ function evaluate_potential(potential::HardSpheres{T}, r::Number) where T
     return pot
 end
 
-
+function Base.show(io::IO, ::MIME"text/plain", p::HardSpheres)
+    println(io, "HardSpheres($(p.D))")
+end
 
 """
     LennardJones
@@ -178,7 +180,7 @@ function evaluate_potential(potential::Potential, r::AbstractArray)
     return evaluate_potential.((potential, ), r)
 end
 
-evaluate_potential_derivative(potential::HardSpheres, r::Number) = 0.0
+evaluate_potential_derivative(potential::HardSpheres, ::Number) = zero(typeof(potential.D))
 
 function evaluate_potential_derivative(potential::Potential, r::AbstractVector)
     return evaluate_potential_derivative.((potential, ), r)

@@ -10,7 +10,7 @@ D = [0.5, 1.0]
 potential = HardSpheres(D)
 ```
 
-Secondly, we define the system. In this example, the total number density is $\rho = 1.6$. For mixtures, the system expects a vector of individual densities. Those are computed by multiplying the total density with the concentration fraction vector.
+Secondly, we define the system. In this example, the total number density is $\rho = 1.6$. For mixtures, the system expects a vector of individual densities. Those are computed by multiplying the total density with the concentration fractions.
 
 ```@example hs
 ρ_total = 1.6

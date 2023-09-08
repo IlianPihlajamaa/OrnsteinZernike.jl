@@ -51,7 +51,7 @@ For mixtures, they are computed respectively from the following definitions
 
 $$p =  k_BT \rho_0\sum_i x_i - 1/6 \rho_0^2 \sum_{ij} x_i x_j \int d\textbf{r} r g_{ij}(r) u'_{ij}(r)$$
 
-$$1/χ = 1 - ρ_0 \sum_{ij} x_i x_j \hat{c}_{ij}(k\to0)$$,
+$$1/(\rho_0 k_BT \chi)  = 1 - ρ_0 \sum_{ij} x_i x_j \hat{c}_{ij}(k\to0)$$,
 
 $$E_x =   1/2 \rho_0 \sum_{ij} x_i x_j  \int d\textbf{r}  g_{ij}(r) u_{ij}(r)$$
 
