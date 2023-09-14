@@ -417,7 +417,7 @@ end
 """
     ReferenceHypernettedChain <: Closure
 
-Implements the Reference Hypernetted Chain closure \$b(r) = b_{HS}(r) \$. Here \$b_{HS}(r)=\\left((a_1+a_2x)(x-a_3)(x-a_4)/(a_3 a_4)\\right)^2\$ for \$x<a_4\$ and \$b_{HS}(r)=\\left(A_1 \\exp(-a_5(x-a_4))\\sin(A2(x-a_4))/r\\right)^2\$ is the hard sphere bridge function found in Malijevský & Labík.
+Implements the Reference Hypernetted Chain closure \$b(r) = b_{HS}(r) \$. Here \$b_{HS}(r)=\\left((a_1+a_2x)(x-a_3)(x-a_4)/(a_3 a_4)\\right)^2\$ for \$x<a_4\$ and \$b_{HS}(r)=\\left(A_1 \\exp(-a_5(x-a_4))\\sin(A_2(x-a_4))/r\\right)^2\$ is the hard sphere bridge function found in Malijevský & Labík.
 The parameters are defined as
 
 \$x = r-1\$
@@ -466,10 +466,10 @@ function bridge_function(closure::ReferenceHypernettedChain, r, _, _, _)
     a_5 = 0.15975/η^2
     a_6 = (2.69757 - 0.86987η)
     A_2 =  π / (a_6 - a_4 - 1)
-    A_1 = (a_1+a_2*a_4)(a_4-a_3)(a_4+1)/(A_2*a_3*a_4)
+    A_1 = (a_1+a_2*a_4)*(a_4-a_3)*(a_4+1)/(A_2*a_3*a_4)
     b = -ifelse(x<a_4, 
         ((a_1+a_2*x)*(x-a_3)*(x-a_4)/(a_3* a_4))^2,
-    	(A_1*exp(-a_5*(x-a_4))*sin(A2*(x-a_4))/r)^2
+    	(A_1*exp(-a_5*(x-a_4))*sin(A_2*(x-a_4))/r)^2
     )
     return b
 end
