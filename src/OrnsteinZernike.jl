@@ -18,6 +18,7 @@ export compute_compressibility, compute_excess_energy, compute_virial_pressure
 
 include("Systems.jl")
 include("Potentials.jl")
+include("PotentialSplitting.jl")
 include("Closures.jl")
 include("FourierTransforms.jl")
 include("Solutions.jl")
