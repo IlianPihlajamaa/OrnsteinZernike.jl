@@ -59,7 +59,7 @@ function Base.show(io::IO, ::MIME"text/plain", p::OZSolution{T1,T2}) where {T1, 
     show(io, p.ck')
     print(io, "'\n Sk = ")
     show(io, p.Sk')
-    print("'\n")
+    print("' \n")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", p::OZSolution{T1,T2}) where {T1,T2<:AbstractArray}

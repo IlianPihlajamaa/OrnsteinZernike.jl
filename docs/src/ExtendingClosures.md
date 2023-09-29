@@ -3,11 +3,11 @@
 Creating your own closure type is very easy. It takes two steps. First, the type itself must be created, and secondly, one of the methods that evaluates the closure must be overloaded.
 
 There are three options. One can overload either
-1.  `bridge_function(closure, r, mayer_f, γ, u_long_range)`
-2.  `closure_c_from_gamma(closure, r, mayer_f, γ, u_long_range)`
-3.  `closure_cmulr_from_gammamulr(closure, r, mayer_f, γ, u_long_range)`
+1.  `bridge_function(closure, r, mayer_f, γ)`
+2.  `closure_c_from_gamma(closure, r, mayer_f, γ, βu_LR)`
+3.  `closure_cmulr_from_gammamulr(closure, r, mayer_f, γ, βu_LR)`
 
-Here, `mayer_f` is the Mayer-f function $f(r) = \exp(-\beta u(r)) - 1$, and `u_long_range` is the tail part of the potential, if the closure needs that. In practise, which of the three methods is overloaded can be arbitrary and depends on what is most convenient.
+Here, `mayer_f` is the Mayer-f function $f(r) = \exp(-\beta u(r)) - 1$, if the closure needs that, and `βu_LR` is the long range part of the potential. In practise, which of the three methods is overloaded can be arbitrary and depends on what is most convenient.
 
 ### Example 
 
@@ -25,7 +25,7 @@ Now we can define how this closure should be evaluated. Here, we can for example
 
 ```@example 1
 import OrnsteinZernike.bridge_function
-function OrnsteinZernike.bridge_function(::MyHNC, _, _, _, _)
+function OrnsteinZernike.bridge_function(::MyHNC, _, _, _)
     return 0.0
 end
 ```

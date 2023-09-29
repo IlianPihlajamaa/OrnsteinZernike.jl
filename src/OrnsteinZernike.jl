@@ -15,6 +15,7 @@ export SoftCoreMeanSpherical, RogersYoung, ZerahHansen, DuhHaymet, Lee, Choudhur
 export VompeMartynov, CharpentierJackse, BomontBretonnet, Khanpour
 export CustomPotential, PowerLaw, HardSpheres, LennardJones
 export compute_compressibility, compute_excess_energy, compute_virial_pressure
+export WCADivision
 
 include("Systems.jl")
 include("Potentials.jl")

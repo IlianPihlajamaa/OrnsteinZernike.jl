@@ -32,3 +32,5 @@ p_exact = (1+2η+3η^2)/(1-η)^2-1.0
 scatter(M_array, abs.(p.-p_exact)./p_exact)
 plot!(ylabel="relative error", xlabel="M", xscale=:log, yscale=:log)
 ```
+
+In principle, these results can be extrapolated to improve the accuracy further.

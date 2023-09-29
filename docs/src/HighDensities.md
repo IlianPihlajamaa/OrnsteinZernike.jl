@@ -1,6 +1,6 @@
 # Solving at high densities
 
-Sometimes, especially when dealing with high densities, the solvers do not converge out-of-the-box. It is sometimes necessary to play with the solver settings to get it to converge
+Sometimes, especially when dealing with high densities, the solvers do not converge out-of-the-box. It may be necessary to play with the solver settings to get it to converge
 ```julia
 using OrnsteinZernike
 ρ = 1.5

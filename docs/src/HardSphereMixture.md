@@ -2,7 +2,7 @@
 
 The previous example showed the case of a 1-component system. Let's instead look at mixtures here. Consider a 3:1 mixture of hard spheres with sizes 0.5 and 1.0. We solve the system with the same three steps as before.
 
-First, we define the potential. Here, we must use `HardSpheres`, which takes a vector containing the diameters of each species.
+First, we define the potential. Here, we must use `HardSpheres`, which takes a vector containing the diameters of each species and applies an additive mixing rule. For more information see [`HardSpheres`](@ref).
 
 ```@example hs
 using OrnsteinZernike
@@ -30,7 +30,7 @@ And now we solve the system.
 sol = solve(system, closure)
 ```
 
-For mixtures, the fields `sol.gr`, `sol.cr`, `sol.ck`, and `sol.Sk` are now three dimensional arrays with shape `(Nr, Ns, Ns)`. For example, $g_{12}(r_6)$ is stored in `sol.gr[6,1,2]`.
+For mixtures, the fields `sol.gr`, `sol.cr`, `sol.ck`, and `sol.Sk` are now three-dimensional arrays with shape `(Nr, Ns, Ns)`. For example, $g_{12}(r_6)$ is stored in `sol.gr[6,1,2]`.
 
 We just solved the system using the default iterative solver [`NgIteration`](@ref) introduced by Ng. However, in this specific case, an exact solution is implemented. To use this, we specify the method `Exact()`.
 

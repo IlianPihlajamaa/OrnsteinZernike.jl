@@ -5,16 +5,16 @@ Abstract closure type
 """
 abstract type Closure end
 
-function closure_c_from_gamma(closure::Closure, r, mayer_f, γ, βu_long_range)
-    B = bridge_function(closure, r, mayer_f, γ, βu_long_range)
+function closure_c_from_gamma(closure::Closure, r, mayer_f, γ, βuLR)
+    B = bridge_function(closure, r, mayer_f, γ .- βuLR)
     myone = one.(B)
     c = @. -myone - γ + (mayer_f + myone)*exp(γ)*real(exp(B))
     return c
 end
 
-function closure_cmulr_from_gammamulr(closure::Closure, r, mayer_f, Γmulr, βu_long_range)
+function closure_cmulr_from_gammamulr(closure::Closure, r, mayer_f, Γmulr, βuLR)
     γ = Γmulr/r
-    return r*closure_c_from_gamma(closure, r, mayer_f, γ, βu_long_range) 
+    return r*closure_c_from_gamma(closure, r, mayer_f, γ, βuLR) 
 end
 
 """
@@ -29,8 +29,13 @@ closure = PercusYevick()
 """
 struct PercusYevick <: Closure end
 
-function closure_cmulr_from_gammamulr(::PercusYevick, r::Number, mayer_f::T, Γmulr::T, _::T) where T
+function closure_cmulr_from_gammamulr(::PercusYevick, r::Number, mayer_f::T, Γmulr::T) where T
     return  @. mayer_f*(r + Γmulr)
+end
+
+function bridge_function(::PercusYevick, _, _, γ)
+    B  = @. log1p(γ) - γ
+    return B
 end
 
 """
@@ -45,7 +50,7 @@ closure = HypernettedChain()
 """
 struct HypernettedChain <: Closure end
 
-function bridge_function(::HypernettedChain, _, _, γ, _)
+function bridge_function(::HypernettedChain, _, _, γ)
     zerounit = zero.(γ)
     B = zerounit
     return B
@@ -63,7 +68,7 @@ closure = MeanSpherical()
 """
 struct MeanSpherical <: Closure end
 
-function bridge_function(::MeanSpherical, _, mayer_f, γ, _) 
+function bridge_function(::MeanSpherical, _, mayer_f, γ) 
     oneunit = one.(γ)
     βu = @. log(mayer_f+oneunit)
     s = @. γ - βu 
@@ -95,7 +100,7 @@ function Verlet(; A=1.0, B=8.0/5.0)
     return Verlet(A, B)
 end
 
-function bridge_function(closure::Verlet, _, _, γ, _)
+function bridge_function(closure::Verlet, _, _, γ)
     A = closure.A; B = closure.B
     oneunit = one.(γ)
     return @. -(A*γ^2/2)/(oneunit + B*γ/2)
@@ -118,7 +123,7 @@ Martynov, G. A., and G. N. Sarkisov. "Exact equations and the theory of liquids.
 """
 struct MartynovSarkisov <: Closure end
 
-function bridge_function(::MartynovSarkisov, _, _, γ, _)
+function bridge_function(::MartynovSarkisov, _, _, γ)
     oneunit = one.(γ)
     return @. sqrt(oneunit+2γ) - oneunit - γ
 end
@@ -141,8 +146,8 @@ References:
 """
 struct SoftCoreMeanSpherical <: Closure end
 
-function bridge_function(::SoftCoreMeanSpherical, _, _, γ, βu_long_range)
-    γstar = γ - βu_long_range
+function bridge_function(::SoftCoreMeanSpherical, _, _, γ)
+    γstar = γ
     return @. -γstar + log1p(γstar)
 end
 
@@ -165,7 +170,7 @@ struct RogersYoung{T} <: Closure
     α::T
 end
 
-function bridge_function(closure::RogersYoung, r, _, γ, _)
+function bridge_function(closure::RogersYoung, r, _, γ)
     oneunit = one.(γ)
     α = closure.α
     @assert α > 0 
@@ -196,8 +201,7 @@ struct ZerahHansen{T<:Number} <: Closure
     α::T
 end
 
-function bridge_function(closure::ZerahHansen, r, _, γ, βu_long_range)
-    γstar = γ - βu_long_range
+function bridge_function(closure::ZerahHansen, r, _, γstar)
     α = closure.α
     f = 1.0 - exp(-α*r)
     return @. -γstar + log1p((exp(f*γstar)-1)/f)
@@ -220,9 +224,8 @@ References:
 """
 struct DuhHaymet <: Closure end
 
-function bridge_function(::DuhHaymet, _, _, γ, βu_long_range)
+function bridge_function(::DuhHaymet, _, _, γstar)
     oneunit = one.(γ)
-    γstar = γ - βu_long_range
     b = @. ifelse(γstar>0,  (-γstar^2)  / (2 * (oneunit + (5γstar+11oneunit)/(7γstar+9oneunit) * γstar)), -γstar^2/2)
     return b
 end
@@ -250,7 +253,7 @@ struct Lee{T} <: Closure
     α::T
 end
 
-function bridge_function(closure::Lee, _, mayerf, γ, _)
+function bridge_function(closure::Lee, _, mayerf, γ)
     oneunit = one.(γ)
     ρ = closure.ρ
     γstar = @. γ - ρ*mayerf/2
@@ -281,9 +284,8 @@ struct ChoudhuryGhosh{T} <: Closure
     α::T
 end
 
-function bridge_function(closure::ChoudhuryGhosh, _, _, γ, βu_long_range)
+function bridge_function(closure::ChoudhuryGhosh, _, _, γstar)
     oneunit = one.(γ)
-    γstar = γ - βu_long_range
     α = closure.α
     return @. ifelse(γstar>0,  (-γstar^2)  / (2 * (oneunit + α * γstar)), -γstar^2/2)
 end
@@ -308,7 +310,7 @@ struct BallonePastoreGalliGazzillo{T} <: Closure
     s::T
 end
 
-function bridge_function(closure::BallonePastoreGalliGazzillo, _, _, γ, _)
+function bridge_function(closure::BallonePastoreGalliGazzillo, _, _, γ)
     oneunit = one.(γ)
     s = closure.s
     return @. (oneunit + s*γ)^(1/s) - γ - oneunit
@@ -331,9 +333,8 @@ Vompe, A. G., and G. A. Martynov. "The bridge function expansion and the self‐
 """
 struct VompeMartynov <: Closure end
 
-function bridge_function(::VompeMartynov, _, _, γ, βu_long_range)
-    oneunit = one.(γ)
-    γstar = γ - βu_long_range
+function bridge_function(::VompeMartynov, _, _, γstar)
+    oneunit = one.(γstar)
     return @. sqrt(oneunit+2γstar) - oneunit - γstar
 end
 
@@ -356,9 +357,8 @@ struct CharpentierJackse{T} <: Closure
     α::T
 end
 
-function bridge_function(closure::CharpentierJackse, _, _, γ, βu_long_range)
+function bridge_function(closure::CharpentierJackse, _, _, γstar)
     oneunit = one.(γ)
-    γstar = γ - βu_long_range
     α = closure.α
     return @. (sqrt(oneunit+4α*γstar) - oneunit - 2α*γstar)/(2α)
 end
@@ -382,9 +382,8 @@ struct BomontBretonnet{T} <: Closure
     f::T
 end
 
-function bridge_function(closure::BomontBretonnet, _, _, γ, βu_long_range)
+function bridge_function(closure::BomontBretonnet, _, _, γstar)
     oneunit = one.(γ)
-    γstar = γ - βu_long_range
     f = closure.f
     return @. sqrt(oneunit + 2γstar + f*γstar^2) - oneunit - γstar
 end
@@ -409,7 +408,7 @@ struct Khanpour{T} <: Closure
     α::T
 end
 
-function bridge_function(closure::Khanpour, _, _, γ, _)
+function bridge_function(closure::Khanpour, _, _, γ)
     α = closure.α
     return @. log1p(α*γ)/α - γ
 end
@@ -455,7 +454,7 @@ struct ReferenceHypernettedChain{T} <: Closure
     η::T
 end
 
-function bridge_function(closure::ReferenceHypernettedChain, r, _, _, _)
+function bridge_function(closure::ReferenceHypernettedChain, r, _, _)
     oneunit = one(r)
     η = closure.η
     x = r-oneunit

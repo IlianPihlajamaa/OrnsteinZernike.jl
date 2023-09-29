@@ -34,16 +34,16 @@ end
 
 return the potential and the long range part of the potential, at distance r in units of kBT. 
 """
-function evalutate_long_range_potential(pot::Potential, kBT, r::Number)
+function evaluate_long_range_potential(pot::Potential, kBT, r::Number)
     U = evaluate_potential(pot, r) / kBT
     return U, zero(U)
 end
-function evalutate_long_range_potential(potdiv::Potential, kBT, r::AbstractArray)
-    Utuples = evalutate_long_range_potential.((potdiv, ), kBT, r)
+function evaluate_long_range_potential(potdiv::Potential, kBT, r::AbstractArray)
+    Utuples = evaluate_long_range_potential.((potdiv, ), kBT, r)
     return first.(Utuples), last.(Utuples)
 end
 
-function evalutate_long_range_potential(potdiv::WCADivision, kBT, r::Number)
+function evaluate_long_range_potential(potdiv::WCADivision, kBT, r::Number)
     pot = potdiv.potential
     U = evaluate_potential(pot, r) / kBT
     if r > potdiv.cutoff
@@ -53,3 +53,8 @@ function evalutate_long_range_potential(potdiv::WCADivision, kBT, r::Number)
     end
     return U, ULR
 end
+
+function evaluate_potential(potential::WCADivision, r)
+    evaluate_potential(potential.potential, r)
+end
+

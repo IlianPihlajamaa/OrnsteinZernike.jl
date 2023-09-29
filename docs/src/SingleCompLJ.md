@@ -26,7 +26,7 @@ system = SimpleLiquid(dims, ρ, kBT, potential)
 
 The `SimpleLiquid` object is meant to be used when dealing with systems that have spherically symmetric interaction potentials and no external fields. 
 
-The third step is to define a closure relation. For now, let's stick to the simple Percus-Yevick closure
+The third step is to define a closure relation. For now, let's stick to the simple Hypernetted Chain closure
 ```@example lj
 closure = HypernettedChain()
 ```

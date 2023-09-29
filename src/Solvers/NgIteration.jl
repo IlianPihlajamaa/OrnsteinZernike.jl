@@ -3,13 +3,13 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
     ρ = system.ρ
 
     r = method.dr * (1:method.M) |> collect
-    βu1, _ = evalutate_long_range_potential(system.potential, system.kBT, r[1])
+    βu1, _ = evaluate_long_range_potential(system.potential, system.kBT, r[1])
     elementtype = typeof(r[1] .* system.kBT .* system.ρ .* βu1)
     mayer_f = zeros(elementtype, length(r))
     fourierplan = get_fourier_plan(system, method, mayer_f)
     r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
     k = fourierplan.k
-    βu, βu_long_range = evalutate_long_range_potential(system.potential, system.kBT, r)
+    βu, βu_long_range = evaluate_long_range_potential(system.potential, system.kBT, r)
     mayer_f .= find_mayer_f_function.((system,), βu)
 
     Γhat = copy(mayer_f)
@@ -103,13 +103,13 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     ρ = system.ρ
 
     r = method.dr * (1:method.M) |> collect
-    βu1, _ = evalutate_long_range_potential(system.potential, system.kBT, r[1])
+    βu1, _ = evaluate_long_range_potential(system.potential, system.kBT, r[1])
     elementtype = typeof(r[1] .* system.kBT .* system.ρ .* βu1)
     mayer_f = zeros(elementtype, length(r))
     fourierplan = get_fourier_plan(system, method, mayer_f)
     r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
     k = fourierplan.k
-    βu, βu_long_range = evalutate_long_range_potential(system.potential, system.kBT, r)
+    βu, βu_long_range = evaluate_long_range_potential(system.potential, system.kBT, r)
     mayer_f .= find_mayer_f_function.((system,), βu)
 
     Ns = length(ρ.diag)
