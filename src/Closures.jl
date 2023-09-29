@@ -29,7 +29,7 @@ closure = PercusYevick()
 """
 struct PercusYevick <: Closure end
 
-function closure_cmulr_from_gammamulr(::PercusYevick, r::Number, mayer_f::T, Γmulr::T) where T
+function closure_cmulr_from_gammamulr(::PercusYevick, r::Number, mayer_f::T, Γmulr::T, _) where T
     return  @. mayer_f*(r + Γmulr)
 end
 
