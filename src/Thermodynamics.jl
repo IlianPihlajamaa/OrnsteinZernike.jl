@@ -191,6 +191,8 @@ function get_concentration_fraction(system)
     error("Unreachable code: file an issue!")
 end
 
+_eachslice(a;dims=1) = eachslice(a,dims=dims)
+_eachslice(a::Vector;dims=1) = a
 
 
 """
@@ -207,12 +209,17 @@ function compute_compressibility(sol::OZSolution, system::SimpleLiquid{dims, spe
     kBT = system.kBT
     x = get_concentration_fraction(system)
     ρ0 = sum(ρ)
-    ĉ = sol.ck
     T = typeof(ρ0)
-    k = sol.k
-    dcdk = (ĉ[2, :, :]-ĉ[1, :, :]) ./ (k[2]-k[1])
-    ĉ0 = ĉ[1, :, :] - k[1] * dcdk
+    ĉ0 = get_ĉ0(sol, system)
     invρkBTχ = one(T) - ρ0 * sum((x*x') .* ĉ0)
     χ = (one(T)/invρkBTχ)/(kBT*ρ0)
     return χ
 end
+
+function get_ĉ0(sol::OZSolution, ::SimpleLiquid{dims, species, T1, T2, P}) where {dims, species, T1, T2, P}
+    spl = Spline1D(sol.r, _eachslice(sol.cr, dims=1).*sol.r.^(dims-1))
+    ĉ0 = surface_N_sphere(dims)*integrate(spl, zero(eltype(sol.r)), maximum(sol.r))
+    return ĉ0
+end
+
+# function pressure_inconsystency(system, closure)

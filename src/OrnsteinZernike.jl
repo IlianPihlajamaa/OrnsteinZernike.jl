@@ -4,15 +4,16 @@ A generic solver package for Ornstein-Zernike equations from liquid state theory
 
 """
 module OrnsteinZernike
-using FFTW, StaticArrays, LinearAlgebra, Hankel, SpecialFunctions
+using FFTW, StaticArrays, LinearAlgebra, Hankel, SpecialFunctions, Dierckx 
+using Roots: find_zero
 
 export solve
 export SimpleLiquid
 export OZSolution
 export Exact, FourierIteration, NgIteration, DensityRamp
-export PercusYevick,  HypernettedChain, MeanSpherical, ReferenceHypernettedChain, Verlet, MartynovSarkisov
+export PercusYevick,  HypernettedChain, MeanSpherical, ModifiedHypernettedChain, Verlet, MartynovSarkisov
 export SoftCoreMeanSpherical, RogersYoung, ZerahHansen, DuhHaymet, Lee, ChoudhuryGhosh, BallonePastoreGalliGazzillo
-export VompeMartynov, CharpentierJackse, BomontBretonnet, Khanpour
+export VompeMartynov, CharpentierJackse, BomontBretonnet, Khanpour, ModifiedVerlet, CarbajalTinoko, ExtendedRogersYoung
 export CustomPotential, PowerLaw, HardSpheres, LennardJones
 export compute_compressibility, compute_excess_energy, compute_virial_pressure
 export WCADivision

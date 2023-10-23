@@ -106,6 +106,32 @@ function bridge_function(closure::Verlet, _, _, γ)
     return @. -(A*γ^2/2)/(oneunit + B*γ/2)
 end
 
+"""
+    ModifiedVerlet <: Closure
+
+Implements the modified Verlet Closure \$b(r) = -\\frac{\\gamma^2(r)/2}{1+\\alpha \\gamma(r)}\$. If \$\\gamma(r)<0\$, the closure reads \$-\\gamma^2/2\$.
+Example:
+```julia
+closure = ModifiedVerlet(0.2)
+```
+References:
+
+Verlet, Loup. "Integral equations for classical fluids: I. The hard sphere case." Molecular Physics 41.1 (1980): 183-190.
+
+"""
+struct ModifiedVerlet{T} <: Closure 
+    α::T
+end
+
+
+function bridge_function(closure::ModifiedVerlet, _, _, γ)
+    α = closure.α
+    oneunit = one.(γ)
+    B = @. ifelse(γ < 0, -(γ^2/2), -(γ^2/2)/(oneunit + α*γ/2))
+    return B
+end
+
+
 
 """
     MartynovSarkisov <: Closure
@@ -179,6 +205,51 @@ function bridge_function(closure::RogersYoung, r, _, γ)
     return b
 end
 
+function closure_c_from_gamma(closure::RogersYoung, r, mayer_f, γ, _)
+    oneunit = one.(γ)
+    α = closure.α
+    @assert α > 0 
+    f = @. 1.0 - exp(-α*r)
+    term = @. (exp(f*γ)-oneunit)/f
+
+    return @. (mayer_f + oneunit)*(oneunit + term) - γ - oneunit
+end
+
+
+"""
+    ExtendedRogersYoung <: Closure
+
+Implements the extended Rogers-Young closure \$b(r) = \\ln(a\\phi(r)^2 +  \\phi(r) + 1) - γ(r) \$. 
+Here, \$\\phi(r) = \\frac{\\exp(f(r)\\gamma(r)) - 1}{f(r)}\$, and \$f(r)=1-\\exp(-\\alpha r)\$, in which \$\\alpha\$ is a free parameter, 
+that may be chosen such that thermodynamic consistency is achieved.
+Example:
+```julia
+closure = ExtendedRogersYoung(0.5, 0.5) # order is α, a
+```
+
+References:
+J. Chem. Phys. 128, 184507 (2008)
+
+"""
+struct ExtendedRogersYoung{T} <: Closure 
+    α::T
+    a::T
+end
+
+function bridge_function(closure::ExtendedRogersYoung, r, _, γ)
+    oneunit = one.(γ)
+    α = closure.α
+    a = closure.a
+    @assert α > 0 
+    f = @. 1.0 - exp(-α*r)
+    ϕ = @. (exp(f*γ)-oneunit)/f
+    b = @. -γ + log1p(ϕ + a*ϕ^2)
+    return b
+end
+
+
+
+
 """
 ZerahHansen <: Closure
 
@@ -225,7 +296,7 @@ References:
 struct DuhHaymet <: Closure end
 
 function bridge_function(::DuhHaymet, _, _, γstar)
-    oneunit = one.(γ)
+    oneunit = one.(γstar)
     b = @. ifelse(γstar>0,  (-γstar^2)  / (2 * (oneunit + (5γstar+11oneunit)/(7γstar+9oneunit) * γstar)), -γstar^2/2)
     return b
 end
@@ -247,16 +318,17 @@ References:
 Lee, Lloyd L. "An accurate integral equation theory for hard spheres: Role of the zero‐separation theorems in the closure relation." The Journal of chemical physics 103.21 (1995): 9388-9396.
 
 """
-struct Lee{T} <: Closure 
+struct Lee{T, T2} <: Closure 
     ζ::T
     ϕ::T
     α::T
+    ρ::T2
 end
 
 function bridge_function(closure::Lee, _, mayerf, γ)
     oneunit = one.(γ)
     ρ = closure.ρ
-    γstar = @. γ - ρ*mayerf/2
+    γstar = @. γ + ρ*mayerf/2
     ζ = closure.ζ
     α = closure.α
     ϕ = closure.ϕ
@@ -285,7 +357,7 @@ struct ChoudhuryGhosh{T} <: Closure
 end
 
 function bridge_function(closure::ChoudhuryGhosh, _, _, γstar)
-    oneunit = one.(γ)
+    oneunit = one.(γstar)
     α = closure.α
     return @. ifelse(γstar>0,  (-γstar^2)  / (2 * (oneunit + α * γstar)), -γstar^2/2)
 end
@@ -358,7 +430,7 @@ struct CharpentierJackse{T} <: Closure
 end
 
 function bridge_function(closure::CharpentierJackse, _, _, γstar)
-    oneunit = one.(γ)
+    oneunit = one.(γstar)
     α = closure.α
     return @. (sqrt(oneunit+4α*γstar) - oneunit - 2α*γstar)/(2α)
 end
@@ -383,7 +455,7 @@ struct BomontBretonnet{T} <: Closure
 end
 
 function bridge_function(closure::BomontBretonnet, _, _, γstar)
-    oneunit = one.(γ)
+    oneunit = one.(γstar)
     f = closure.f
     return @. sqrt(oneunit + 2γstar + f*γstar^2) - oneunit - γstar
 end
@@ -414,9 +486,9 @@ function bridge_function(closure::Khanpour, _, _, γ)
 end
 
 """
-    ReferenceHypernettedChain <: Closure
+ModifiedHypernettedChain <: Closure
 
-Implements the Reference Hypernetted Chain closure \$b(r) = b_{HS}(r) \$. Here \$b_{HS}(r)=\\left((a_1+a_2x)(x-a_3)(x-a_4)/(a_3 a_4)\\right)^2\$ for \$x<a_4\$ and \$b_{HS}(r)=\\left(A_1 \\exp(-a_5(x-a_4))\\sin(A_2(x-a_4))/r\\right)^2\$ is the hard sphere bridge function found in Malijevský & Labík.
+Implements the Modified Hypernetted Chain closure \$b(r) = b_{HS}(r) \$. Here \$b_{HS}(r)=\\left((a_1+a_2x)(x-a_3)(x-a_4)/(a_3 a_4)\\right)^2\$ for \$x<a_4\$ and \$b_{HS}(r)=\\left(A_1 \\exp(-a_5(x-a_4))\\sin(A_2(x-a_4))/r\\right)^2\$ is the hard sphere bridge function found in Malijevský & Labík.
 The parameters are defined as
 
 \$x = r-1\$
@@ -441,7 +513,7 @@ and \$\\eta\$ is the volume fraction of the hard sphere reference system. This c
 
 Example:
 ```julia
-closure = ReferenceHypernettedChain(0.4)
+closure = ModifiedHypernettedChain(0.4)
 ```
 
 References:
@@ -450,14 +522,14 @@ Lado, F. "Perturbation correction for the free energy and structure of simple fl
 
 Malijevský, Anatol, and Stanislav Labík. "The bridge function for hard spheres." Molecular Physics 60.3 (1987): 663-669.
 """
-struct ReferenceHypernettedChain{T} <: Closure 
+struct ModifiedHypernettedChain{T} <: Closure 
     η::T
 end
 
-function bridge_function(closure::ReferenceHypernettedChain, r, _, _)
-    oneunit = one(r)
+function bridge_function(closure::ModifiedHypernettedChain, r, _, _)
+    oneunit = one(r[1])
     η = closure.η
-    x = r-oneunit
+    x = @. r - oneunit
     a_1 = η * (1.55707 - 1.85633η) / (1-η)^2
     a_2 = η * (1.28127 - 1.82134η) / (1-η)
     a_3 = (0.74480 - 0.93453η) 
@@ -466,10 +538,50 @@ function bridge_function(closure::ReferenceHypernettedChain, r, _, _)
     a_6 = (2.69757 - 0.86987η)
     A_2 =  π / (a_6 - a_4 - 1)
     A_1 = (a_1+a_2*a_4)*(a_4-a_3)*(a_4+1)/(A_2*a_3*a_4)
-    b = -ifelse(x<a_4, 
+    b = @. -ifelse(x<a_4, 
         ((a_1+a_2*x)*(x-a_3)*(x-a_4)/(a_3* a_4))^2,
     	(A_1*exp(-a_5*(x-a_4))*sin(A_2*(x-a_4))/r)^2
     )
     return b
 end
 
+"""
+CarbajalTinoko <: Closure
+
+Implements the Carbajal-Tinoko closure \$e(r;\\alpha)\\left[(2-y(r))e^{y(r)}-2-y(r)\\right]/\\left(e^{y(r)}-1\\right)\$ where \$e(r;\\alpha)=3\\exp(\\alpha r)\$ for \$\\alpha <0\$ and \$e(r;\\alpha) = 3+\\alpha\$ otherwise.
+
+Example:
+```julia
+closure = CarbajalTinoko(0.4)
+```
+
+References:
+
+Carbajal-Tinoco, Mauricio D. "Thermodynamically consistent integral equation for soft repulsive spheres." The Journal of chemical physics 128.18 (2008).
+"""
+struct CarbajalTinoko{T} <: Closure 
+    λ::T
+end
+
+function bridge_function(closure::CarbajalTinoko, r::Vector, f::Vector, γ::Vector)
+    return bridge_function.((closure,), r, f, γ)
+end
+function bridge_function(closure::CarbajalTinoko, r, _, γ)
+    λ = closure.λ
+    e = ifelse(λ > 0, 3 + λ, 3exp(λ*r))
+
+    f = function (b)
+        ω = γ + b
+        if  abs(ω) < 0.0001
+            bfunc = e*(-(ω^2/6)+ω^4/360)
+        else
+            y = exp(ω)
+            bfunc = e*((2-ω)*y - 2 - ω)/(y - 1)
+        end
+        obj = b - bfunc
+        return obj
+    end
+    b = find_zero(f, γ)
+
+    return b
+end
