@@ -217,9 +217,14 @@ function compute_compressibility(sol::OZSolution, system::SimpleLiquid{dims, spe
 end
 
 function get_ĉ0(sol::OZSolution, ::SimpleLiquid{dims, species, T1, T2, P}) where {dims, species, T1, T2, P}
-    spl = Spline1D(sol.r, _eachslice(sol.cr, dims=1).*sol.r.^(dims-1))
-    ĉ0 = surface_N_sphere(dims)*integrate(spl, zero(eltype(sol.r)), maximum(sol.r))
+    ĉ0 = zeros(eltype(eltype(sol.ck)), species, species)
+    for i = 1:species
+        for j = 1:species
+            spl = Spline1D(sol.r, sol.cr[:, i, j].*sol.r.^(dims-1))
+            ĉ0[i,j] = surface_N_sphere(dims)*integrate(spl, zero(eltype(sol.r)), maximum(sol.r))
+        end
+    end
     return ĉ0
 end
 
-# function pressure_inconsystency(system, closure)
+
