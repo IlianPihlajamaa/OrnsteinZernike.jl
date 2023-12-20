@@ -134,8 +134,8 @@ end
 
 Computes the pressure via the virial route
 
-uses the formula p = kBTρ - 1/6 ρ^2 ∫dr r g(r) u'(r) for single component systems
-and p =  kBT Σᵢρᵢ - 1/6 Σᵢⱼ ρᵢρⱼ ∫dr r gᵢⱼ(r) u'ᵢⱼ(r) for mixtures.
+uses the formula p = kBTρ - 1/(2d) ρ^2 ∫dr r g(r) u'(r) for single component systems
+and p =  kBT Σᵢρᵢ - 1/(2d) Σᵢⱼ ρᵢρⱼ ∫dr r gᵢⱼ(r) u'ᵢⱼ(r) for mixtures.
 
 It handles discontinuities in the interaction potential analytically if `discontinuities(potential)` is defined.
 For additional speed/accuracy define a method of `evaluate_potential_derivative(potential, r::Number)` that analytically computes du/dr. 
@@ -167,14 +167,14 @@ function compute_virial_pressure(sol::OZSolution, system::SimpleLiquid{dims, Nsp
         end
     end
     sphere_surface = surface_N_sphere(dims)
-    p = kBT*ρ0 - sphere_surface/6 * ρ0^2 * p1
+    p = kBT*ρ0 - sphere_surface/(2*dims) * ρ0^2 * p1
 
     ## now add the terms for the discontinuities
 
     discs = unique(discontinuities(system.potential))
     for discontinuity in discs
         dey0 = find_de_mul_y0(discontinuity, β, potential, gr, r)
-        dp = (sphere_surface*ρ0^2)/(6β)*discontinuity^rpow*sum((x*x') .* dey0)
+        dp = (sphere_surface*ρ0^2)/((2*dims)*β)*discontinuity^rpow*sum((x*x') .* dey0)
         p += dp
     end
 
@@ -214,6 +214,12 @@ function compute_compressibility(sol::OZSolution, system::SimpleLiquid{dims, spe
     invρkBTχ = one(T) - ρ0 * sum((x*x') .* ĉ0)
     χ = (one(T)/invρkBTχ)/(kBT*ρ0)
     return χ
+end
+
+function get_ĉ0(sol::OZSolution, ::SimpleLiquid{dims, 1, T1, T2, P}) where {dims, T1, T2, P}
+    spl = Spline1D(sol.r, sol.cr[:, 1, 1].*sol.r.^(dims-1))
+    ĉ0 = surface_N_sphere(dims)*integrate(spl, zero(eltype(sol.r)), maximum(sol.r))
+    return ĉ0
 end
 
 function get_ĉ0(sol::OZSolution, ::SimpleLiquid{dims, species, T1, T2, P}) where {dims, species, T1, T2, P}

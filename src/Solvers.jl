@@ -165,6 +165,32 @@ function DensityRamp(method, densities::AbstractVector{T}; verbose=true) where T
     end
 end
 
+"""
+    TemperatureRamp <: Method
+
+Solves the system by iteratively solving systems of decreasing Temperature, using the previous solution as initial guess at a lower temperature. This may help deal with convergence issues.
+
+Arguments
+- `method`: method by which to solve the system for individual temperatures.
+- `temperatures`: temperatures to consider. Must be a vector of increasing values.
+- `verbose`: whether to print information.
+
+Example:
+`TemperatureRamp(NgIteration(), [0.1, 0.3, 0.4]; verbose=false)`
+
+"""
+struct TemperatureRamp{T<:Method, T2<:AbstractVector} <: Method 
+    method::T
+    temperatures::T2
+    verbose::Bool
+end
+
+function TemperatureRamp(method, temperatures::AbstractVector{T}; verbose=true) where T
+    @assert issorted(temperatures, rev=true)
+    return TemperatureRamp(method, temperatures, verbose)
+end
+
+
 defaultsolver() = NgIteration()
 
 
@@ -232,4 +258,5 @@ include("Solvers/Exact.jl")
 include("Solvers/FourierIteration.jl")
 include("Solvers/NgIteration.jl")
 include("Solvers/DensityRamp.jl")
+include("Solvers/TemperatureRamp.jl")
 

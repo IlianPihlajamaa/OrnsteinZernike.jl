@@ -10,7 +10,7 @@ using Roots: find_zero
 export solve
 export SimpleLiquid
 export OZSolution
-export Exact, FourierIteration, NgIteration, DensityRamp
+export Exact, FourierIteration, NgIteration, DensityRamp, TemperatureRamp
 export PercusYevick,  HypernettedChain, MeanSpherical, ModifiedHypernettedChain, Verlet, MartynovSarkisov
 export SoftCoreMeanSpherical, RogersYoung, ZerahHansen, DuhHaymet, Lee, ChoudhuryGhosh, BallonePastoreGalliGazzillo
 export VompeMartynov, CharpentierJackse, BomontBretonnet, Khanpour, ModifiedVerlet, CarbajalTinoko, ExtendedRogersYoung

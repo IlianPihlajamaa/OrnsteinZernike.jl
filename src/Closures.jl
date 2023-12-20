@@ -29,8 +29,8 @@ closure = PercusYevick()
 """
 struct PercusYevick <: Closure end
 
-function closure_cmulr_from_gammamulr(::PercusYevick, r::Number, mayer_f::T, Γmulr::T, _) where T
-    return  @. mayer_f*(r + Γmulr)
+function closure_cmulr_from_gammamulr(::PercusYevick, r::Number, mayer_f::T, Γmulr::T, βuLR) where T
+    return  @. r*(mayer_f+1)*exp(βuLR)*(1+Γmulr/r-βuLR) - Γmulr - r#mayer_f*(r + Γmulr)
 end
 
 function bridge_function(::PercusYevick, _, _, γ)
@@ -56,25 +56,6 @@ function bridge_function(::HypernettedChain, _, _, γ)
     return B
 end
 
-"""
-    MeanSpherical
-
-Implements the MSA closure \$c(r) = -\\beta u(r)\$, or equivalently \$b(r) = \\ln(\\gamma(r) - \\beta u(r) + 1) - γ(r) +  \\beta u(r)\$.
-
-Example:
-```julia
-closure = MeanSpherical()
-```
-"""
-struct MeanSpherical <: Closure end
-
-function bridge_function(::MeanSpherical, _, mayer_f, γ) 
-    oneunit = one.(γ)
-    βu = @. log(mayer_f+oneunit)
-    s = @. γ - βu 
-    B = @. log1p(s) - s
-    return B
-end
 
 """
     Verlet <: Closure
@@ -205,15 +186,15 @@ function bridge_function(closure::RogersYoung, r, _, γ)
     return b
 end
 
-function closure_c_from_gamma(closure::RogersYoung, r, mayer_f, γ, _)
-    oneunit = one.(γ)
-    α = closure.α
-    @assert α > 0 
-    f = @. 1.0 - exp(-α*r)
-    term = @. (exp(f*γ)-oneunit)/f
+# function closure_c_from_gamma(closure::RogersYoung, r, mayer_f, γ, _)
+#     oneunit = one.(γ)
+#     α = closure.α
+#     @assert α > 0 
+#     f = @. 1.0 - exp(-α*r)
+#     term = @. (exp(f*γ)-oneunit)/f
 
-    return @. (mayer_f + oneunit)*(oneunit + term) - γ - oneunit
-end
+#     return @. (mayer_f + oneunit)*(oneunit + term) - γ - oneunit
+# end
 
 
 """
