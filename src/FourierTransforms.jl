@@ -15,6 +15,16 @@ struct My1DPlan{T2,T3,T4, T5, T6}
     M::T4
 end
 
+struct MyNDPlan{dims, T, T2}
+    r::Vector{T}
+    k::Vector{T}
+    M::Int
+    plan_forward::Matrix{T2}
+    plan_backward::Matrix{T2}
+end
+
+
+
 function get_fourier_plan(::SimpleLiquid{1, species, T1, T2, P}, method, F) where {species, T1, T2, P}
     M = length(F)
     dr = method.dr
@@ -65,6 +75,27 @@ function find_fourier_plan_nd(::SimpleLiquid{ndims, species, T1, T2, P}, F::Vect
     M = length(F)
     plan = QDHT(ndims/2-1, 1, M*dr, M)
     return plan
+    # M = length(F)
+    # plan_forward = zeros(eltype(eltype(F)), M, M)
+    # plan_backward = zeros(eltype(eltype(F)), M, M)
+    # println("hi")
+    # p = ndims/2 - 1
+    # λ_i = besselj_zero.(p, 1:(M+1))
+    # Rmax = dr * M
+    # Kmax = λ_i[end]/Rmax
+    # k = λ_i[1:end-1]/Rmax
+    # r = λ_i[1:end-1]/Kmax
+
+    # for i = 1:M
+    #     for j = 1:M
+    #         plan_forward[j, i] = 2 * (2π)^(p+1) / Kmax^2 *  besselj(p, k[j]*r[i])/besselj(p+1, Kmax*r[i])^2
+    #         plan_backward[j, i] = 2 / ( Rmax^2 * (2π)^(p+1) ) * besselj(p, k[i]*r[j])/besselj(p+1, Rmax*k[i])^2
+    #     end
+    # end
+    # Tr = eltype(r)
+    # Tq = eltype(plan_backward)
+    # return MyNDPlan{ndims, Tr, Tq}(r, k, M, plan_forward, plan_backward)
+
 end
 
 function inverse_radial_fourier_transform_3d(F̂, r, k)
@@ -181,6 +212,17 @@ function fourier!(F̂::AbstractVector{T}, F::AbstractVector{T}, Q::Hankel.QDHT{p
     @. F = F / r^(halfdims-2)
 
     @. F̂ = F̂ * (2π)^halfdims / k^(halfdims-2)
+
+    # p = dims/2 - 1
+    # k = Q.k
+    # r = Q.r
+    
+    # @. F = F * r^(p-1)
+    # mul!(F̂, Q.plan_forward, F)
+    # @. F = F / r^(p-1)
+
+    # @. F̂ = F̂ / k^(p-1)
+
 end
 
 """
@@ -199,6 +241,15 @@ function inverse_fourier!(F::AbstractVector{T}, F̂::AbstractVector{T}, Q::Hanke
     @. F̂ = F̂ / k^(halfdims-2)
     @. F ./= Q.scaleRK^2
     @. F = F * (2π)^(-halfdims) / r^(halfdims-2)
+
+    # p = dims/2 - 1
+    # k = Q.k
+    # r = Q.r
+
+    # @. F̂ = F̂ * k^(p-1)
+    # mul!(F, Q.plan_backward, F̂)
+    # @. F̂ = F̂ / k^(p-1)
+    # @. F = F / r^(p-1)
 end
 
 

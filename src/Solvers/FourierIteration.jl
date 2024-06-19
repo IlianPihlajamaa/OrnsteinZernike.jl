@@ -57,7 +57,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     end
     if method.verbose 
         print("Converged after $iteration iterations, ")
-        println("the error is $(round(err, digits=ceil(Int, 1-log10(tolerance)))).")
+        println("the error is $(round(err, digits=ceil(Int, 1-log10(err)))).")
     end
     c = C ./ r
     g = find_g_from_c_and_Γ(c, Γ_new, r)

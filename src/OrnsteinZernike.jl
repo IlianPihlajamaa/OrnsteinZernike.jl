@@ -5,6 +5,8 @@ A generic solver package for Ornstein-Zernike equations from liquid state theory
 """
 module OrnsteinZernike
 using FFTW, StaticArrays, LinearAlgebra, Hankel, SpecialFunctions, Dierckx 
+using Bessels: besselj
+using FunctionZeros
 using Roots: find_zero
 
 export solve

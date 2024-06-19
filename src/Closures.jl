@@ -30,8 +30,12 @@ closure = PercusYevick()
 struct PercusYevick <: Closure end
 
 function closure_cmulr_from_gammamulr(::PercusYevick, r::Number, mayer_f::T, Γmulr::T, βuLR) where T
-    return  @. r*(mayer_f+1)*exp(βuLR)*(1+Γmulr/r-βuLR) - Γmulr - r#mayer_f*(r + Γmulr)
+    return  @. (mayer_f+1)*exp(βuLR)*(r+Γmulr-βuLR*r) - Γmulr - r#mayer_f*(r + Γmulr)
 end
+
+# function closure_c_from_gamma(::PercusYevick, r::Number, mayer_f::T, Γmulr::T, βuLR) where T
+#     return  @. mayer_f*(r + Γmulr)
+# end
 
 function bridge_function(::PercusYevick, _, _, γ)
     B  = @. log1p(γ) - γ
