@@ -156,13 +156,15 @@ function DensityRamp(method, densities::AbstractVector{T}; verbose=true) where T
         return DensityRamp(method, densities, verbose)
     elseif T <: AbstractVector
         @assert issorted(sum.(densities))
+        Ns = length(densities[1])
+        @assert allequal(length.(densities))
         densities = Diagonal.(SVector{Ns}.(densities))
         return DensityRamp(method, densities, verbose)
-    elseif T <: AbstractMatrix
+    elseif T <: Diagonal
         @assert issorted(sum.(densities))
-        @assert all(isdiag.(densities))
         return DensityRamp(method, densities, verbose)
     end
+    error("Invalid type for densities.")
 end
 
 """
