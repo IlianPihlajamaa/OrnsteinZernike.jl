@@ -19,7 +19,7 @@ Right now, the implemented exact methods are
 
 Construct using 
 
-```Exact(;  M=2^10, dr = sqrt(π/(M+1))/(2π))```
+```Exact(;  M=1000, dr = 10.0/M)```
 
 Here, `M` is the number of points that the exact solution is evaluated on, and `dr` is the grid spacing.
 These are used to perform Fourier transformations.
@@ -42,7 +42,7 @@ struct Exact <: Method
     dr::Float64
 end
 
-function Exact(;  M=2^10, dr = sqrt(π/(M+1))/(2π))
+function Exact(;  M=1000, dr = 10.0/M)
     return Exact(M, dr)
 end
 
@@ -68,7 +68,7 @@ Arguments:
 - `tolerance::Float64`: tolerance to be reached
 - `verbose::Bool`: whether or not to print convergence information
 
-Default: `FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance=10^-6, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))`
+Default: `FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance=10^-6, verbose=true, M=1000, dr=10.0/M)`
 """
 struct FourierIteration <: Method 
     M::Int
@@ -79,7 +79,7 @@ struct FourierIteration <: Method
     verbose::Bool
 end
 
-function FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance=10^-10, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))
+function FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance=10^-10, verbose=true, M=1000, dr=10.0/M)
     @assert max_iterations > 0 
     @assert tolerance > 0 
     @assert 0 <= mixing_parameter <= 1
