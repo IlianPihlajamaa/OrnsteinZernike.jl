@@ -78,9 +78,9 @@ kBT = 1.0
 pot = HardSpheres(1.0)
 system = SimpleLiquid(dims, ρ, kBT, pot)
 closure = PercusYevick()
-method = NgIteration(tolerance=10^-10, N_stages=5, M=M, verbose=false, max_iterations=10^3)
+method = NgIteration(tolerance=10^-10, N_stages=5, M=M, verbose=false, max_iterations=10^3, dr=sqrt(π/(M+1))/(2π))
 sol = solve(system, closure, method)
-sol2 = solve(system, closure, Exact(M=M))
+sol2 = solve(system, closure, Exact(M=M, dr=sqrt(π/(M+1))/(2π)))
 
 atol = 0.1
 
