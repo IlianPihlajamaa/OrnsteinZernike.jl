@@ -108,7 +108,7 @@ Arguments:
 - `tolerance::Float64`: tolerance to be reached
 - `verbose::Bool`: whether or not to print convergence information
 
-Default: `NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-6, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))`
+Default: `NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-6, verbose=true, M=1000, dr=10.0/M)`
 
 References:
 Ng, K. C. (1974). Hypernetted chain solutions for the classical one‐component plasma up to Γ= 7000. The Journal of Chemical Physics, 61(7), 2680-2689.
@@ -122,7 +122,7 @@ struct NgIteration <: Method
     verbose::Bool
 end
 
-function NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-10, verbose=true, M=2^10, dr=sqrt(π/(M+1))/(2π))
+function NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-10, verbose=true, M=1000, dr=10.0/M)
     @assert max_iterations > 0 
     @assert tolerance > 0 
     @assert N_stages > 0
