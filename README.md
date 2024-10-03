@@ -2,7 +2,7 @@
 A generic solver for Ornstein-Zernike equations from liquid state theory
 
 [![Build status (Github Actions)](https://github.com/IlianPihlajamaa/OrnsteinZernike.jl/workflows/CI/badge.svg)](https://github.com/IlianPihlajamaa/OrnsteinZernike.jl/actions)
-[![codecov.io](http://codecov.io/github/IlianPihlajamaa/OrnsteinZernike.jl/coverage.svg?branch=main)](http://codecov.io/github/IlianPihlajamaa/OrnsteinZernike.jl?branch=main)
+[![codecov](http://codecov.io/github/IlianPihlajamaa/OrnsteinZernike.jl/coverage.svg?branch=main)](http://codecov.io/github/IlianPihlajamaa/OrnsteinZernike.jl?branch=main)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://IlianPihlajamaa.github.io/OrnsteinZernike.jl/stable)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://IlianPihlajamaa.github.io/OrnsteinZernike.jl/dev)
 
