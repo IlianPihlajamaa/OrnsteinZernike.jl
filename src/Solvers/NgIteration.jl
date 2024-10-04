@@ -81,7 +81,7 @@ function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, metho
 
     if method.verbose 
         print("Converged after $iteration iterations, ")
-        println("the error is $(round(err, digits=ceil(Int, 1-log10(tolerance)))).")
+        println("the error is $(round(err, digits=ceil(Int, 1-log10(err)))).")
     end
     c = C ./ r
     g = find_g_from_c_and_Γ(c, Γ_new, r)
@@ -122,20 +122,27 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     Ĉ = copy(mayer_f)
     Γ_new = copy(mayer_f)
 
+
     gn = initialize_vector_of_vectors(TT, N_stages+1, Ns*Ns*Nr) # first element is g_n, second is g_{n-1} etc
     fn = initialize_vector_of_vectors(TT, N_stages+1, Ns*Ns*Nr)
     dn = initialize_vector_of_vectors(TT, N_stages+1, Ns*Ns*Nr)
     d0n = initialize_vector_of_vectors(TT, N_stages, Ns*Ns*Nr) # first element is d01 second is d02 etc
-    if !(isnothing(init))
-        fn[end] .= init.*r
-    else
-        fn[end] .= zero(eltype(eltype(fn)))
-    end
+    # the elements of fn etc are vectors of length Ns*Ns*Nr
+
+
+
     A = zeros(TT, N_stages, N_stages)
     b = zeros(TT, N_stages)
     Γ_new_full = reshape(reinterpret(reshape, TT, Γ_new), Ns*Ns*Nr) # for going back and forth between vec{float} and vec{Smat}
     gn_red = reinterpret_vector_of_vectors(gn, T, Ns*Ns, Nr)#[reinterpret(reshape, T, reshape(gn[i], (Ns*Ns, Nr))) for i in eachindex(gn)]
     fn_red = reinterpret_vector_of_vectors(fn, T, Ns*Ns, Nr)#[reinterpret(reshape, T, reshape(fn[i], (Ns*Ns, Nr))) for i in eachindex(fn)]
+
+    if !(isnothing(init))
+        fn_red[end] .= init.*r
+    else
+        @show zero(eltype(eltype(fn_red)))
+        fn_red[end] .= (zero(eltype(eltype(fn_red))), )
+    end
 
     max_iterations = method.max_iterations
     tolerance = method.tolerance
@@ -189,7 +196,7 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
 
     if method.verbose 
         print("Converged after $iteration iterations, ")
-        println("the error is $(round(err, digits=ceil(Int, 1-log10(tolerance)))).")
+        println("the error is $(round(err, digits=ceil(Int, 1-log10(err)))).")
     end
     c = C ./ r
     g = find_g_from_c_and_Γ(c, Γ_new, r)
