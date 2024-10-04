@@ -17,7 +17,7 @@ system = SimpleLiquid(dims, ρ, kBT, potential)</code></pre><pre class="document
  gr = [-1.0242828807349724e-10 -1.0232170666313323e-10 … 0.9999999938362887 0.9999999938605444]&#39;
  ck = [-16.014517909323153 -15.680903323809737 … 1.595763191459259e-16 -5.5112996606428287e-17]&#39;
  Sk = [0.09426216097138185 0.09607493542793866 … 1.0 1.0]</code></pre><p>Note that we have not specified the method by which we do so. In this case, a simple default method is chosen that works well in most cases.</p><p>The <code>sol</code> object contains fields for the radial distribution function <code>gr</code>, direct correlation function (in real and Fourier space) <code>cr</code> and <code>ck</code>, the static structure factor <code>Sk</code>, and arrays for <code>r</code> and <code>k</code>. For example, we can plot the radial distribution function as follows:</p><pre><code class="language-julia hljs">using Plots
-plot(sol.r, sol.gr, xlims=(0,5), xlabel=&quot;r&quot;, ylabel=&quot;g(r)&quot;)</code></pre><img src="SingleCompLJ-c1c7220c.svg" alt="Example block output"/><p>Full code:</p><pre><code class="language-julia hljs">using OrnsteinZernike
+plot(sol.r, sol.gr, xlims=(0,5), xlabel=&quot;r&quot;, ylabel=&quot;g(r)&quot;)</code></pre><img src="SingleCompLJ-e1324986.svg" alt="Example block output"/><p>Full code:</p><pre><code class="language-julia hljs">using OrnsteinZernike
 ϵ = 1.0
 σ = 1.0
 n = 8
