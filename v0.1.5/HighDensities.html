@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Solving at high densities · OrnsteinZernike.jl Documentation</title><meta name="title" content="Solving at high densities · OrnsteinZernike.jl Documentation"/><meta property="og:title" content="Solving at high densities · OrnsteinZernike.jl Documentation"/><meta property="twitter:title" content="Solving at high densities · OrnsteinZernike.jl Documentation"/><meta name="description" content="Documentation for OrnsteinZernike.jl Documentation."/><meta property="og:description" content="Documentation for OrnsteinZernike.jl Documentation."/><meta property="twitter:description" content="Documentation for OrnsteinZernike.jl Documentation."/><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="search_index.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">OrnsteinZernike.jl Documentation</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="index.html">Index</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="SingleCompLJ.html">First steps</a></li><li><a class="tocitem" href="HardSphereMixture.html">Hard-sphere mixture</a></li><li class="is-active"><a class="tocitem" href="HighDensities.html">Solving at high densities</a></li><li><a class="tocitem" href="OtherDimensions.html">Other dimensions</a></li><li><a class="tocitem" href="Accuracy.html">Accuracy</a></li><li><a class="tocitem" href="ThermodynamicConsistency.html">Thermodynamic Consistency</a></li></ul></li><li><span class="tocitem">Basics</span><ul><li><a class="tocitem" href="GeneralWorkflow.html">General Workflow</a></li><li><a class="tocitem" href="Potentials.html">Interaction Potentials</a></li><li><a class="tocitem" href="Systems.html">Systems</a></li><li><a class="tocitem" href="Closures.html">Closures</a></li><li><a class="tocitem" href="Solvers.html">Solvers</a></li></ul></li><li><a class="tocitem" href="Theory.html">Theory</a></li><li><span class="tocitem">Extending</span><ul><li><a class="tocitem" href="ExtendingPotentials.html">Defining your own potentials</a></li><li><a class="tocitem" href="ExtendingClosures.html">Defining your own closure</a></li></ul></li><li><a class="tocitem" href="API.html">API</a></li><li><a class="tocitem" href="FromPython.html">From Python</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href="HighDensities.html">Solving at high densities</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="HighDensities.html">Solving at high densities</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/IlianPihlajamaa/OrnsteinZernike.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/IlianPihlajamaa/OrnsteinZernike.jl/blob/main/docs/src/HighDensities.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Solving-at-high-densities"><a class="docs-heading-anchor" href="#Solving-at-high-densities">Solving at high densities</a><a id="Solving-at-high-densities-1"></a><a class="docs-heading-anchor-permalink" href="#Solving-at-high-densities" title="Permalink"></a></h1><p>Sometimes, especially when dealing with high densities, the solvers do not converge out-of-the-box. It may be necessary to play with the solver settings to get it to converge</p><pre><code class="language-julia hljs">using OrnsteinZernike
+ρ = 1.5
+kBT = 1.0
+dims = 3
+
+pot = HardSpheres(1.0)
+system = SimpleLiquid(dims, ρ, kBT, pot)
+closure = PercusYevick()
+method = NgIteration()
+sol = solve(system, closure, method);</code></pre><pre><code class="nohighlight hljs">After iteration 0, the error is 3.41302002652.
+After iteration 10, the error is 1.98231818283.
+After iteration 20, the error is 1.54425698984.
+After iteration 30, the error is 1.31506989937.
+[...]
+After iteration 960, the error is 0.12249150013.
+After iteration 970, the error is 0.1162956682.
+After iteration 980, the error is 0.12306597032.
+After iteration 990, the error is 0.10235109774.
+After iteration 1000, the error is 0.09999300441.
+ERROR: Recursive iteration did not converge within 1001 steps. Current error = 0.09999300441413587.</code></pre><p>Instead, we can try to change some solver settings (see <a href="Solvers.html#OrnsteinZernike.NgIteration"><code>NgIteration</code></a> for detailed descriptions):</p><pre><code class="language-julia hljs">using OrnsteinZernike
+
+M = 10^4 # number of gridpoints
+dr = 100.0/M # grid spacing
+max_iterations = 10^4 # max number of iterations before convergence
+N_stages = 8 # number of previous iterations to use for the next guess
+
+method = NgIteration(M=M; dr=dr, max_iterations=max_iterations, N_stages=N_stages)
+sol = solve(system, closure, method);</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">OZSolution{Vector{Float64}, Vector{Float64}}:
+ r = [0.005 0.015 … 99.985 99.995]&#39;
+ k = [0.015707963267948967 0.0471238898038469 … 314.11214146917547 314.1435573957114]&#39;
+ cr = [-3139.2016683207626 -3088.539140455303 … 0.0 0.0]&#39;
+ gr = [-8.26048562885262e-9 -8.130427886499092e-9 … 1.0025427514521608 1.0025598774141167]&#39;
+ ck = [-2098.4781776916393 -2098.2362442665503 … 0.0060462065781713035 0.0060516075220891355]&#39;
+ Sk = [0.0003175896453541105 0.0003176262528361562 … 1.009152315048434 1.0091605655037978]</code></pre><pre><code class="language-julia hljs">using Plots
+plot(sol.r, sol.gr, xlims=(0,5), xlabel=&quot;r&quot;, ylabel=&quot;g(r)&quot;, lw=4, label=&quot;iterative&quot;)
+sol2 = solve(system, closure, Exact(M=M; dr=dr));
+plot!(sol2.r, sol2.gr, lw=2, color=:black, label=&quot;exact&quot;)</code></pre><img src="HighDensities-1b8b56dd.svg" alt="Example block output"/><p>Which converges even though the density is clearly nonphysically high.</p><p>Sometimes convergence is accelerated if the solution of the same equations at a slightly lower density is used as an initial condition. This is especially useful if the solution is needed at many different densities. While this can be done by hand using the <code>init</code> keyword argument of the <code>solve</code> function, a convenient method <code>DensityRamp</code> is implemented to do this automatically. For example, consider a hard sphere system at <code>ρ = 1.2</code>.</p><pre><code class="language-julia hljs">using OrnsteinZernike
+ρ = 1.2
+kBT = 1.0
+dims = 3
+
+pot = HardSpheres(1.0)
+system = SimpleLiquid(dims, ρ, kBT, pot)
+closure = PercusYevick()
+method = NgIteration(M=5000, dr=0.01)
+sol = solve(system, closure, method);</code></pre><pre><code class="nohighlight hljs">After iteration 0, the error is 2.51773674949.
+After iteration 10, the error is 1.41253963056.
+After iteration 20, the error is 1.2605856682.
+After iteration 30, the error is 0.70489573233.
+After iteration 40, the error is 0.44336537233.
+After iteration 50, the error is 0.39947202862.
+After iteration 60, the error is 0.25827952962.
+After iteration 70, the error is 0.23273727229.
+After iteration 80, the error is 0.13551597572.
+After iteration 90, the error is 0.13460620172.
+After iteration 100, the error is 0.29303789746.
+After iteration 110, the error is 0.12428896865.
+After iteration 120, the error is 0.13350846977.
+After iteration 130, the error is 0.00388920336.
+After iteration 140, the error is 0.00018271462.
+After iteration 150, the error is 7.94778e-6.
+After iteration 160, the error is 1.27727e-6.
+After iteration 170, the error is 5.4383e-7.
+After iteration 180, the error is 1.78e-9.
+Converged after 185 iterations, the error is 7.0e-11.</code></pre><p>To do this, we can use the <code>DensityRamp</code> solver. This takes two arguments. The first is the actual method by which to solve the equations, which we leave as <code>NgIteration()</code> and the second is a list of densities to be evaluated before the target density. It returns a <code>Vector</code> of solution objects.</p><pre><code class="language-julia hljs">densities = [1.15, 1.18]
+method2 = DensityRamp(method, densities)
+sol = @time solve(system, closure, method2);</code></pre><pre><code class="nohighlight hljs">Solving the system at ρ = 1.15.
+
+After iteration 0, the error is 2.45107333815.
+After iteration 10, the error is 1.14683100707.
+After iteration 20, the error is 0.56643550932.
+After iteration 30, the error is 0.49252243775.
+After iteration 40, the error is 0.40727608832.
+After iteration 50, the error is 0.03465798498.
+After iteration 60, the error is 0.00212896547.
+After iteration 70, the error is 2.296428e-5.
+After iteration 80, the error is 4.4255e-7.
+After iteration 90, the error is 1.634e-8.
+Converged after 98 iterations, the error is 3.0e-11.
+
+Solving the system at ρ = 1.18.
+
+After iteration 0, the error is 234.73047273369.
+After iteration 10, the error is 0.09622279909.
+After iteration 20, the error is 0.11509610499.
+After iteration 30, the error is 0.03246309423.
+After iteration 40, the error is 0.01668981609.
+After iteration 50, the error is 0.00030500371.
+After iteration 60, the error is 1.38937e-6.
+After iteration 70, the error is 1.1985e-7.
+After iteration 80, the error is 1.516e-8.
+After iteration 90, the error is 9.3e-10.
+After iteration 100, the error is 3.0e-10.
+Converged after 104 iterations, the error is 9.0e-11.
+
+Solving the system at ρ = 1.2.
+
+After iteration 0, the error is 193.67155095726.
+After iteration 10, the error is 0.06503380948.
+After iteration 20, the error is 0.11540431925.
+After iteration 30, the error is 0.0836301059.
+After iteration 40, the error is 0.00063923863.
+After iteration 50, the error is 5.98769e-6.
+After iteration 60, the error is 4.2188e-7.
+After iteration 70, the error is 3.1e-9.
+Converged after 80 iterations, the error is 9.0e-11.
+  0.071976 seconds (17.20 k allocations: 4.204 MiB)</code></pre><p>While, in total, this has increased the number of iterations done, we have obtained the solution at two different densities as well.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="HardSphereMixture.html">« Hard-sphere mixture</a><a class="docs-footer-nextpage" href="OtherDimensions.html">Other dimensions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Friday 4 October 2024 08:27">Friday 4 October 2024</span>. Using Julia version 1.10.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
