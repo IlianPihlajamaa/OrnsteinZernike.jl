@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Thermodynamic Consistency · OrnsteinZernike.jl Documentation</title><meta name="title" content="Thermodynamic Consistency · OrnsteinZernike.jl Documentation"/><meta property="og:title" content="Thermodynamic Consistency · OrnsteinZernike.jl Documentation"/><meta property="twitter:title" content="Thermodynamic Consistency · OrnsteinZernike.jl Documentation"/><meta name="description" content="Documentation for OrnsteinZernike.jl Documentation."/><meta property="og:description" content="Documentation for OrnsteinZernike.jl Documentation."/><meta property="twitter:description" content="Documentation for OrnsteinZernike.jl Documentation."/><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="search_index.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">OrnsteinZernike.jl Documentation</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="index.html">Index</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="SingleCompLJ.html">First steps</a></li><li><a class="tocitem" href="HardSphereMixture.html">Hard-sphere mixture</a></li><li><a class="tocitem" href="HighDensities.html">Solving at high densities</a></li><li><a class="tocitem" href="OtherDimensions.html">Other dimensions</a></li><li><a class="tocitem" href="Accuracy.html">Accuracy</a></li><li class="is-active"><a class="tocitem" href="ThermodynamicConsistency.html">Thermodynamic Consistency</a><ul class="internal"><li><a class="tocitem" href="#Free-choice-of-\\alpha"><span>Free choice of <span>$\alpha$</span></span></a></li><li><a class="tocitem" href="#Using-thermodynamics"><span>Using thermodynamics</span></a></li></ul></li></ul></li><li><span class="tocitem">Basics</span><ul><li><a class="tocitem" href="GeneralWorkflow.html">General Workflow</a></li><li><a class="tocitem" href="Potentials.html">Interaction Potentials</a></li><li><a class="tocitem" href="Systems.html">Systems</a></li><li><a class="tocitem" href="Closures.html">Closures</a></li><li><a class="tocitem" href="Solvers.html">Solvers</a></li></ul></li><li><a class="tocitem" href="Theory.html">Theory</a></li><li><span class="tocitem">Extending</span><ul><li><a class="tocitem" href="ExtendingPotentials.html">Defining your own potentials</a></li><li><a class="tocitem" href="ExtendingClosures.html">Defining your own closure</a></li></ul></li><li><a class="tocitem" href="API.html">API</a></li><li><a class="tocitem" href="FromPython.html">From Python</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href="ThermodynamicConsistency.html">Thermodynamic Consistency</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="ThermodynamicConsistency.html">Thermodynamic Consistency</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/IlianPihlajamaa/OrnsteinZernike.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/IlianPihlajamaa/OrnsteinZernike.jl/blob/main/docs/src/ThermodynamicConsistency.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Thermodynamic-Consistency"><a class="docs-heading-anchor" href="#Thermodynamic-Consistency">Thermodynamic Consistency</a><a id="Thermodynamic-Consistency-1"></a><a class="docs-heading-anchor-permalink" href="#Thermodynamic-Consistency" title="Permalink"></a></h1><p>Some <a href="Closures.html#Closures">Closures</a> have free parameters that can be tuned to obtain the most accurate bridge functions. For example, the famous Rogers-Young closure <a href="Closures.html#OrnsteinZernike.RogersYoung"><code>RogersYoung</code></a> interpolates between the Percus-Yevick closure and the Hypernetted Chain one with a free parameter <span>$\alpha$</span>. While this parameter can be chosen freely, it is usually chosen such that the solutions satisfy thermodynamic consistency. </p><h2 id="Free-choice-of-\\alpha"><a class="docs-heading-anchor" href="#Free-choice-of-\\alpha">Free choice of <span>$\alpha$</span></a><a id="Free-choice-of-\\alpha-1"></a><a class="docs-heading-anchor-permalink" href="#Free-choice-of-\\alpha" title="Permalink"></a></h2><p>To warm up, let&#39;s solve a 3D hard-sphere system for <span>$\alpha=0.5$</span></p><pre><code class="language-julia hljs">using OrnsteinZernike, Plots
+M = 5000
+ρ = 0.6 * sqrt(2)
+dr = 20.0/M
+kBT = 1.0
+dims = 3
+α = 0.5
+pot = HardSpheres(1.0)
+system = SimpleLiquid(dims, ρ, kBT, pot)
+method = NgIteration(M=M, dr=dr, verbose=false)
+solRY = solve(system, RogersYoung(α), method)
+solPY = solve(system, PercusYevick(), method)
+solHNC = solve(system, HypernettedChain(), method)
+
+plot(solRY.r, solRY.gr, label=&quot;Rogers-Young&quot;)
+plot!(solPY.r, solPY.gr, label=&quot;Percus-Yevick&quot;)
+plot!(solHNC.r, solHNC.gr, label=&quot;Hypernetted Chain&quot;)
+plot!(xlims=(0.9,2.3), xlabel=&quot;r&quot;, ylabel=&quot;g(r)&quot;)</code></pre><img src="ThermodynamicConsistency-c2eb8c39.svg" alt="Example block output"/><p>Here, we can see, that indeed, the Rogers-Young closure finds a middle ground between the two others. </p><h2 id="Using-thermodynamics"><a class="docs-heading-anchor" href="#Using-thermodynamics">Using thermodynamics</a><a id="Using-thermodynamics-1"></a><a class="docs-heading-anchor-permalink" href="#Using-thermodynamics" title="Permalink"></a></h2><p>There are a number of thermodynamic relations that allow a consistent choice of <span>$\alpha$</span>. Here we opt for the requirement <span>$\frac{1}{\rho\chi_T}=\left(\frac{\partial p}{\partial \rho}\right)_T$</span>, which physically means that we require the virial and compressibility route of obtaining the pressure to give the same results. For simplicity, we use finite differences to obtain the derivative of the pressure. See the <a href="Theory.html#Theory">Theory</a> section for more details. Subsequently, we use the bisection method from <code>Roots.jl</code> to find the optimal parameter. The results can be compared to Table 1 in Ref. 1. </p><pre><code class="language-julia hljs">using OrnsteinZernike, Plots
+import Roots
+function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
+
+    function RY_inconsistency(ρ, α)
+        system1 = SimpleLiquid(dims, ρ, kBT, pot)
+        method = NgIteration(M=M, dr=dr, verbose=false)
+        sol1 = solve(system1, RogersYoung(α), method)
+        p1 = compute_virial_pressure(sol1, system1)
+
+        dρ = sqrt(eps(ρ))
+        system2 = SimpleLiquid(dims, ρ+dρ, kBT, pot)
+        sol2 = solve(system2, RogersYoung(α), method)
+        p2 = compute_virial_pressure(sol2, system2)
+        dpdρ = (p2-p1)/dρ
+
+        χ = compute_compressibility(sol1, system1)
+        inconsistency = dpdρ - 1/(ρ*χ)
+        return inconsistency
+    end
+
+    # we need to find α such that the inconsistency is zero.
+    func = α -&gt;  RY_inconsistency(ρ, α)
+    α =  Roots.find_zero(func, (0.001,50.0), Roots.Bisection(), atol=0.0001)
+    system = SimpleLiquid(dims, ρ, kBT, pot)
+    method = NgIteration(M=M, dr=dr, verbose=false)
+    sol = solve(system, RogersYoung(α), method)
+    return system, sol, α
+end
+
+for ρstar = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.654]
+    ρ = ρstar*sqrt(2)
+    M = 1000
+    dr = 10.0/M
+    kBT = 1.0
+    dims = 3
+    pot = HardSpheres(1.0)
+    system, sol, α = find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
+    P = compute_virial_pressure(sol, system)/ρ/kBT - 1
+    gmax = maximum(sol.gr)
+    println(&quot;At ρ/√2 = $(ρstar), we find α = $(round(α,digits=2)), and βp/ρ - 1 = $(round(P,digits=4)).&quot;)
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">At ρ/√2 = 0.1, we find α = 0.21, and βp/ρ - 1 = 0.3592.
+At ρ/√2 = 0.2, we find α = 0.23, and βp/ρ - 1 = 0.8861.
+At ρ/√2 = 0.3, we find α = 0.25, and βp/ρ - 1 = 1.6714.
+At ρ/√2 = 0.4, we find α = 0.26, and βp/ρ - 1 = 2.8665.
+At ρ/√2 = 0.5, we find α = 0.26, and βp/ρ - 1 = 4.7362.
+At ρ/√2 = 0.6, we find α = 0.26, and βp/ρ - 1 = 7.7674.
+At ρ/√2 = 0.654, we find α = 0.25, and βp/ρ - 1 = 10.1957.</code></pre><p>References:</p><ol><li>Rogers, Forrest J., and David A. Young. &quot;New, thermodynamically consistent, integral equation for simple fluids.&quot; Physical Review A 30.2 (1984): 999.</li></ol></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="Accuracy.html">« Accuracy</a><a class="docs-footer-nextpage" href="GeneralWorkflow.html">General Workflow »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Friday 4 October 2024 09:00">Friday 4 October 2024</span>. Using Julia version 1.10.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
