@@ -471,7 +471,7 @@ function bridge_function(closure::Khanpour, _, _, γ)
 end
 
 """
-ModifiedHypernettedChain <: Closure
+    ModifiedHypernettedChain <: Closure
 
 Implements the Modified Hypernetted Chain closure \$b(r) = b_{HS}(r) \$. Here \$b_{HS}(r/σ)=\\left((a_1+a_2x)(x-a_3)(x-a_4)/(a_3 a_4)\\right)^2\$ for \$x<a_4\$ and \$b_{HS}(r)=\\left(A_1 \\exp(-a_5(x-a_4))\\sin(A_2(x-a_4))/r\\right)^2\$ is the hard sphere bridge function found in Malijevský & Labík.
 The parameters are defined as
@@ -494,12 +494,12 @@ The parameters are defined as
 
 \$a_6 = (2.69757 - 0.86987\\eta)\$
 
-and \$\\eta\$ is the volume fraction of the hard sphere reference system. This closure only works for single component systems in three dimensions. By default, σ = 1.0.
+and \$\\eta\$ is the volume fraction of the hard sphere reference system. This closure only works for single component systems in three dimensions. By default, \$\\sigma = 1.0\$.
 
 Example:
 ```julia
 closure = ModifiedHypernettedChain(0.4)
-closure = ModifiedHypernettedChain(0.4; σ=0.8)
+closure = ModifiedHypernettedChain(0.4; sigma=0.8)
 ```
 
 References:
@@ -510,17 +510,18 @@ Malijevský, Anatol, and Stanislav Labík. "The bridge function for hard spheres
 """
 struct ModifiedHypernettedChain{T, T2} <: Closure 
     η::T
-    σ::T2
+    sigma::T2
 end
 
-function ModifiedHypernettedChain(η; σ=1.0)
-    return ModifiedHypernettedChain(η, σ)
+function ModifiedHypernettedChain(η; sigma=1.0)
+    return ModifiedHypernettedChain(η, sigma)
 end
 
 function bridge_function(closure::ModifiedHypernettedChain, r, _, _)
     oneunit = one(r[1])
     η = closure.η
-    x = @. r ./ σ - oneunit
+    sigma = closure.sigma
+    x = @. r ./ sigma - oneunit
     a_1 = η * (1.55707 - 1.85633η) / (1-η)^2
     a_2 = η * (1.28127 - 1.82134η) / (1-η)
     a_3 = (0.74480 - 0.93453η) 
