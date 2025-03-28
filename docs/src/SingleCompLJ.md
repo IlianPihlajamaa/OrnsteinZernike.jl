@@ -6,7 +6,7 @@ In order to solve an Ornstein-Zernike equation, there are a number of things tha
 3. The closure relation
 4. The solver
 
-Let's start with a very simple example: a three-dimensional 1-component system, where the particles interact according to a power law potential. In this case, we can make use of the built-in potential 
+Let's start with a very simple example: a three-dimensional 1-component system, where the particles interact according to an inverse power law potential $u(r)=\epsilon (\sigma/r)^n$. In this case, we can make use of the built-in potential 
 ```@example lj
 using OrnsteinZernike
 ϵ = 1.0
