@@ -23,6 +23,7 @@ NgIteration
 
 ```@docs
 DensityRamp
+TemperatureRamp
 ```
 
 ## References
