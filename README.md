@@ -46,4 +46,4 @@ See the <a href="https://ilianpihlajamaa.github.io/OrnsteinZernike.jl/dev/">Docu
 Please open an issue if anything is unclear in the documentation, if any unexpected errors arise or for feature requests. PRs are of course also welcome.
 
 # Citing
-If you use this software for scientific publications, please consider citing <a href="[https://ilianpihlajamaa.github.io/OrnsteinZernike.jl/dev/](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.110.044608)">Pihlajamaa, I., & Janssen, L. M. (2024). Comparison of integral equation theories of the liquid state. Physical Review E, 110(4), 044608.</a>. 
+If you use this software for scientific publications, please consider citing <a href="https://journals.aps.org/pre/abstract/10.1103/PhysRevE.110.044608">Pihlajamaa, I., & Janssen, L. M. (2024). Comparison of integral equation theories of the liquid state. Physical Review E, 110(4), 044608</a>. 
