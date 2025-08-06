@@ -44,8 +44,8 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           files: lcov.info
-          token: ${{ secrets.CODECOV_TOKEN }}   # required for v4 except PRs from forks
-          fail_ci_if_error: true                # optional but helpful
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
 
   docs:
     name: Documentation
