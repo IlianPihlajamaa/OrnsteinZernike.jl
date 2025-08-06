@@ -108,6 +108,9 @@ struct ModifiedVerlet{T} <: Closure
     α::T
 end
 
+function ModifiedVerlet(; α=0.4)
+    return ModifiedVerlet(α)
+end
 
 function bridge_function(closure::ModifiedVerlet, _, _, γ)
     α = closure.α
@@ -181,6 +184,10 @@ struct RogersYoung{T} <: Closure
     α::T
 end
 
+function RogersYoung(; α=0.5)
+    return RogersYoung(α)
+end
+
 function bridge_function(closure::RogersYoung, r, _, γ)
     oneunit = one.(γ)
     α = closure.α
@@ -221,6 +228,10 @@ struct ExtendedRogersYoung{T} <: Closure
     a::T
 end
 
+function ExtendedRogersYoung(; α=0.5, a=0.5)
+    return ExtendedRogersYoung(α, a)
+end
+
 function bridge_function(closure::ExtendedRogersYoung, r, _, γ)
     oneunit = one.(γ)
     α = closure.α
@@ -255,6 +266,10 @@ Zerah, Gilles, and Jean‐Pierre Hansen. "Self‐consistent integral equations f
 """
 struct ZerahHansen{T<:Number} <: Closure 
     α::T
+end
+
+function ZerahHansen(; α=0.5)
+    return ZerahHansen(α)
 end
 
 function bridge_function(closure::ZerahHansen, r, _, γstar)
@@ -310,6 +325,10 @@ struct Lee{T, T2} <: Closure
     ρ::T2
 end
 
+function Lee(; ζ=1.073, ϕ=1.816, α=1.0, ρ=0.4)
+    return Lee(ζ, ϕ, α, ρ)
+end
+
 function bridge_function(closure::Lee, _, mayerf, γ)
     oneunit = one.(γ)
     ρ = closure.ρ
@@ -341,6 +360,10 @@ struct ChoudhuryGhosh{T} <: Closure
     α::T
 end
 
+function ChoudhuryGhosh(; α=1.01752)
+    return ChoudhuryGhosh(α)
+end
+
 function bridge_function(closure::ChoudhuryGhosh, _, _, γstar)
     oneunit = one.(γstar)
     α = closure.α
@@ -365,6 +388,10 @@ Ballone, P., et al. "Additive and non-additive hard sphere mixtures: Monte Carlo
 """
 struct BallonePastoreGalliGazzillo{T} <: Closure 
     s::T
+end
+
+function BallonePastoreGalliGazzillo(; s=1.5)
+    return BallonePastoreGalliGazzillo(s)
 end
 
 function bridge_function(closure::BallonePastoreGalliGazzillo, _, _, γ)
@@ -414,6 +441,10 @@ struct CharpentierJackse{T} <: Closure
     α::T
 end
 
+function CharpentierJackse(; α=0.5)
+    return CharpentierJackse(α)
+end
+
 function bridge_function(closure::CharpentierJackse, _, _, γstar)
     oneunit = one.(γstar)
     α = closure.α
@@ -437,6 +468,10 @@ Bomont, J. M., and J. L. Bretonnet. "A self-consistent integral equation: Bridge
 """
 struct BomontBretonnet{T} <: Closure 
     f::T
+end
+
+function BomontBretonnet(; f=0.5)
+    return BomontBretonnet(f)
 end
 
 function bridge_function(closure::BomontBretonnet, _, _, γstar)
@@ -463,6 +498,10 @@ Khanpour, Mehrdad. "A unified derivation of Percus–Yevick and hyper-netted cha
 """
 struct Khanpour{T} <: Closure 
     α::T
+end
+
+function Khanpour(; α=0.5)
+    return Khanpour(α)
 end
 
 function bridge_function(closure::Khanpour, _, _, γ)
@@ -513,7 +552,7 @@ struct ModifiedHypernettedChain{T, T2} <: Closure
     sigma::T2
 end
 
-function ModifiedHypernettedChain(η; sigma=1.0)
+function ModifiedHypernettedChain(; η=0.3, sigma=1.0)
     return ModifiedHypernettedChain(η, sigma)
 end
 
@@ -553,6 +592,10 @@ Carbajal-Tinoco, Mauricio D. "Thermodynamically consistent integral equation for
 """
 struct CarbajalTinoko{T} <: Closure 
     λ::T
+end
+
+function CarbajalTinoko(; λ=0.4)
+    return CarbajalTinoko(λ)
 end
 
 function bridge_function(closure::CarbajalTinoko, r::Vector, f::Vector, γ::Vector)
