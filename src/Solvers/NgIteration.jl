@@ -140,7 +140,6 @@ function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure,
     if !(isnothing(init))
         fn_red[end] .= init.*r
     else
-        @show zero(eltype(eltype(fn_red)))
         fn_red[end] .= (zero(eltype(eltype(fn_red))), )
     end
 
