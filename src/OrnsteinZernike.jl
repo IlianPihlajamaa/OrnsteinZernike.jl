@@ -8,7 +8,6 @@ using FFTW, StaticArrays, LinearAlgebra, Hankel, SpecialFunctions, Dierckx
 using Bessels: besselj
 using FunctionZeros
 using Roots: find_zero
-using InteractiveUtils: subtypes
 
 export solve
 export SimpleLiquid

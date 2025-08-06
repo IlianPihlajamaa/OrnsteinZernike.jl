@@ -2,6 +2,7 @@ using Test, OrnsteinZernike, StaticArrays
 using FFTW
 using Hankel
 using Random
+using InteractiveUtils: subtypes
 import Roots
 Random.seed!(523)
 
