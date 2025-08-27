@@ -122,8 +122,8 @@ S0 = ρ_grid .* kBT .* chi_values
 βp  = delta_ρ * sum(1 ./ S0) 
 p_comp = kBT * βp    # convert βp → p
 
-println("Virial-route pressure at ρ=$(ρ_target):        p_virial = $(p_virial)")
-println("Compressibility-route pressure at ρ=$(ρ_target): p_comp   = $(p_comp)")
+println("Virial-route pressure at          ρ = $(ρ_target): p_virial = $(p_virial)")
+println("Compressibility-route pressure at ρ = $(ρ_target): p_comp   = $(p_comp)")
 ```
 
 **Notes**
