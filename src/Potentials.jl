@@ -165,12 +165,12 @@ end
 """
 exp(- beta * u) - 1.
 """
-function find_mayer_f_function(system::SimpleLiquid{dims, species, T1, T2, P}, βU) where {dims, species, T1, T2, P}
+function find_mayer_f_function(::SimpleUnchargedSystem, βU)
     f = @. exp(-βU) - 1.0
     return f
 end
 
-function find_mayer_f_function(system::SimpleLiquid{dims, species, T1, T2, P}, r::AbstractArray, βU::AbstractArray) where {dims, species, T1, T2, P}
+function find_mayer_f_function(system::SimpleUnchargedSystem, r::AbstractArray, βU::AbstractArray)
     return find_mayer_f_function.((system, ), r, βU)
 end
 

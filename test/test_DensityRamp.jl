@@ -7,7 +7,7 @@ function ramptest()
     dims = 3
 
     pot = HardSpheres(1.0)
-    system = SimpleLiquid(dims, ρ, kBT, pot)
+    system = SimpleFluid(dims, ρ, kBT, pot)
     closure = PercusYevick()
     method0 = NgIteration(tolerance=10^-10, M=M, dr=dr, N_stages=5, max_iterations=1000, verbose=false)
     method = DensityRamp(method0, ρ*(0.1:0.1:1.0), verbose=false)

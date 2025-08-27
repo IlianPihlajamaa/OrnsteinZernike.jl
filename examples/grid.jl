@@ -1,6 +1,6 @@
 using OrnsteinZernike, Plots
 
-system = SimpleLiquid(3, 0.8, 1.0, LennardJones(1.0, 1.0))
+system = SimpleFluid(3, 0.8, 1.0, LennardJones(1.0, 1.0))
 closure = HypernettedChain()
 
 sol_fine   = solve(system, closure; method=NgIteration(M=2000, dr=0.005))

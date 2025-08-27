@@ -28,7 +28,7 @@ function lj_matrix(r, params)
 end
 
 pot = CustomPotential(lj_matrix, (1.0,1.0, 1.2,0.8, 1.1,0.9))
-system = SimpleLiquid(3, ρ, 1.0, pot)
+system = SimpleMixture(3, ρ, 1.0, pot)
 
 sol = solve(system, HypernettedChain())
 

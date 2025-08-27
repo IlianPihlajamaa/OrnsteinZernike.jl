@@ -10,7 +10,7 @@ using FunctionZeros
 using Roots: find_zero
 
 export solve
-export SimpleLiquid
+export SimpleFluid, SimpleMixture, SimpleChargedFluid, SimpleChargedMixture
 export OZSolution
 export Exact, FourierIteration, NgIteration, DensityRamp, TemperatureRamp
 export PercusYevick,  HypernettedChain, MeanSpherical, ModifiedHypernettedChain, Verlet, MartynovSarkisov

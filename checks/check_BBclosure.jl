@@ -7,14 +7,14 @@ function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
 
     function pressure(ρ, α)
         method = NgIteration(M=M, dr=dr, verbose=false)
-        system = SimpleLiquid(dims, ρ, kBT, pot)
+        system = SimpleFluid(dims, ρ, kBT, pot)
         sol = solve(system, BomontBretonnet(α), method)
         p = compute_virial_pressure(sol, system)
         return p
     end
 
     function find_inconsistency(ρ, α)
-        system1 = SimpleLiquid(dims, ρ, kBT, pot)
+        system1 = SimpleFluid(dims, ρ, kBT, pot)
         method = NgIteration(M=M, dr=dr, verbose=false)
         sol1 = solve(system1, BomontBretonnet(α), method)
 
@@ -23,17 +23,17 @@ function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
         @time begin
             p1 = compute_virial_pressure(sol1, system1)
             dρ = sqrt(eps(ρ))
-            system2 = SimpleLiquid(dims, ρ+dρ, kBT, pot)
+            system2 = SimpleFluid(dims, ρ+dρ, kBT, pot)
             sol2 = solve(system2, BomontBretonnet(α), method)
             p2 = compute_virial_pressure(sol2, system2)
             dpdρ2 = (p2-p1)/dρ
         end
         @time begin
             dρ = sqrt(eps(ρ))
-            system2 = SimpleLiquid(dims, ρ+dρ, kBT, pot)
+            system2 = SimpleFluid(dims, ρ+dρ, kBT, pot)
             sol2 = solve(system2, BomontBretonnet(α), method)
             p2 = compute_virial_pressure(sol2, system2)
-            system3 = SimpleLiquid(dims, ρ-dρ, kBT, pot)
+            system3 = SimpleFluid(dims, ρ-dρ, kBT, pot)
             sol3 = solve(system3, BomontBretonnet(α), method)
             p3 = compute_virial_pressure(sol3, system3)
             dpdρ3 = (p2-p3)/dρ/2
@@ -48,7 +48,7 @@ function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
 
     func = α ->  find_inconsistency(ρ, α)
     α =  Roots.find_zero(func, (0.0,1.0), Roots.Bisection(), atol=0.0001)
-    system = SimpleLiquid(dims, ρ, kBT, pot)
+    system = SimpleFluid(dims, ρ, kBT, pot)
     method = NgIteration(M=M, dr=dr, verbose=false)
     sol = solve(system, BomontBretonnet(α), method)
     return system, sol, α
@@ -78,7 +78,7 @@ for closure in [PercusYevick, MartynovSarkisov]
         kBT = 1.0
         dims = 3
         pot = HardSpheres(1.0)
-        system = SimpleLiquid(dims, ρ, kBT, pot)
+        system = SimpleFluid(dims, ρ, kBT, pot)
         method = NgIteration(M=M, dr=dr, verbose=false)
         sol = solve(system, closure(), method)
         B = (OrnsteinZernike.bridge_function(closure(), 0.0, 0.0, sol.gr .- 1 .- sol.cr))

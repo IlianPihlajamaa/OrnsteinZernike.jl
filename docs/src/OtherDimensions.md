@@ -13,7 +13,7 @@ for i = 1:6
     dimension = dimensionalities[i]
     potential = HardSpheres(1.0)
     kBT = 1.0
-    system = SimpleLiquid(dimension, density, kBT, potential)
+    system = SimpleFluid(dimension, density, kBT, potential)
     closure = PercusYevick()
     method = DensityRamp(NgIteration(), range(0.001, density-0.1, length=10))
     sol = solve(system, closure, method)[end]

@@ -1,5 +1,5 @@
 
-function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure, method::FourierIteration; init=nothing) where {dims, species, T1, T2, P}
+function solve(system::SimpleUnchargedSystem, closure::Closure, method::FourierIteration; init=nothing) 
     ρ = system.ρ
 
     r = method.dr * (1:method.M) |> collect

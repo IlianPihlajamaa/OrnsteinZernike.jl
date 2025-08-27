@@ -6,7 +6,7 @@ function test_closure(closure)
     dims = 3
 
     pot = HardSpheres(1.0)
-    system = SimpleLiquid(dims, ρ, kBT, pot)
+    system = SimpleFluid(dims, ρ, kBT, pot)
     method0 = NgIteration(tolerance=10^-8, M=M, dr=dr, N_stages=2, max_iterations=1000, verbose=false)
     sol = solve(system, closure, method0)
     @test !(any(isnan, sol.cr))  # Check for NaN in cr

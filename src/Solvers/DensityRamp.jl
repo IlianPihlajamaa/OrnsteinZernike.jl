@@ -11,7 +11,7 @@ end
 recast_γ(γ::Array{T, 1}) where {T} = γ
 
 
-function solve(system::SimpleLiquid, closure::Closure, method::DensityRamp)
+function solve(system::SimpleUnchargedSystem, closure::Closure, method::DensityRamp)
     densities = method.densities
     ρtarget = system.ρ
     sols = []

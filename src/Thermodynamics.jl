@@ -42,7 +42,7 @@ end
 
 
 """
-    compute_excess_energy(sol::OZSolution, system::SimpleLiquid)
+    compute_excess_energy(sol::OZSolution,  system::SimpleUnchargedSystem)
 
 Computes the excess energy per particle Eₓ, such that E = (dims/2*kBT + Eₓ)*N.
 
@@ -50,7 +50,9 @@ uses the formula Eₓ = 1/2 ρ ∫dr g(r) u(r) for single component systems
 and Eₓ = 1/2 ρ Σᵢⱼ xᵢxⱼ ∫dr gᵢⱼ(r) uᵢⱼ(r) for mixtures. Here x is the concentration fraction xᵢ=ρᵢ/sum(ρ).
 
 """
-function compute_excess_energy(sol::OZSolution, system::SimpleLiquid{dims, species, T1, T2, P}) where {dims,species, T1, T2, P}
+function compute_excess_energy(sol::OZSolution, system::SimpleUnchargedSystem)
+    dims = dimensions(system)
+    Ns = number_of_species(system)
     r = sol.r
     ρ = system.ρ
     ρ0 = sum(ρ)
@@ -63,8 +65,8 @@ function compute_excess_energy(sol::OZSolution, system::SimpleLiquid{dims, speci
     sphere_surface = surface_N_sphere(dims)
     fraction_matrix = (x*x')
 
-    for s1 = axes(gr,2)
-        for s2 = axes(gr,3)
+    for s1 = 1:Ns
+        for s2 = 1:Ns
             integrand = gr[:, s1, s2] .* getindex.(u, s1, s2) .* r[:] .^ rpow 
             for i in eachindex(integrand) # if u is inf or gr is very small, set contribution to zero 
                 if isnan(integrand[i]) || gr[i, s1, s2] < 10^-6
@@ -130,7 +132,7 @@ end
 
 
 """
-    compute_virial_pressure(sol::OZSolution, system::SimpleLiquid)
+    compute_virial_pressure(sol::OZSolution,  system::SimpleUnchargedSystem)
 
 Computes the pressure via the virial route
 
@@ -141,7 +143,9 @@ It handles discontinuities in the interaction potential analytically if `discont
 For additional speed/accuracy define a method of `evaluate_potential_derivative(potential, r::Number)` that analytically computes du/dr. 
 By default this is done using finite differences.
 """
-function compute_virial_pressure(sol::OZSolution, system::SimpleLiquid{dims, Nspecies, T1, T2, P}) where {dims, Nspecies, T1, T2, P}
+function compute_virial_pressure(sol::OZSolution, system:: SimpleUnchargedSystem) 
+    dims = dimensions(system)
+    Ns = number_of_species(system)
     r = sol.r
     ρ = system.ρ
     ρ0 = sum(ρ)
@@ -154,8 +158,8 @@ function compute_virial_pressure(sol::OZSolution, system::SimpleLiquid{dims, Nsp
     rpow = dims
     p1 = zero(eltype(gr))
     fraction_matrix = (x*x')
-    for s1 = axes(gr,2)
-        for s2 = axes(gr,3)
+    for s1 = 1:Ns
+        for s2 = 1:Ns
             integrand = gr[:, s1, s2] .* getindex.(dudr, s1, s2) .* r[:] .^ rpow 
             for i in eachindex(integrand) # if u is inf or gr is very small, set contribution to zero 
                 if isnan(integrand[i]) || gr[i, s1, s2] < 10^-6
@@ -181,7 +185,7 @@ function compute_virial_pressure(sol::OZSolution, system::SimpleLiquid{dims, Nsp
     return p
 end
 
-function get_concentration_fraction(system)
+function get_concentration_fraction(system::SimpleUnchargedSystem)
     ρ = system.ρ
     if ρ isa AbstractArray
         return ρ.diag / sum(ρ.diag)
@@ -196,7 +200,7 @@ _eachslice(a::Vector;dims=1) = a
 
 
 """
-    compute_compressibility(sol::OZSolution, system::SimpleLiquid)
+    compute_compressibility(sol::OZSolution, system::SimpleFluid)
 
 Computes the isothermal compressibility χ of the system
 
@@ -204,7 +208,7 @@ uses the formula 1/ρkBTχ = 1 - ρ ĉ(k=0) for single component systems and
 1/ρkBTχ = 1 - ρ Σᵢⱼ ĉᵢⱼ(k=0) for mixtures. 
 Eq. (3.6.16) in Hansen and McDonald
 """
-function compute_compressibility(sol::OZSolution, system::SimpleLiquid{dims, species, T1, T2, P}) where {dims, species, T1, T2, P}
+function compute_compressibility(sol::OZSolution, system::SimpleUnchargedSystem) 
     ρ = system.ρ
     kBT = system.kBT
     x = get_concentration_fraction(system)
@@ -216,13 +220,16 @@ function compute_compressibility(sol::OZSolution, system::SimpleLiquid{dims, spe
     return χ
 end
 
-function get_ĉ0(sol::OZSolution, ::SimpleLiquid{dims, 1, T1, T2, P}) where {dims, T1, T2, P}
+function get_ĉ0(sol::OZSolution, system::SimpleFluid) 
+    dims = dimensions(system)
     spl = Spline1D(sol.r, sol.cr[:, 1, 1].*sol.r.^(dims-1))
     ĉ0 = surface_N_sphere(dims)*integrate(spl, zero(eltype(sol.r)), maximum(sol.r))
     return ĉ0
 end
 
-function get_ĉ0(sol::OZSolution, ::SimpleLiquid{dims, species, T1, T2, P}) where {dims, species, T1, T2, P}
+function get_ĉ0(sol::OZSolution, s::SimpleMixture)
+    dims = dimensions(s)
+    species = number_of_species(s)
     ĉ0 = zeros(eltype(eltype(sol.ck)), species, species)
     for i = 1:species
         for j = 1:species

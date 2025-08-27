@@ -40,7 +40,7 @@ dims = 3
 kBT = 1.0
 rho = 0.5
 potential = jl.HardSpheres(1.0)
-system = jl.SimpleLiquid(dims, rho, kBT, potential)
+system = jl.SimpleFluid(dims, rho, kBT, potential)
 closure = jl.PercusYevick()
 sol = jl.solve(system, closure)
 

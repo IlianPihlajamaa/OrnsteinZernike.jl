@@ -17,7 +17,7 @@ Secondly, we define the system. In this example, the total number density is $\r
 ρ = ρ_total*[0.75, 0.25] ## it is a 3:1 system
 dims = 3 # we consider a 3D system
 kBT = 1.0 # thermal energy
-system = SimpleLiquid(dims, ρ, kBT, potential)
+system = SimpleMixture(dims, ρ, kBT, potential)
 ```
 
 Thirdly, we define the closure

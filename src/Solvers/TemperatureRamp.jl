@@ -1,4 +1,4 @@
-function solve(system::SimpleLiquid, closure::Closure, method::TemperatureRamp)
+function solve(system::SimpleUnchargedSystem, closure::Closure, method::TemperatureRamp)
     temperatures = method.temperatures
     kBTtarget = system.kBT
     sols = []

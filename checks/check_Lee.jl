@@ -5,13 +5,13 @@ function find_self_consistent_solution_Lee(ρ, kBT, M, dr, dims, pot)
         ζ, ϕ, α = params
         @show ζ, ϕ, α
         closure = Lee(ζ, ϕ, α, ρ)
-        system1 = SimpleLiquid(dims, ρ, kBT, pot)
+        system1 = SimpleFluid(dims, ρ, kBT, pot)
         method = NgIteration(M=M, dr=dr, verbose=false)
         sol1 = solve(system1, closure, method)
         p1 = compute_virial_pressure(sol1, system1)
 
         dρ = sqrt(eps(ρ))
-        system2 = SimpleLiquid(dims, ρ+dρ, kBT, pot)
+        system2 = SimpleFluid(dims, ρ+dρ, kBT, pot)
         sol2 = solve(system2, closure, method)
         p2 = compute_virial_pressure(sol2, system2)
 
@@ -43,7 +43,7 @@ function find_self_consistent_solution_Lee(ρ, kBT, M, dr, dims, pot)
     @show s
     params = s.zero
     ζ, ϕ, α = params
-    system = SimpleLiquid(dims, ρ, kBT, pot)
+    system = SimpleFluid(dims, ρ, kBT, pot)
     method = NgIteration(M=M, dr=dr, verbose=false)
     closure = Lee(ζ, ϕ, α, ρ)
     sol = solve(system, closure, method)

@@ -6,7 +6,7 @@ import Roots, ForwardDiff
 function find_pressure_derivative(ρ, kBT, dims, pot, closure, method)
 
     function pressure(ρ)
-        system = SimpleLiquid(dims, ρ, kBT, pot)
+        system = SimpleFluid(dims, ρ, kBT, pot)
         sol = solve(system, closure, method)
         p = compute_virial_pressure(sol, system)
         return p

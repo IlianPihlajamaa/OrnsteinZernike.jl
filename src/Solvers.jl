@@ -150,7 +150,10 @@ struct DensityRamp{T<:Method, T2<:AbstractVector} <: Method
     verbose::Bool
 end
 
-function DensityRamp(method, densities::AbstractVector{T}; verbose=true) where T
+function DensityRamp(method::Method, densities::AbstractVector{T}; verbose=true) where T
+    if method isa DensityRamp
+        error("Nesting DensityRamp methods is not supported.")
+    end
     if T <: Number
         @assert issorted(densities)
         return DensityRamp(method, densities, verbose)
@@ -197,25 +200,23 @@ defaultsolver() = NgIteration()
 
 
 """
-    solve(system::SimpleLiquid, closure::Closure, method::Method)
+    solve(system::System, closure::Closure, method::Method)
 
 Solves the system `system` using the closure `closure` with method `method`.
 
-    solve(system::SimpleLiquid, closure::Closure)
+    solve(system::System, closure::Closure)
 
 Solves the system `system` using the closure `closure` with the default method `NgIteration()`.
 """
 function solve end
 
-function solve(system::SimpleLiquid, closure::Closure; init=nothing)
+function solve(system::System, closure::Closure; init=nothing)
     solve(system, closure, defaultsolver(); init=init)
 end
 
-ndims(::SimpleLiquid{Ndims, species, T1, T2, P}) where {Ndims, species, T1, T2, P} = Ndims
-
-function solve(system::SimpleLiquid, closure::Closure,  ::Exact)
+function solve(system::System, closure::Closure,  ::Exact)
     P = typeof(system.potential)
-    error("The potential $(P) with closure $(typeof(closure)) has no implemented exact solution in $(ndims(system)) dimensions.")
+    error("The potential $(P) with closure $(typeof(closure)) has no implemented exact solution in $(dimensions(system)) dimensions.")
 end
 
 function compute_error(y1::Vector{T}, y2::Vector{T}) where T

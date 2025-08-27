@@ -1,7 +1,7 @@
 name = "OrnsteinZernike"
 uuid = "51399321-c693-48c0-994d-05e3df0250f2"
 authors = ["Ilian Pihlajamaa <ilian.pihlajamaa@gmail.com>"]
-version = "0.1.6"
+version = "0.2.0"
 
 [deps]
 Bessels = "0e736298-9ec6-45e8-9647-e4fc86a2fe38"

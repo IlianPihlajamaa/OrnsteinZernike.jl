@@ -22,7 +22,7 @@ Let's solve the Ornstein-Zernike equation for a single component three-dimension
 using OrnsteinZernike
 dims = 3; kBT = 1.0; ρ = 0.5;
 potential = HardSpheres(1.0)
-system = SimpleLiquid(dims, ρ, kBT, potential)
+system = SimpleFluid(dims, ρ, kBT, potential)
 closure = PercusYevick()
 sol = @time solve(system, closure);
 ```

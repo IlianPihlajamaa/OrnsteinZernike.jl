@@ -6,12 +6,12 @@ import Roots
 # function find_self_consistent_solution(ρ, kBT, method, dims, pot; lims=(0.1, 2.0))
 
 #     function RY_inconsistency(ρ, α)
-#         system1 = SimpleLiquid(dims, ρ, kBT, pot)
+#         system1 = SimpleFluid(dims, ρ, kBT, pot)
 #         sol1 = solve(system1, RogersYoung(α), method)
 #         p1 = compute_virial_pressure(sol1, system1)
 
 #         dρ = sqrt(eps(ρ))
-#         system2 = SimpleLiquid(dims, ρ+dρ, kBT, pot)
+#         system2 = SimpleFluid(dims, ρ+dρ, kBT, pot)
 #         sol2 = solve(system2, RogersYoung(α), method)
 #         p2 = compute_virial_pressure(sol2, system2)
 #         dpdρ = (p2-p1)/dρ
@@ -23,7 +23,7 @@ import Roots
 
 #     func = α ->  RY_inconsistency(ρ, α)
 #     α =  Roots.find_zero(func, lims, Roots.Bisection(), atol=0.0001)
-#     system = SimpleLiquid(dims, ρ, kBT, pot)
+#     system = SimpleFluid(dims, ρ, kBT, pot)
 #     sol = solve(system, RogersYoung(α), method)
 #     return system, sol, α
 # end
@@ -129,13 +129,13 @@ function find_self_consistent_solution_ERY(ρ, kBT, method, dims, pot; x0=[0.2, 
         dρ = ρ*0.001
         dkBT = sqrt(eps(kBT))
 
-        system0 = SimpleLiquid(dims, ρ-dρ, kBT, pot)
+        system0 = SimpleFluid(dims, ρ-dρ, kBT, pot)
         sol0 = solve(system0, closure, method)
-        system1 = SimpleLiquid(dims, ρ, kBT, pot)
+        system1 = SimpleFluid(dims, ρ, kBT, pot)
         sol1 = solve(system1, closure, method)
-        system2 = SimpleLiquid(dims, ρ+dρ, kBT, pot)
+        system2 = SimpleFluid(dims, ρ+dρ, kBT, pot)
         sol2 = solve(system2, closure, method)
-        system3 = SimpleLiquid(dims, ρ, kBT+dkBT, pot)
+        system3 = SimpleFluid(dims, ρ, kBT+dkBT, pot)
         sol3 = solve(system3, closure, method)
 
         p0 = compute_virial_pressure(sol0, system0)
@@ -166,7 +166,7 @@ function find_self_consistent_solution_ERY(ρ, kBT, method, dims, pot; x0=[0.2, 
 
     func = x ->  ERY_inconsistency(ρ, x[1]^2, x[2]^2)
     α =  optimize(func, [x0...]+rand(2)./10, NelderMead(), Optim.Options(x_tol=0.0001, f_tol=10^-6)).minimizer
-    system = SimpleLiquid(dims, ρ, kBT, pot)
+    system = SimpleFluid(dims, ρ, kBT, pot)
     sol = solve(system, ExtendedRogersYoung(α[1], α[2]), method)
     return system, sol, α
 end

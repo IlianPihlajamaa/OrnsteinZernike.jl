@@ -25,7 +25,7 @@ end
 
 
 
-function get_fourier_plan(::SimpleLiquid{1, species, T1, T2, P}, method, F) where {species, T1, T2, P}
+function get_fourier_plan(::Union{SimpleFluid{1, T1, T2, P}, SimpleMixture{1,Ns,T1,T2,P}}, method, F) where {Ns, T1, T2, P}
     M = length(F)
     dr = method.dr
     dk =  π/((M+0.5)*dr)
@@ -35,7 +35,7 @@ function get_fourier_plan(::SimpleLiquid{1, species, T1, T2, P}, method, F) wher
 end
 
 
-function get_fourier_plan(::SimpleLiquid{3, species, T1, T2, P}, method, F::Vector{T}) where {species, T1, T2, P, T<:Union{Float64, AbstractMatrix{Float64}}}
+function get_fourier_plan(::Union{SimpleFluid{3, T1, T2, P}, SimpleMixture{3,Ns,T1,T2,P}} , method, F::Vector{T}) where {Ns, T1, T2, P, T<:Union{Float64, AbstractMatrix{Float64}}}
     plan =  find_fourier_plan_3d(F)
     M = method.M
     dr = method.dr
@@ -45,7 +45,7 @@ function get_fourier_plan(::SimpleLiquid{3, species, T1, T2, P}, method, F::Vect
     return My3DPlan(plan, r, k, dr, dk, M)
 end
 
-function get_fourier_plan(system::SimpleLiquid{ndims, species, T1, T2, P}, method, F) where {ndims, species, T1, T2, P}
+function get_fourier_plan(system::SimpleUnchargedSystem, method, F)
     dr = method.dr
     return find_fourier_plan_nd(system, F, dr)
 end
@@ -71,7 +71,8 @@ end
 
 
 
-function find_fourier_plan_nd(::SimpleLiquid{ndims, species, T1, T2, P}, F::Vector{T}, dr::Number) where {ndims, species, T1, T2, P, T}
+function find_fourier_plan_nd(system::SimpleUnchargedSystem, F::Vector{T}, dr::Number) where T
+    ndims = dimensions(system)
     M = length(F)
     plan = QDHT(ndims/2-1, 1, M*dr, M)
     return plan

@@ -45,7 +45,7 @@ which sets the size of the box in real space.
 ```@example 8
 using OrnsteinZernike, Plots
 
-system = SimpleLiquid(3, 0.8, 1.0, LennardJones(1.0, 1.0))
+system = SimpleFluid(3, 0.8, 1.0, LennardJones(1.0, 1.0))
 closure = HypernettedChain()
 
 Rmax = 10.0

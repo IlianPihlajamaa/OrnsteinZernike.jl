@@ -8,7 +8,7 @@ kBT = 1.0
 dims = 3
 
 pot = HardSpheres(1.0)
-system = SimpleLiquid(dims, ρ, kBT, pot)
+system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration()
 sol = solve(system, closure, method);
@@ -35,7 +35,7 @@ using OrnsteinZernike
 kBT = 1.0 # hide
 dims = 3 # hide
 pot = HardSpheres(1.0) # hide
-system = SimpleLiquid(dims, ρ, kBT, pot) # hide
+system = SimpleFluid(dims, ρ, kBT, pot) # hide
 closure = PercusYevick() # hide
 
 M = 10^4 # number of gridpoints
@@ -63,7 +63,7 @@ kBT = 1.0
 dims = 3
 
 pot = HardSpheres(1.0)
-system = SimpleLiquid(dims, ρ, kBT, pot)
+system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration(M=5000, dr=0.01)
 sol = solve(system, closure, method);

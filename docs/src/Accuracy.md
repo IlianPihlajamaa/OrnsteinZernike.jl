@@ -13,7 +13,7 @@ p = zeros(length(M_array))
 kBT = 1.0
 dims = 3 
 pot = HardSpheres(1.0)
-system = SimpleLiquid(dims, ρ, kBT, pot)
+system = SimpleFluid(dims, ρ, kBT, pot)
 
 for (i,M) in enumerate(M_array)
     dr = Rmax/M

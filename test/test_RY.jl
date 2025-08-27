@@ -1,13 +1,13 @@
 function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
 
     function RY_inconsistency(ρ, α)
-        system1 = SimpleLiquid(dims, ρ, kBT, pot)
+        system1 = SimpleFluid(dims, ρ, kBT, pot)
         method = NgIteration(M=M, dr=dr, verbose=false)
         sol1 = solve(system1, RogersYoung(α), method)
         p1 = compute_virial_pressure(sol1, system1)
 
         dρ = sqrt(eps(ρ))
-        system2 = SimpleLiquid(dims, ρ+dρ, kBT, pot)
+        system2 = SimpleFluid(dims, ρ+dρ, kBT, pot)
         sol2 = solve(system2, RogersYoung(α), method)
         p2 = compute_virial_pressure(sol2, system2)
         dpdρ = (p2-p1)/dρ
@@ -20,7 +20,7 @@ function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
 
     func = α ->  RY_inconsistency(ρ, α)
     α =  Roots.find_zero(func, (0.1,5.0), Roots.Bisection(), atol=0.0001)
-    system = SimpleLiquid(dims, ρ, kBT, pot)
+    system = SimpleFluid(dims, ρ, kBT, pot)
     method = NgIteration(M=M, dr=dr, verbose=false)
     sol = solve(system, RogersYoung(α), method)
     return system, sol, α

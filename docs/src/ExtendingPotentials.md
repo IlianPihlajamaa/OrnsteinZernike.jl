@@ -29,7 +29,7 @@ And use the potential as any other
 dims = 3 # we consider a 3D system
 ρ = 0.6 # number density
 kBT = 1.0 # thermal energy
-system = SimpleLiquid(dims, ρ, kBT, potential)
+system = SimpleFluid(dims, ρ, kBT, potential)
 closure = HypernettedChain()
 sol = solve(system, closure)
 using Plots
@@ -74,7 +74,7 @@ dims = 3 # we consider a 3D system
 potential = CustomPotential(mypotential, p)
 ρ = [0.25, 0.25] # number density
 kBT = 1.0 # thermal energy
-system = SimpleLiquid(dims, ρ, kBT, potential)
+system = SimpleMixture(dims, ρ, kBT, potential)
 closure = HypernettedChain()
 sol = solve(system, closure)
 using Plots

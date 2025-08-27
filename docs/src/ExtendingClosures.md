@@ -49,7 +49,7 @@ potential = PowerLaw(ϵ, σ, n)
 dims = 3 
 ρ = 0.6 
 kBT = 1.0
-system = SimpleLiquid(dims, ρ, kBT, potential)
+system = SimpleFluid(dims, ρ, kBT, potential)
 closure = MyHNC()
 sol = solve(system, closure)
 using Plots

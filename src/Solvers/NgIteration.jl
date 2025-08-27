@@ -1,4 +1,4 @@
-function solve(system::SimpleLiquid{dims, 1, T1, T2, P}, closure::Closure, method::NgIteration; init=nothing) where {dims, T1, T2, P}
+function solve(system::SimpleFluid, closure::Closure, method::NgIteration; init=nothing) 
     N_stages = method.N_stages
     ρ = system.ρ
 
@@ -98,7 +98,7 @@ function reinterpret_vector_of_vectors(vecofvec, ::Type{T}, L1, L2) where T
     return [reinterpret(reshape, T, reshape(vecofvec[i], (L1, L2))) for i in eachindex(vecofvec)]
 end
 
-function solve(system::SimpleLiquid{dims, species, T1, T2, P}, closure::Closure, method::NgIteration; init=nothing) where {dims, species, T1, T2, P}
+function solve(system::SimpleMixture, closure::Closure, method::NgIteration; init=nothing) 
     N_stages = method.N_stages
     ρ = system.ρ
 

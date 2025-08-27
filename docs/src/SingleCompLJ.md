@@ -21,10 +21,10 @@ Now that we have the potential, we define the system
 dims = 3 # we consider a 3D system
 ρ = 0.6 # number density
 kBT = 1.0 # thermal energy
-system = SimpleLiquid(dims, ρ, kBT, potential)
+system = SimpleFluid(dims, ρ, kBT, potential)
 ```
 
-The `SimpleLiquid` object is meant to be used when dealing with systems that have spherically symmetric interaction potentials and no external fields. 
+The `SimpleFluid` object is meant to be used when dealing with systems that have spherically symmetric interaction potentials and no external fields. 
 
 The third step is to define a closure relation. For now, let's stick to the simple Hypernetted Chain closure
 ```@example lj
@@ -55,7 +55,7 @@ potential = PowerLaw(ϵ, σ, n)
 dims = 3 # we consider a 3D system
 ρ = 0.6 # number density
 kBT = 1.0 # thermal energy
-system = SimpleLiquid(dims, ρ, kBT, potential)
+system = SimpleFluid(dims, ρ, kBT, potential)
 closure = HypernettedChain()
 sol = solve(system, closure)
 using Plots

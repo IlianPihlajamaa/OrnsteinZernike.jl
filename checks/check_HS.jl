@@ -4,7 +4,7 @@ kBT = 1.1
 dims = 3
 dr = 10/M
 pot = HardSpheres(1.0)
-system = SimpleLiquid(dims, ρ, kBT, pot)
+system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = FourierIteration(M = M,dr=dr, tolerance=10^-10, mixing_parameter=0.8, verbose=false, max_iterations=10^4)
 sol = solve(system, closure, method)

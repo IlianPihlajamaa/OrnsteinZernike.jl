@@ -100,7 +100,7 @@ potential = PowerLaw(ϵ, σ, 8)
 ρ_target   = 0.8
 delta_ρ = 0.01
 ρ_grid     = collect((delta_ρ/2):delta_ρ:(ρ_target-delta_ρ/2))  # avoid 0 to keep numerics stable
-system_at = ρ -> SimpleLiquid(3, ρ, kBT, potential)
+system_at = ρ -> SimpleFluid(3, ρ, kBT, potential)
 
 # (1) Virial-route pressure at ρ_target
 sol_target = solve(system_at(ρ_target), closure, NgIteration(M=5000, dr=0.01))

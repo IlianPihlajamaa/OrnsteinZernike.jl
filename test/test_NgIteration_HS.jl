@@ -7,7 +7,7 @@ dr = 10/M
 kBT = 1.0
 
 pot = HardSpheres(1.0)
-system = SimpleLiquid(dims, ρ, kBT, pot)
+system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration(tolerance=10^-10, N_stages=5, M=M, dr=dr, verbose=false, max_iterations=10^3)
 sol = solve(system, closure, method)
@@ -29,7 +29,7 @@ dims = 3
 
 D = [0.40402349270703586,1.243480095653075,0.1173675810956587,1.327361311444319,0.3444445605976121]
 pot = HardSpheres(D)
-system = SimpleLiquid(dims, ρ, kBT, pot)
+system = SimpleMixture(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration(tolerance=10^-10,dr=dr, N_stages=5, M=M, verbose=false, max_iterations=10^3)
 
@@ -55,7 +55,7 @@ M = 2^8
 kBT = 1.0
 
 pot = HardSpheres(1.0)
-system = SimpleLiquid(dims, ρ, kBT, pot)
+system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration(tolerance=10^-10, N_stages=5, M=M, verbose=false, max_iterations=10^3)
 sol = solve(system, closure, method)
@@ -76,7 +76,7 @@ M = 2^8
 kBT = 1.0
 
 pot = HardSpheres(1.0)
-system = SimpleLiquid(dims, ρ, kBT, pot)
+system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration(tolerance=10^-10, N_stages=5, M=M, verbose=false, max_iterations=10^3, dr=sqrt(π/(M+1))/(2π))
 sol = solve(system, closure, method)

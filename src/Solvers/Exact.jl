@@ -74,7 +74,7 @@ end
 
 
 
-function solve(system::SimpleLiquid{3, 1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
+function solve(system::SimpleFluid{3, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
     # D = 1 by definition
     @assert system.potential.D == 1.0 "This method assumes that the hard sphere diameter D = 1.0"
     dk = π  ./ (method.dr * (method.M))
@@ -102,7 +102,7 @@ function solve(system::SimpleLiquid{3, 1, T1, T2, HardSpheres{T3}}, ::PercusYevi
     return OZSolution(r, k, gr, Sk, Ck, Cr)
 end
 
-function solve(system::SimpleLiquid{1, 1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
+function solve(system::SimpleFluid{1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
     # D = 1 by definition
     @assert system.potential.D == 1.0 "This method assumes that the hard sphere diameter D = 1.0"
     r = method.dr * (1:method.M) |> collect
@@ -136,7 +136,7 @@ function solve(system::SimpleLiquid{1, 1, T1, T2, HardSpheres{T3}}, ::PercusYevi
     return OZSolution(r, k, gr, Sk, Ck, Cr)
 end
 
-function solve(system::SimpleLiquid{5, 1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
+function solve(system::SimpleFluid{5, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
     # D = 1 by definition
     @assert system.potential.D == 1.0 "This method assumes that the hard sphere diameter D = 1.0"
     r = rand(method.M)
@@ -201,7 +201,7 @@ end
 # """
 # ref: Baxter, R.J. Ornstein–Zernike Relation and Percus–Yevick Approximation for Fluid Mixtures, J. Chem. Phys. 52, 4559 (1970)
 # """
-function solve(system::SimpleLiquid{3, species, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {species, T1, T2, T3<:AbstractMatrix}
+function solve(system::SimpleMixture{3, species, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {species, T1, T2, T3<:AbstractMatrix}
     dk = π  ./ (method.dr * (method.M))
     r = [i*method.dr for i = 0.5:(method.M-0.5)]
     k = [j*dk for j = 0.5:(method.M-0.5)]
