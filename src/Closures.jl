@@ -124,7 +124,7 @@ end
 """
     MartynovSarkisov <: Closure
 
-Implements the Martynov-Sarkisov Closure \$b(r) = -\\sqrt{1+2\\gamma}-1-\\gamma, which is constructed for the 3d hard-sphere liquid.
+Implements the Martynov-Sarkisov Closure \$b(r) = -\\sqrt{1+2\\gamma}-1-\\gamma\$, which is constructed for the 3d hard-sphere liquid.
 
 Example:
 ```julia
