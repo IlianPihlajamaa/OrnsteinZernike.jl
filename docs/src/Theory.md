@@ -97,7 +97,7 @@ closure = Verlet()   # any closure works; V shown here
 potential = PowerLaw(ϵ, σ, 8)
 
 # Choose a target density and also a ramp to integrate from 0 → ρ_target
-ρ_target   = 0.3
+ρ_target   = 0.8
 delta_ρ = 0.01
 ρ_grid     = collect((delta_ρ/2):delta_ρ:(ρ_target-delta_ρ/2))  # avoid 0 to keep numerics stable
 system_at = ρ -> SimpleLiquid(3, ρ, kBT, potential)
@@ -118,11 +118,8 @@ end
 #     d(βp)/dρ = 1 / S(0) with S(0) = ρ * kBT * κ_T
 S0 = ρ_grid .* kBT .* chi_values
 
-# Trapezoidal integration of 1/S0 over ρ to get β p(ρ)
-βp = 0.0
-for i in 1:length(ρ_grid)
-    βp  += delta_ρ * 1/S0[i] 
-end
+# Midpoint integration of 1/S0 over ρ to get β p(ρ)
+βp  = delta_ρ * sum(1 ./ S0) 
 p_comp = kBT * βp    # convert βp → p
 
 println("Virial-route pressure at ρ=$(ρ_target):        p_virial = $(p_virial)")
