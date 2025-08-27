@@ -1,20 +1,20 @@
 # Systems
 
-A `System` describes the physical system you want to solve: dimensionality, density, temperature, and the interaction potential.  
+A `System` describes *what* you want to solve: dimensionality, density, temperature, and the interaction potential.  
 The package exports two **neutral** system types and two **charged** wrappers:
 
 - `SimpleFluid` — single component
 - `SimpleMixture` — multi-component (mixtures)
-- `SimpleChargedFluid` — single component + electrostatics
-- `SimpleChargedMixture` — mixture + electrostatics
+- `SimpleChargedFluid` — **one-component plasma (OCP)**: a single mobile charged species in a *uniform neutralizing background*
+- `SimpleChargedMixture` — electrolyte mixture: multiple mobile charged species (no background; must be electroneutral)
 
 !!! tip "Choosing a system"
-    | Type                   | Components | ρ (density) input           | `evaluate_potential` return |
-    |------------------------|------------|-----------------------------|-----------------------------|
-    | `SimpleFluid`          | 1          | `Number`                    | `Number`                    |
-    | `SimpleMixture`        | ≥ 2        | `AbstractVector` (length = Ns) | `Ns×Ns` matrix (e.g. `SMatrix`) |
-    | `SimpleChargedFluid`   | 1          | (in `base`)                 | (from `base`)               |
-    | `SimpleChargedMixture` | ≥ 2        | (in `base`)                 | (from `base`)               |
+    | Type                     | Components | ρ (density) input           | `evaluate_potential` return |
+    |--------------------------|------------|-----------------------------|-----------------------------|
+    | `SimpleFluid`            | 1          | `Number`                    | `Number`                    |
+    | `SimpleMixture`          | ≥ 2        | `AbstractVector` (length = Ns) | `Ns×Ns` matrix (e.g. `SMatrix`) |
+    | `SimpleChargedFluid`     | 1 + background | (in `base`)             | (from `base`)               |
+    | `SimpleChargedMixture`   | ≥ 2        | (in `base`)                 | (from `base`)               |
 
 Internally, for mixtures the density vector is stored as a diagonal matrix with `StaticArrays.SVector` storage for performance.
 
@@ -66,52 +66,61 @@ system = SimpleMixture(dims, ρ, kBT, potential)
 
 ---
 
-## Charged systems (electrolytes)
+## Charged systems
 
-Electrostatics are modeled at the **system level** via wrappers around neutral systems:
+### `SimpleChargedFluid` — One-Component Plasma (OCP)
 
-- `SimpleChargedFluid(base; z, εr=78.4, κ=:auto)`
-- `SimpleChargedMixture(base; z, εr=78.4, κ=:auto)`
+`SimpleChargedFluid` models a **single mobile charged species** embedded in a **uniform neutralizing background** (“jellium”).  
+This means you do **not** need a counter-ion species: electroneutrality is enforced by the background.
 
-Here `z` are charges (units of *e*), `εr` is the relative dielectric, and `κ` is the Gaussian/Ewald split (defaults to Debye).
+- Background charge density is implicitly `ρ_bg = − ρ · z` (not mobile, not part of the potential; it only neutralizes and fixes the small-k behavior).
+- Debye screening uses *mobile* charges only: `κ_D^2 = 4π ℓ_B ρ z^2` (in 3D reduced units).
+- The solver handles the `k→0` Coulomb singularity via an Ewald-like split; background terms cancel the divergent constants so structure is well-defined.
+- Use `SimpleChargedMixture` instead if you want explicit co-/counter-ions (no background, mixture must be electroneutral).
 
 ```@docs
 SimpleChargedFluid
-SimpleChargedMixture
 ```
 
-!!! warning "Electroneutrality"
-    `SimpleChargedMixture` checks ∑ᵢ ρᵢ zᵢ ≈ 0 and will throw if violated.
-
-### Example: 3D 1:1 restricted primitive model (RPM)
-
-```@example 1
-using OrnsteinZernike # hide
-# Base mixture (short-range): equal-diameter hard spheres
-dims = 3
-ρ    = [0.3, 0.3]                      # species densities
-kBT  = 1.0
-hs   = HardSpheres([1.0, 1.0])         # per-species diameters
-base = SimpleMixture(dims, ρ, kBT, hs)
-
-# Add electrostatics on the system level
-z    = [1.0, -1.0]
-sys  = SimpleChargedMixture(base; z=z, εr=78.4)  # κ auto-set to Debye
-
-# Now you can call `solve(sys, closure)` just like for neutral systems.
-nothing # hide
-```
-
-### Example: 3D charged single component
+#### Example: 3D classical OCP (hard-sphere core + Coulomb + neutralizing background)
 
 ```@example 1
 using OrnsteinZernike # hide
 dims = 3
 ρ    = 0.5
 kBT  = 1.0
-pot  = HardSpheres(1.0)
-base = SimpleFluid(dims, ρ, kBT, pot)
-sys  = SimpleChargedFluid(base; z=1.0, εr=78.4)
+core = HardSpheres(1.0)                 # short-range core (optional)
+base = SimpleFluid(dims, ρ, kBT, core)
+
+# OCP: single species of charge z in a uniform neutralizing background
+z    = 1.0
+sys  = SimpleChargedFluid(base; z=z, εr=78.4)  # κ chosen automatically (Debye)
+
+# Now use closures/solvers as usual:
+# sol = solve(sys, HypernettedChain(); method=NgIteration(M=2000, dr=0.01))
+```
+
+### `SimpleChargedMixture` — Electrolyte mixtures
+
+`SimpleChargedMixture` wraps a neutral `SimpleMixture` and adds per-species charges `z`.  
+No background is added; the system must satisfy electroneutrality `∑ᵢ ρᵢ zᵢ ≈ 0`.
+
+```@docs
+SimpleChargedMixture
+```
+
+#### Example: 3D 1:1 restricted primitive model (RPM)
+
+```@example 1
+using OrnsteinZernike # hide
+dims = 3
+ρ    = [0.3, 0.3]                      # mobile species densities
+kBT  = 1.0
+hs   = HardSpheres([1.0, 1.0])         # per-species diameters (short-range)
+base = SimpleMixture(dims, ρ, kBT, hs)
+
+z    = [ 1.0, -1.0 ]                   # charges (must be electroneutral with ρ)
+sys  = SimpleChargedMixture(base; z=z, εr=78.4)  # κ auto-set to Debye
 ```
 
 ---
@@ -133,6 +142,8 @@ You’ll see a deprecation warning; please migrate to the new names.
   If `ρ` is a vector of length `Ns`, then `evaluate_potential(potential, r)` must return an `Ns×Ns` matrix (e.g., `SMatrix{Ns,Ns}`).
 - **Units**:  
   Ensure the potential and `kBT` are in consistent reduced units.
-- **Charged mixtures must be neutral**:  
-  `SimpleChargedMixture` enforces electroneutrality via ∑ᵢ ρᵢ zᵢ ≈ 0.
+- **For OCP (`SimpleChargedFluid`)**:  
+  Remember the neutralizing background is implicit and non-mobile; use *mixtures* if you need explicit counter-ions.
+- **For `SimpleChargedMixture`**:  
+  The mixture must be electroneutral: `∑ᵢ ρᵢ zᵢ ≈ 0`.
 

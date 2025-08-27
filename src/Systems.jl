@@ -114,26 +114,43 @@ mutable struct SimpleChargedMixture{dims,Ns,Tρ,TkT,P,Tz} <: AbstractMixture
     κ::Float64
 end
 
-# Convenience helpers
-bjerrum_length(kBT, εr) = 1.0 / (4π * εr * kBT)
-debye_kappa(ρ::Number, z::Number, ℓB) = sqrt(4π * ℓB * ρ * z^2)
-debye_kappa(ρdiag::Diagonal{T,<:SVector}, z::SVector, ℓB) where {T} =
-    sqrt(4π * ℓB * sum(diag(ρdiag) .* (z .^ 2)))
+# ---- Dimension constant for the Coulomb kernel's FT:  v̂(k) = (C_d / k^2) / (ε_r β) ----
+# (Matches the surface area of the unit sphere: C_3=4π, C_2=2π, C_1=2.)
+C_d(d::Integer) = d == 3 ? 4π : d == 2 ? 2π : d == 1 ? 2 : error("Unsupported dimension d=$d")
+
+# ---- Bjerrum length: ℓB = 1 / (C_d * εr * kBT)  (assumes charges measured in |e| units) ----
+bjerrum_length(kBT, εr; dims::Integer=3) = 1.0 / (C_d(dims) * εr * kBT)
+
+# ---- Debye screening parameter κ_D  (scalar, single-species) ----
+# κ_D^2 = C_d * ℓB * ρ * z^2  ⇒  κ_D = sqrt(C_d * ℓB * ρ * z^2)
+debye_kappa(ρ::Number, z::Number, ℓB; dims::Integer=3) =
+    sqrt(C_d(dims) * ℓB * ρ * z^2)
+
+# ---- Debye κ_D for mixtures (vector densities) ----
+# Accept either a Diagonal of densities or a plain vector; z is the vector of valences.
+debye_kappa(ρdiag::Diagonal, z::AbstractVector, ℓB; dims::Integer=3) =
+    sqrt(C_d(dims) * ℓB * sum(diag(ρdiag) .* (z .^ 2)))
+
+debye_kappa(ρ::AbstractVector, z::AbstractVector, ℓB; dims::Integer=3) =
+    sqrt(C_d(dims) * ℓB * sum(ρ .* (z .^ 2)))
+
 
 # Charged constructors
 function SimpleChargedFluid(base::SimpleFluid; z::Number, εr=78.4, κ=:auto)
-    ℓB = bjerrum_length(base.kBT, εr)
-    κD = debye_kappa(base.ρ, z, ℓB)
+    dims = dimensions(base)
+    ℓB = bjerrum_length(base.kBT, εr; dims=dims)
+    κD = debye_kappa(base.ρ, z, ℓB; dims=dims)
     κv = κ === :auto ? κD : Float64(κ)
     return SimpleChargedFluid{dimensions(base), typeof(base.ρ), typeof(base.kBT), typeof(base.potential), typeof(z)}(base, z, ℓB, κv)
 end
 
 function SimpleChargedMixture(base::SimpleMixture; z::AbstractVector, εr=78.4, κ=:auto)
+    dims = dimensions(base)
     Ns = length(z)
     zS = SVector{Ns}(z)
     @assert isapprox(sum(diag(base.ρ) .* zS), 0.0; atol=1e-12) "Electroneutrality required: ∑ ρ_i z_i ≈ 0."
-    ℓB = bjerrum_length(base.kBT, εr)
-    κD = debye_kappa(base.ρ, zS, ℓB)
+    ℓB = bjerrum_length(base.kBT, εr; dims=dims)
+    κD = debye_kappa(base.ρ, zS, ℓB; dims=dims)
     κv = κ === :auto ? κD : Float64(κ)
     return SimpleChargedMixture{dimensions(base), Ns, typeof(base.ρ), typeof(base.kBT), typeof(base.potential), eltype(zS)}(base, zS, ℓB, κv)
 end

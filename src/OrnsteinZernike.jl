@@ -16,8 +16,9 @@ export Exact, FourierIteration, NgIteration, DensityRamp, TemperatureRamp
 export PercusYevick,  HypernettedChain, MeanSpherical, ModifiedHypernettedChain, Verlet, MartynovSarkisov
 export SoftCoreMeanSpherical, RogersYoung, ZerahHansen, DuhHaymet, Lee, ChoudhuryGhosh, BallonePastoreGalliGazzillo
 export VompeMartynov, CharpentierJackse, BomontBretonnet, Khanpour, ModifiedVerlet, CarbajalTinoko, ExtendedRogersYoung
-export CustomPotential, PowerLaw, HardSpheres, LennardJones
+export CustomPotential, PowerLaw, HardSpheres, LennardJones, SquareWell, Morse, TabulatedPotential, Yukawa, GaussianCore
 export compute_compressibility, compute_excess_energy, compute_virial_pressure
+export evaluate_potential, evaluate_potential_derivative, discontinuities
 export WCADivision
 
 include("Systems.jl")

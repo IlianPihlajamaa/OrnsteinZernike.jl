@@ -214,3 +214,410 @@ end
 function discontinuities(p::HardSpheres{T}) where T<:Number
     return [p.D]
 end
+
+########################################
+# Yukawa / Screened-Coulomb (mixtures) #
+########################################
+
+"""
+    Yukawa
+
+Screened-Coulomb / Yukawa pair interaction
+
+    u(r) = A * exp(-κ r) / r
+
+Constructors:
+- `Yukawa(A::Number, κ::Number)` — single-component
+- `Yukawa(q::AbstractVector, κ::Number)` — mixture from "charges": A_ij = q_i q_j
+- `Yukawa(Aij::AbstractMatrix, κ::Number)` — mixture with explicit pair amplitudes
+
+Example (single component):
+```julia
+potential = Yukawa(1.0, 2.0)  # A=1, κ=2
+```
+
+Example (mixture from charges):
+```julia
+q  = [1.0, -1.0, 2.0]
+pot = Yukawa(q, 1.5)
+```
+
+Example (mixture with explicit A_ij):
+```julia
+Aij = [1.0 0.2; 0.2 0.5]
+pot = Yukawa(Aij, 1.0)
+```
+"""
+struct Yukawa{TA,TK} <: Potential
+    A::TA
+    κ::TK
+    Yukawa(A::Number, κ::Number) = new{typeof(A),typeof(κ)}(A, κ)
+
+    function Yukawa(q::AbstractVector{T}, κ::Number) where {T<:Number}
+        qs = SVector{length(q),T}(q)
+        Aij = qs * qs'
+        return new{typeof(Aij),typeof(κ)}(Aij, κ)
+    end
+
+    function Yukawa(Aij::AbstractMatrix{T}, κ::Number) where {T<:Number}
+        Ns = size(Aij, 1); @assert size(Aij,1) == size(Aij,2)
+        A = SMatrix{Ns,Ns,T}(Aij)
+        return new{typeof(A),typeof(κ)}(A, κ)
+    end
+end
+
+function evaluate_potential(p::Yukawa, r::Number)
+    A, κ = p.A, p.κ
+    return A .* exp.(-κ .* r) ./ r
+end
+
+# du/dr = A e^{-κ r} * (-(κ r + 1)) / r^2   (elementwise w.r.t. pair table A)
+function evaluate_potential_derivative(p::Yukawa, r::Number)
+    A, κ = p.A, p.κ
+    return A .* exp.(-κ .* r) .* (-(κ .* r .+ 1.0)) ./ (r.^2)
+end
+
+discontinuities(::Yukawa) = Float64[]
+
+
+#############################################
+# Gaussian Core Model (GCM) — with mixtures #
+#############################################
+
+"""
+    GaussianCore
+
+Gaussian core (ultrasoft) pair interaction
+
+    u(r) = ϵ * exp(-(r/σ)^2)
+
+Constructors:
+- `GaussianCore(ϵ::Number, σ::Number)` — single-component
+- `GaussianCore(ϵ::AbstractVector, σ::AbstractVector)` — mixture with
+   σ_ij = (σ_i + σ_j)/2 (additive), ϵ_ij = √(ϵ_i ϵ_j) (geometric mean)
+- `GaussianCore(ϵij::AbstractMatrix, σij::AbstractMatrix)` — explicit pair tables
+
+Example:
+```julia
+potential = GaussianCore(1.0, 1.5)
+```
+
+Example (mixture with mixing rules):
+```julia
+eps = [1.0, 0.8]
+sig = [1.0, 1.2]
+potential = GaussianCore(eps, sig)
+```
+"""
+struct GaussianCore{TE,TS} <: Potential
+    ϵ::TE
+    σ::TS
+
+    GaussianCore(ϵ::Number, σ::Number) = new{typeof(ϵ),typeof(σ)}(ϵ, σ)
+
+    function GaussianCore(ϵ::AbstractVector{T1}, σ::AbstractVector{T2}) where {T1<:Number,T2<:Number}
+        @assert length(ϵ) == length(σ)
+        N  = length(ϵ)
+        ϵs = SVector{N,T1}(ϵ)
+        σs = SVector{N,T2}(σ)
+        ϵij = sqrt.(ϵs * ϵs')
+        σij = (σs .+ σs') / 2
+        return new{typeof(ϵij), typeof(σij)}(ϵij, σij)
+    end
+
+    function GaussianCore(ϵij::AbstractMatrix{T1}, σij::AbstractMatrix{T2}) where {T1<:Number,T2<:Number}
+        @assert size(ϵij,1)==size(ϵij,2)==size(σij,1)==size(σij,2)
+        N  = size(ϵij,1)
+        ϵM = SMatrix{N,N,T1}(ϵij)
+        σM = SMatrix{N,N,T2}(σij)
+        return new{typeof(ϵM), typeof(σM)}(ϵM, σM)
+    end
+end
+
+function evaluate_potential(p::GaussianCore, r::Number)
+    ϵ, σ = p.ϵ, p.σ
+    return ϵ .* exp.(- (r ./ σ).^2)
+end
+
+# du/dr = u(r) * (-2 r / σ^2)
+function evaluate_potential_derivative(p::GaussianCore, r::Number)
+    ϵ, σ = p.ϵ, p.σ
+    u = ϵ .* exp.(- (r ./ σ).^2)
+    return u .* (-2 .* r ./ (σ.^2))
+end
+
+discontinuities(::GaussianCore) = Float64[]
+
+
+##############################
+# Square-Well (with mixtures)#
+##############################
+
+"""
+    SquareWell
+
+Square-well pair interaction:
+
+    u(r) = ∞                     if r < σ
+         = -ϵ                    if σ ≤ r ≤ λσ
+         = 0                     if r > λσ
+
+Constructors:
+- `SquareWell(σ::Number, ϵ::Number, λ::Number)` — single-component
+- `SquareWell(σ::AbstractVector, ϵ::AbstractVector, λ::Number)` — mixture with
+    σ_ij = (σ_i + σ_j)/2, ϵ_ij = √(ϵ_i ϵ_j)
+- `SquareWell(σij::AbstractMatrix, ϵij::AbstractMatrix, λ::Number)` — explicit pair tables
+
+Example:
+```julia
+potential = SquareWell(1.0, 1.0, 1.5)
+```
+
+Example (mixture with mixing rules):
+```julia
+sig = [0.9, 1.1, 1.0]
+eps = [1.0, 0.8, 1.2]
+potential = SquareWell(sig, eps, 1.5)
+```
+"""
+struct SquareWell{Tσ,Tϵ,Tλ} <: Potential
+    σ::Tσ
+    ϵ::Tϵ
+    λ::Tλ
+end
+
+# Single-component
+SquareWell(σ::Number, ϵ::Number, λ::Number) = SquareWell{typeof(σ),typeof(ϵ),typeof(λ)}(σ, ϵ, λ)
+
+# Mixture from vectors
+function SquareWell(σ::AbstractVector{Tσ}, ϵ::AbstractVector{Tϵ}, λ::Number) where {Tσ<:Number,Tϵ<:Number}
+    @assert length(σ) == length(ϵ)
+    N  = length(σ)
+    σs = SVector{N,Tσ}(σ)
+    ϵs = SVector{N,Tϵ}(ϵ)
+    σij = (σs .+ σs') / 2
+    ϵij = sqrt.(ϵs * ϵs')
+    return SquareWell{typeof(σij),typeof(ϵij),typeof(λ)}(σij, ϵij, λ)
+end
+
+# Mixture from explicit pair tables
+function SquareWell(σij::AbstractMatrix{Tσ}, ϵij::AbstractMatrix{Tϵ}, λ::Number) where {Tσ<:Number,Tϵ<:Number}
+    @assert size(σij,1) == size(σij,2) == size(ϵij,1) == size(ϵij,2)
+    N  = size(σij,1)
+    σM = SMatrix{N,N,Tσ}(σij)
+    ϵM = SMatrix{N,N,Tϵ}(ϵij)
+    return SquareWell{typeof(σM),typeof(ϵM),typeof(λ)}(σM, ϵM, λ)
+end
+
+function evaluate_potential(p::SquareWell, r::Number)
+    σ, ϵ, λ = p.σ, p.ϵ, p.λ
+    # broadcasted piecewise: works for scalar or pair tables
+    return ifelse.(r .< σ, Inf, ifelse.(r .<= λ .* σ, -ϵ, 0.0))
+end
+
+# Derivative is zero away from discontinuities
+evaluate_potential_derivative(::SquareWell, ::Number) = 0.0
+
+# Discontinuities at σ and λσ (return all pairwise values if matrix)
+function discontinuities(p::SquareWell)
+    σ, λ = p.σ, p.λ
+    if σ isa AbstractArray
+        return [vec(float.(σ)); vec(float.(λ .* σ))]  # concat
+    else
+        return [float(σ), float(λ*σ)]
+    end
+end
+
+
+##############################
+# Morse (with mixtures)      #
+##############################
+
+"""
+    Morse
+
+Morse potential:
+
+    u(r) = ϵ * (exp(-2α(r-σ)) - 2 exp(-α(r-σ)))
+
+Constructors:
+- `Morse(ϵ::Number, σ::Number, α::Number)` — single-component
+- `Morse(ϵ::AbstractVector, σ::AbstractVector, α::AbstractVector)` — mixture with
+    σ_ij = (σ_i + σ_j)/2, ϵ_ij = √(ϵ_i ϵ_j), α_ij = (α_i + α_j)/2
+- `Morse(ϵij::AbstractMatrix, σij::AbstractMatrix, αij::AbstractMatrix)` — explicit pair tables
+
+Example:
+```julia
+potential = Morse(1.0, 1.0, 2.0)
+```
+
+Example (mixture with mixing rules):
+```julia
+eps = [1.0, 0.8]
+sig = [1.0, 1.2]
+alp = [2.0, 1.5]
+potential = Morse(eps, sig, alp)
+```
+"""
+struct Morse{Tϵ,Tσ,Tα} <: Potential
+    ϵ::Tϵ
+    σ::Tσ
+    α::Tα
+end
+
+# Single-component
+Morse(ϵ::Number, σ::Number, α::Number) = Morse{typeof(ϵ),typeof(σ),typeof(α)}(ϵ, σ, α)
+
+# Mixture from vectors (common symmetric rules)
+function Morse(ϵ::AbstractVector{Te}, σ::AbstractVector{Ts}, α::AbstractVector{Ta}) where {Te<:Number,Ts<:Number,Ta<:Number}
+    @assert length(ϵ)==length(σ)==length(α)
+    N  = length(ϵ)
+    ϵs = SVector{N,Te}(ϵ)
+    σs = SVector{N,Ts}(σ)
+    αs = SVector{N,Ta}(α)
+    ϵij = sqrt.(ϵs * ϵs')
+    σij = (σs .+ σs') / 2
+    αij = (αs .+ αs') / 2
+    return Morse{typeof(ϵij),typeof(σij),typeof(αij)}(ϵij, σij, αij)
+end
+
+# Mixture from explicit pair tables
+function Morse(ϵij::AbstractMatrix{Te}, σij::AbstractMatrix{Ts}, αij::AbstractMatrix{Ta}) where {Te<:Number,Ts<:Number,Ta<:Number}
+    @assert size(ϵij,1)==size(ϵij,2)==size(σij,1)==size(σij,2)==size(αij,1)==size(αij,2)
+    N  = size(ϵij,1)
+    ϵM = SMatrix{N,N,Te}(ϵij)
+    σM = SMatrix{N,N,Ts}(σij)
+    αM = SMatrix{N,N,Ta}(αij)
+    return Morse{typeof(ϵM),typeof(σM),typeof(αM)}(ϵM, σM, αM)
+end
+
+function evaluate_potential(p::Morse, r::Number)
+    ϵ, σ, α = p.ϵ, p.σ, p.α
+    x  = r .- σ
+    e1 = exp.(-α .* x)
+    return ϵ .* (e1.^2 .- 2 .* e1)
+end
+
+# du/dr = ϵ * (-2α e^{-2αx} + 2α e^{-αx})
+function evaluate_potential_derivative(p::Morse, r::Number)
+    ϵ, σ, α = p.ϵ, p.σ, p.α
+    x  = r .- σ
+    e1 = exp.(-α .* x)
+    return ϵ .* (-2 .* α .* (e1.^2) .+ 2 .* α .* e1)
+end
+
+discontinuities(::Morse) = Float64[]
+
+
+#######################
+# Tabulated Potential #
+#######################
+
+"""
+    TabulatedPotential
+
+Piecewise-linear potential defined on a sorted grid `r_grid` with values `u_grid`.
+
+- Linear interpolation within tabulated range.
+- Extrapolation behavior controlled by `extrapolation`:
+   - `:error` (default) — throw if r is outside [r_min, r_max]
+   - `:flat` — clamp to end values
+   - `:linear` — extend linearly using end slope
+
+Example:
+```julia
+r = range(0.8, 6.0; length=500) |> collect
+u = @. 4.0*((1.0/r)^12 - (1.0/r)^6)  # LJ shape as a table
+pot = TabulatedPotential(r, u, :flat)
+```
+"""
+struct TabulatedPotential{TR,TU} <: Potential
+    r::TR
+    u::TU
+    extrapolation::Symbol
+    function TabulatedPotential(r::AbstractVector{Tr}, u::AbstractVector{Tu}, extrapolation::Symbol=:error) where {Tr<:Real,Tu<:Real}
+        @assert length(r) == length(u) "r and u must be the same length"
+        @assert issorted(r) "r grid must be sorted ascending"
+        return new{typeof(r), typeof(u)}(r, u, extrapolation)
+    end
+end
+
+@inline function _bracket(r::AbstractVector{<:Real}, x::Real)
+    return searchsortedlast(r, x)
+end
+
+@inline function _interp_linear(x, x1, y1, x2, y2)
+    t = (x - x1) / (x2 - x1)
+    return (1 - t) * y1 + t * y2
+end
+
+@inline function _slope(x1, y1, x2, y2)
+    return (y2 - y1) / (x2 - x1)
+end
+
+function evaluate_potential(p::TabulatedPotential, r::Number)
+    rg, ug, mode = p.r, p.u, p.extrapolation
+    rmin, rmax = rg[1], rg[end]
+
+    if r < rmin || r > rmax
+        if mode === :error
+            error("TabulatedPotential: r=$(r) outside [$(rmin), $(rmax)]")
+        elseif mode === :flat
+            return r < rmin ? ug[1] : ug[end]
+        elseif mode === :linear
+            if r < rmin
+                m = _slope(rg[1], ug[1], rg[2], ug[2])
+                return ug[1] + m*(r - rg[1])
+            else
+                m = _slope(rg[end-1], ug[end-1], rg[end], ug[end])
+                return ug[end] + m*(r - rg[end])
+            end
+        else
+            error("Unknown extrapolation mode $(mode)")
+        end
+    end
+
+    i = _bracket(rg, r)
+    if i == length(rg)
+        return ug[end]
+    elseif rg[i] == r
+        return ug[i]
+    else
+        return _interp_linear(r, rg[i], ug[i], rg[i+1], ug[i+1])
+    end
+end
+
+function evaluate_potential_derivative(p::TabulatedPotential, r::Number)
+    rg, ug, mode = p.r, p.u, p.extrapolation
+    rmin, rmax = rg[1], rg[end]
+
+    # Out-of-range behavior
+    if r < rmin || r > rmax
+        if mode === :error
+            error("TabulatedPotential derivative: r=$(r) outside [$(rmin), $(rmax)]")
+        elseif mode === :flat
+            return zero(promote_type(eltype(rg), eltype(ug)))
+        elseif mode === :linear
+            if r < rmin
+                return _slope(rg[1], ug[1], rg[2], ug[2])
+            else
+                return _slope(rg[end-1], ug[end-1], rg[end], ug[end])
+            end
+        else
+            error("Unknown extrapolation mode $(mode)")
+        end
+    end
+
+    # In-range: piecewise-constant slope; at nodes use right slope (left at last node)
+    i = _bracket(rg, r)  # largest index with rg[i] ≤ r
+    if i == length(rg)             # at the last grid point
+        return _slope(rg[end-1], ug[end-1], rg[end], ug[end])
+    elseif rg[i] == r              # exactly on a node (not the last): use right slope
+        return _slope(rg[i], ug[i], rg[i+1], ug[i+1])
+    else                           # inside cell i → i+1
+        return _slope(rg[i], ug[i], rg[i+1], ug[i+1])   # <-- fixed: ug[i] on the left
+    end
+end
+
+
+discontinuities(::TabulatedPotential) = Float64[]

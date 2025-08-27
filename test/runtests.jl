@@ -13,7 +13,7 @@ function main_test(target)
 end
 
 
-for target in ["Fourier", "FourierIteration_HS", "NgIteration_HS", "thermodynamics", "DensityRamp", "dims", "RY", "closures"]
+for target in ["Fourier", "FourierIteration_HS", "NgIteration_HS", "thermodynamics", "DensityRamp", "dims", "RY", "closures", "potentials"]
     main_test(target)
 end
 
