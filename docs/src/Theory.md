@@ -56,3 +56,94 @@ $$1/(\rho_0 k_BT \chi)  = 1 - ρ_0 \sum_{ij} x_i x_j \hat{c}_{ij}(k\to0)$$,
 $$E_x =   1/2 \rho_0 \sum_{ij} x_i x_j  \int d\textbf{r}  g_{ij}(r) u_{ij}(r)$$
 
 in which $\rho_0=N/V$. The functions to use are [`compute_virial_pressure`](@ref), [`compute_compressibility`](@ref), and, [`compute_excess_energy`](@ref).
+
+
+# Thermodynamic Routes
+
+The Ornstein–Zernike framework gives several thermodynamic quantities:
+
+- **Virial route (pressure)**: from \(g(r)\) and \(u'(r)\).
+- **Compressibility route**:
+  - `compute_compressibility` returns **isothermal compressibility** \(\chi\).
+  - Pressure via compressibility route requires **integration over density** using
+    \[
+      \frac{\partial (\beta p)}{\partial \rho} \;=\; \frac{1}{S(0)}, 
+      \qquad S(0) = \rho\,k_BT\,\kappa_T,
+    \]
+    so
+    \[
+      \beta p(\rho) \;=\; \int_0^\rho \frac{d\rho'}{S(0;\rho')}.
+    \]
+- **Energy route**: excess internal energy from \(g(r)\).
+
+Because closures are approximate, routes generally **disagree**; the gap is a measure of closure error.
+
+---
+
+## Example: Virial Pressure vs. Compressibility-Route Pressure
+
+Below we:
+1) compute **virial pressure** directly,  
+2) compute \(\chi\) at a sequence of densities,  
+3) integrate \(1/S(0)\) to obtain the **compressibility-route pressure**.
+
+```@example 9
+using OrnsteinZernike
+
+# --- System definition at target temperature and potential ---
+kBT     = 1.0
+σ, ϵ    = 1.0, 1.0
+closure = Verlet()   # any closure works; V shown here
+potential = PowerLaw(ϵ, σ, 8)
+
+# Choose a target density and also a ramp to integrate from 0 → ρ_target
+ρ_target   = 0.3
+delta_ρ = 0.01
+ρ_grid     = collect((delta_ρ/2):delta_ρ:(ρ_target-delta_ρ/2))  # avoid 0 to keep numerics stable
+system_at = ρ -> SimpleLiquid(3, ρ, kBT, potential)
+
+# (1) Virial-route pressure at ρ_target
+sol_target = solve(system_at(ρ_target), closure, NgIteration(M=5000, dr=0.01))
+p_virial   = compute_virial_pressure(sol_target, system_at(ρ_target))   # this is "virial pressure"
+
+# (2) Compressibility κ_T along a density grid
+chi_values = similar(ρ_grid)
+sols = solve(system_at(ρ_grid[end]), closure, DensityRamp(NgIteration(M=5000, dr=0.01), ρ_grid))
+
+for (i, ρ) in enumerate(ρ_grid)
+    chi_values[i] = compute_compressibility(sols[i], system_at(ρ))  # Isothermal compressibility κ_T
+end
+
+# (3) Integrate to get compressibility-route pressure:
+#     d(βp)/dρ = 1 / S(0) with S(0) = ρ * kBT * κ_T
+S0 = ρ_grid .* kBT .* chi_values
+
+# Trapezoidal integration of 1/S0 over ρ to get β p(ρ)
+βp = 0.0
+for i in 1:length(ρ_grid)
+    βp  += delta_ρ * 1/S0[i] 
+end
+p_comp = kBT * βp    # convert βp → p
+
+println("Virial-route pressure at ρ=$(ρ_target):        p_virial = $(p_virial)")
+println("Compressibility-route pressure at ρ=$(ρ_target): p_comp   = $(p_comp)")
+```
+
+**Notes**
+- `compute_compressibility(sol, system)` returns \(\chi\) (units of inverse pressure).  
+- We used a **density ramp** inside the loop to help convergence and reuse previous solutions.  
+
+---
+
+## Why Routes Differ
+
+- **Virial route** is sensitive to short-range structure (contact region).  
+- **Compressibility route** probes long-wavelength fluctuations via \(S(0)\).  
+- Discrepancies reflect **closure approximation error**.
+
+---
+
+## Making Routes Agree
+
+Closures like **Rogers–Young** include a tunable parameter (e.g., \(\alpha\)) that can be chosen so that
+\( p_{\mathrm{vir}} \approx p_{\mathrm{comp}} \). See the *Thermodynamic Consistency* tutorial for a bisection example.

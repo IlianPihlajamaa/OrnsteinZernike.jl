@@ -1,0 +1,4 @@
+[deps]
+OrnsteinZernike = "51399321-c693-48c0-994d-05e3df0250f2"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
