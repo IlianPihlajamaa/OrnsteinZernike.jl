@@ -231,11 +231,6 @@ function compute_error(y1::AbstractArray, y2::AbstractArray)
     return sqrt(sum(error))
 end
 
-
-
-
-
-
 struct OZSolverCache{T, S, F}
     mayer_f::Vector{T}
     fourierplan::F

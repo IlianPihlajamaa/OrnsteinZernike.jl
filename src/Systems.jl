@@ -80,7 +80,7 @@ const SimpleUnchargedSystem = Union{SimpleFluid, SimpleMixture}
 """
     SimpleChargedFluid{dims,Tρ,TkT,P,Tz} <: AbstractSingleComponent
 
-Single-component electrolyte wrapper. Keeps electrostatics (charges, Bjerrum length, split κ)
+Single-component electrolyte wrapper (one-component plasma). Keeps electrostatics (charges, Bjerrum length, split κ)
 as **system-level** state; short-range/core physics remain in `potential`.
 
 Fields:

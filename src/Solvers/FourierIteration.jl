@@ -1,7 +1,7 @@
 function solve(system::SimpleUnchargedSystem, closure::Closure, method::FourierIteration; gamma_0=nothing, init=nothing)
     if !isnothing(init)
         @warn "The `init` keyword argument is deprecated. Please use `gamma_0` instead."
-        isnothing(gamma_0) && gamma_0 = init
+        if isnothing(gamma_0); gamma_0 = init; end
     end
     ρ = system.ρ
 
