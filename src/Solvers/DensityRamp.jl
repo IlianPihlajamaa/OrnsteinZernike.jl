@@ -28,7 +28,7 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::DensityR
         end
         system.ρ = densities[i]
         γ_old2 = recast_γ(γ_old)
-        sol = solve(system, closure, method.method, init=γ_old2)
+        sol = solve(system, closure, method.method, gamma_0=γ_old2)
         push!(sols, sol)
         @. γ_old =  sol.gr - one(eltype(sol.gr)) - sol.cr
     end
@@ -37,7 +37,7 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::DensityR
     end
     system.ρ = ρtarget
     γ_old2 = recast_γ(γ_old)
-    sol = solve(system, closure, method.method, init=γ_old2)
+    sol = solve(system, closure, method.method, gamma_0=γ_old2)
     push!(sols, sol)
     return sols
 end 

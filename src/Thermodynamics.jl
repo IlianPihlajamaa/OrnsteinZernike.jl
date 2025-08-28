@@ -51,7 +51,7 @@ and Eₓ = 1/2 ρ Σᵢⱼ xᵢxⱼ ∫dr gᵢⱼ(r) uᵢⱼ(r) for mixtures. He
 
 """
 function compute_excess_energy(sol::OZSolution, system::SimpleUnchargedSystem)
-    dims = dimensions(system)
+    dims = dims_of(system)
     Ns = number_of_species(system)
     r = sol.r
     ρ = system.ρ
@@ -144,7 +144,7 @@ For additional speed/accuracy define a method of `evaluate_potential_derivative(
 By default this is done using finite differences.
 """
 function compute_virial_pressure(sol::OZSolution, system:: SimpleUnchargedSystem) 
-    dims = dimensions(system)
+    dims = dims_of(system)
     Ns = number_of_species(system)
     r = sol.r
     ρ = system.ρ
@@ -221,14 +221,14 @@ function compute_compressibility(sol::OZSolution, system::SimpleUnchargedSystem)
 end
 
 function get_ĉ0(sol::OZSolution, system::SimpleFluid) 
-    dims = dimensions(system)
+    dims = dims_of(system)
     spl = Spline1D(sol.r, sol.cr[:, 1, 1].*sol.r.^(dims-1))
     ĉ0 = surface_N_sphere(dims)*integrate(spl, zero(eltype(sol.r)), maximum(sol.r))
     return ĉ0
 end
 
 function get_ĉ0(sol::OZSolution, s::SimpleMixture)
-    dims = dimensions(s)
+    dims = dims_of(s)
     species = number_of_species(s)
     ĉ0 = zeros(eltype(eltype(sol.ck)), species, species)
     for i = 1:species

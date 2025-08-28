@@ -1,259 +1,162 @@
-function solve(system::SimpleFluid, closure::Closure, method::NgIteration; init=nothing) 
+function solve(system::SimpleUnchargedSystem, closure::Closure, method::NgIteration; gamma_0=nothing, init=nothing)
+    if !isnothing(init)
+        @warn "The `init` keyword argument is deprecated. Please use `gamma_0` instead."
+        isnothing(gamma_0) && gamma_0 = init
+    end
     N_stages = method.N_stages
     ρ = system.ρ
 
-    r = method.dr * (1:method.M) |> collect
-    βu1, _ = evaluate_long_range_potential(system.potential, system.kBT, r[1])
-    elementtype = typeof(r[1] .* system.kBT .* system.ρ .* βu1)
-    mayer_f = zeros(elementtype, length(r))
-    fourierplan = get_fourier_plan(system, method, mayer_f)
-    r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
-    k = fourierplan.k
-    βu, βu_long_range = evaluate_long_range_potential(system.potential, system.kBT, r)
-    mayer_f .= find_mayer_f_function.((system,), βu)
-
-    Γhat = copy(mayer_f)
-    C = copy(mayer_f)
-    Ĉ = copy(mayer_f)
-    Γ_new = copy(mayer_f)
-    gn = [copy(mayer_f) for _ in 1:N_stages+1] # first element is g_n, second is g_{n-1} etc
-    fn = [copy(mayer_f) for _ in 1:N_stages+1]
-    dn = [copy(mayer_f) for _ in 1:N_stages+1]
-    d0n = [copy(mayer_f) for _ in 1:N_stages] # first element is d01 second is d02 etc
-    if !(isnothing(init))
-        fn[end] .= init.*r
-    else
-        fn[end] .= zero(eltype(eltype(fn)))
-    end
-    T = eltype(mayer_f)
-    A = zeros(T, N_stages, N_stages)
-    b = zeros(T, N_stages)
-
-    max_iterations = method.max_iterations
-    tolerance = method.tolerance
-    
-    err = tolerance*2
-    iteration = 0
-
-    # first bootstrapping steps 
-    for stage = reverse(1:N_stages)
-        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, fn[stage+1], βu_long_range)
-        fourier!(Ĉ, C, fourierplan)
-        @. Γhat = (k - Ĉ*ρ) \ (Ĉ * ρ * Ĉ)
-        inverse_fourier!(gn[stage+1], Γhat, fourierplan)
-        fn[stage] .= gn[stage+1]
-        # @show error = compute_error(gn[stage+1], fn[stage+1])
-    end
-
-    while err > tolerance
-        if iteration > max_iterations
-            error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
-        end
-        Γold = fn[1]  
-        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, Γold, βu_long_range)
-        fourier!(Ĉ, C, fourierplan)
-        @. Γhat = (k - Ĉ*ρ) \ (Ĉ * ρ * Ĉ)
-
-        inverse_fourier!(Γ_new, Γhat, fourierplan)
-        gn[1] .= Γ_new
-        err = compute_error(gn[1], fn[1])
-        if method.verbose && iteration % 10 == 0
-            println("After iteration $iteration, the error is $(round(err, digits=ceil(Int, 1-log10(tolerance)))).")
-        end
-        for stage = 1:N_stages+1
-            @. dn[stage] = gn[stage] - fn[stage]
-        end
-        for stage = 1:N_stages
-            @. d0n[stage] = dn[1] - dn[stage+1]
-        end
-        
-        coefficients = find_Ng_coefficients(A, b, N_stages, d0n, dn, r)
-        update_Γ_new_Ng!(Γ_new, coefficients, gn)
-
-        for stage = reverse(1:N_stages)
-            gn[stage+1] .= gn[stage]
-            fn[stage+1] .= fn[stage]
-        end
-        fn[1] .= Γ_new
-        iteration += 1
-
-    end
-
-    if method.verbose 
-        print("Converged after $iteration iterations, ")
-        println("the error is $(round(err, digits=ceil(Int, 1-log10(err)))).")
-    end
-    c = C ./ r
-    g = find_g_from_c_and_Γ(c, Γ_new, r)
-    ĉ = Ĉ ./ k
-    Sk =  find_S_from_ĉ_and_ρ(ĉ, ρ)
-    return OZSolution(r, k, g, Sk, ĉ, c)
-end 
-
-function initialize_vector_of_vectors(::Type{T}, N, L) where T
-    return [zeros(T, L) for _ = 1:N]
-end
-
-function reinterpret_vector_of_vectors(vecofvec, ::Type{T}, L1, L2) where T
-    return [reinterpret(reshape, T, reshape(vecofvec[i], (L1, L2))) for i in eachindex(vecofvec)]
-end
-
-function solve(system::SimpleMixture, closure::Closure, method::NgIteration; init=nothing) 
-    N_stages = method.N_stages
-    ρ = system.ρ
-
-    r = method.dr * (1:method.M) |> collect
-    βu1, _ = evaluate_long_range_potential(system.potential, system.kBT, r[1])
-    elementtype = typeof(r[1] .* system.kBT .* system.ρ .* βu1)
-    mayer_f = zeros(elementtype, length(r))
-    fourierplan = get_fourier_plan(system, method, mayer_f)
-    r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
-    k = fourierplan.k
-    βu, βu_long_range = evaluate_long_range_potential(system.potential, system.kBT, r)
-    mayer_f .= find_mayer_f_function.((system,), βu)
-
-    Ns = length(ρ.diag)
-    Nr = length(r)
+    cache = OZSolverCache(system, method)
+    mayer_f, fourierplan, r, k, βu_long_range, βu, Γhat, C, Ĉ, Γ_new = 
+        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_long_range, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
 
     T = eltype(mayer_f)
     TT = eltype(T)
-    Γhat = copy(mayer_f)
-    C = copy(mayer_f)
-    Ĉ = copy(mayer_f)
-    Γ_new = copy(mayer_f)
-
-
-    gn = initialize_vector_of_vectors(TT, N_stages+1, Ns*Ns*Nr) # first element is g_n, second is g_{n-1} etc
-    fn = initialize_vector_of_vectors(TT, N_stages+1, Ns*Ns*Nr)
-    dn = initialize_vector_of_vectors(TT, N_stages+1, Ns*Ns*Nr)
-    d0n = initialize_vector_of_vectors(TT, N_stages, Ns*Ns*Nr) # first element is d01 second is d02 etc
-    # the elements of fn etc are vectors of length Ns*Ns*Nr
-
-
-
     A = zeros(TT, N_stages, N_stages)
     b = zeros(TT, N_stages)
-    Γ_new_full = reshape(reinterpret(reshape, TT, Γ_new), Ns*Ns*Nr) # for going back and forth between vec{float} and vec{Smat}
-    gn_red = reinterpret_vector_of_vectors(gn, T, Ns*Ns, Nr)#[reinterpret(reshape, T, reshape(gn[i], (Ns*Ns, Nr))) for i in eachindex(gn)]
-    fn_red = reinterpret_vector_of_vectors(fn, T, Ns*Ns, Nr)#[reinterpret(reshape, T, reshape(fn[i], (Ns*Ns, Nr))) for i in eachindex(fn)]
 
-    if !(isnothing(init))
-        fn_red[end] .= init.*r
+    # if T <: AbstractMatrix, we need to store gi as a vector of matrices
+    # if T <: Number, we need to store gi as a vectors of numbers 
+    gn_full = [copy(mayer_f) for _ in 1:N_stages+1] # first element is g_n, second is g_{n-1} etc
+    fn_full = [copy(mayer_f) for _ in 1:N_stages+1]
+    dn_full = [copy(mayer_f) for _ in 1:N_stages+1]
+    d0n_full = [copy(mayer_f) for _ in 1:N_stages] # first element is d01 second is d02 etc
+
+    # flattened arrays!!
+    # if T <: Number, flatten_array is identity
+    gn_flat = [flatten_array(gn_full[i]) for i in eachindex(gn_full)]
+    fn_flat = [flatten_array(fn_full[i]) for i in eachindex(fn_full)]
+    dn_flat = [flatten_array(dn_full[i]) for i in eachindex(dn_full)]
+    d0n_flat = [flatten_array(d0n_full[i]) for i in eachindex(d0n_full)]
+    Γ_new_flat = flatten_array(Γ_new)
+
+    if !(isnothing(gamma_0))
+        for i = eachindex(fn_full[end])
+            fn_full[end][i] = gamma_0[i] * r[i]
+        end
     else
-        fn_red[end] .= (zero(eltype(eltype(fn_red))), )
+        fill!(fn_full[end], zero(T))
     end
 
     max_iterations = method.max_iterations
     tolerance = method.tolerance
-    
-    err = tolerance*2
+
+    err = tolerance * 2
     iteration = 0
     # first bootstrapping steps 
     for stage = reverse(1:N_stages)
-        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, fn_red[stage+1], βu_long_range)
-        fourier!(Ĉ, C, fourierplan)
-        for ik in eachindex(Γhat, Ĉ)
-            Γhat[ik] = (k[ik] * I - Ĉ[ik]*ρ) \ (Ĉ[ik] * ρ * Ĉ[ik])
-        end
-        inverse_fourier!(gn_red[stage+1], Γhat, fourierplan)
-        fn[stage] .= gn[stage+1]
+        C .= closure_cmulr_from_gammamulr.((closure,), r, mayer_f, fn_full[stage+1], βu_long_range)
+        oz_iteration_step!(C, Ĉ, Γhat, gn_full[stage+1], ρ, fourierplan)
+        fn_flat[stage] .= gn_flat[stage+1]
     end
 
     while err > tolerance
         if iteration > max_iterations
             error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
         end
-        C .= closure_cmulr_from_gammamulr.((closure, ), r, mayer_f, fn_red[1], βu_long_range)
-        fourier!(Ĉ, C, fourierplan)
-        for ik in eachindex(Γhat, Ĉ)
-            Γhat[ik] = (k[ik] * I - Ĉ[ik]*ρ) \ (Ĉ[ik] * ρ * Ĉ[ik])
-        end
-        inverse_fourier!(Γ_new, Γhat, fourierplan)
-        gn[1] .= Γ_new_full
-        err = compute_error(gn[1], fn[1])
+        C .= closure_cmulr_from_gammamulr.((closure,), r, mayer_f, fn_full[1], βu_long_range)
+        oz_iteration_step!(C, Ĉ, Γhat, Γ_new, ρ, fourierplan)
+        gn_flat[1] .= Γ_new_flat
+        err = compute_error(gn_flat[1], fn_flat[1])
         if method.verbose && iteration % 10 == 0
             println("After iteration $iteration, the error is $(round(err, digits=ceil(Int, 1-log10(tolerance)))).")
         end
         for stage = 1:N_stages+1
-            @. dn[stage] = gn[stage] - fn[stage]
+            @. dn_flat[stage] = gn_flat[stage] - fn_flat[stage]
         end
         for stage = 1:N_stages
-            @. d0n[stage] = dn[1] - dn[stage+1]
+            @. d0n_flat[stage] = dn_flat[1] - dn_flat[stage+1]
         end
-        
-        coefficients = find_Ng_coefficients(A, b, N_stages, d0n, dn, r)
-        update_Γ_new_Ng!(Γ_new_full, coefficients, gn)
+
+        coefficients = find_Ng_coefficients(A, b, N_stages, d0n_flat, dn_flat, r)
+        update_Γ_new_Ng!(Γ_new_flat, coefficients, gn_flat)
 
         for stage = reverse(1:N_stages)
-            gn[stage+1] .= gn[stage]
-            fn[stage+1] .= fn[stage]
+            gn_flat[stage+1] .= gn_flat[stage]
+            fn_flat[stage+1] .= fn_flat[stage]
         end
-        fn[1] .= Γ_new_full
+        fn_flat[1] .= Γ_new_flat
         iteration += 1
-
     end
 
-    if method.verbose 
+    if method.verbose
         print("Converged after $iteration iterations, ")
         println("the error is $(round(err, digits=ceil(Int, 1-log10(err)))).")
     end
     c = C ./ r
-    g = find_g_from_c_and_Γ(c, Γ_new, r)
     ĉ = Ĉ ./ k
-    Sk =  find_S_from_ĉ_and_ρ(ĉ, ρ)
-    return OZSolution(r, k, g, Sk, ĉ, c)
-end 
+    γ = Γ_new ./ r
+    γ̂ = Γhat ./ k
+    return construct_solution(r, k, c, ĉ, γ, γ̂, ρ)
+end
 
-function update_Γ_new_Ng!(Γ_new::AbstractVector{T}, coeffs, gn::AbstractVector{<:AbstractVector{T}}) where T<:Number
-    N_stages = length(gn)-1
-    Γ_new .= (one(T) - sum(coeffs)).*gn[1] 
+
+flatten_array(a::Vector{T}) where T<:Number = a
+function flatten_array(a::Vector{T}) where T<:SMatrix
+    L1, L2 = size(a[1])
+    @assert L1 == L2
+    N = length(a)
+    return reshape(reinterpret(reshape, eltype(T), a), L1 * L2 * N)
+end
+
+unflatten_array(a::Vector{S}, args...) where {S<:Number} = a
+function unflatten_array(a::Base.ReshapedArray{T, 1, R}, args...) where {T<:Number, R<:Base.ReinterpretArray}
+    return a.parent.parent
+end
+
+function update_Γ_new_Ng!(Γ_new::AbstractVector{T}, coeffs, gn::AbstractVector{<:AbstractVector{T}}) where {T<:Number}
+    N_stages = length(gn) - 1
+    Γ_new .= (one(T) - sum(coeffs)) .* gn[1]
     for stage = 1:N_stages
-        Γ_new .+= coeffs[stage].*gn[stage+1]
+        Γ_new .+= coeffs[stage] .* gn[stage+1]
     end
 end
 
-function update_Γ_new_Ng!(Γ_new::Vector{T}, coeffs, gn::Vector{Vector{T}}) where T<:AbstractMatrix
+function update_Γ_new_Ng!(Γ_new::Vector{T}, coeffs, gn::Vector{Vector{T}}) where {T<:AbstractMatrix}
     #coeffs is vector of matrix
-    N_stages = length(gn)-1
+    N_stages = length(gn) - 1
     for i in eachindex(Γ_new)
-        Γ_new[i] = (ones(T) .- sum(coeffs)) .* gn[1][i] 
+        Γ_new[i] = (ones(T) .- sum(coeffs)) .* gn[1][i]
         for stage = 1:N_stages
             Γ_new[i] += coeffs[stage] .* gn[stage+1][i]
         end
     end
 end
 
-function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{Vector{T}}, dn::Vector{Vector{T}}, r) where T<:Number
-    for stage1= 1:N_stages
+
+function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{S}, dn::Vector{S}, r) where {T<:Number, S<:AbstractArray}
+    @assert eltype(S) == T
+    for stage1 = 1:N_stages
         for stage2 = stage1:N_stages
-            Aij = inner(d0n[stage1],d0n[stage2],r)
+            Aij = inner(d0n[stage1], d0n[stage2], r)
             A[stage1, stage2] = Aij
             A[stage2, stage1] = Aij
         end
         b[stage1] = inner(dn[1], d0n[stage1], r)
     end
-    coeffs = A\b
+    coeffs = A \ b
     return coeffs
 end
 
-function inner(u::Vector{T},v::Vector{T}, r) where T<:Number
+function inner(u::AbstractArray, v::AbstractArray, r) 
+    @assert eltype(u) <: Number
+    T = eltype(u)
     @assert length(u) == length(v)
     if length(r) == length(u) #singlecomponent
         S = zero(T)
         for i in firstindex(u):(lastindex(u)-1)
-            S += u[i]*v[i]*(r[i+1]-r[i])
+            S += u[i] * v[i] * (r[i+1] - r[i])
         end
         return S
     else # multicomponent
         S = zero(T)
-        Ns2 =  length(u)÷length(r)
+        Ns2 = length(u) ÷ length(r)
         for iss = 1:Ns2
             for i in firstindex(r):(lastindex(r)-1)
-                idx = (i-1)*Ns2 + iss
-                S += u[idx]*v[idx]*(r[i+1]-r[i])
+                idx = (i - 1) * Ns2 + iss
+                S += u[idx] * v[idx] * (r[i+1] - r[i])
             end
         end
         return S
     end
 end
-

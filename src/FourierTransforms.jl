@@ -72,7 +72,7 @@ end
 
 
 function find_fourier_plan_nd(system::SimpleUnchargedSystem, F::Vector{T}, dr::Number) where T
-    ndims = dimensions(system)
+    ndims = dims_of(system)
     M = length(F)
     plan = QDHT(ndims/2-1, 1, M*dr, M)
     return plan

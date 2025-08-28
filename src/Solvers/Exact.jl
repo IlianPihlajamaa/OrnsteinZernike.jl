@@ -76,7 +76,7 @@ end
 
 function solve(system::SimpleFluid{3, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
     # D = 1 by definition
-    @assert system.potential.D == 1.0 "This method assumes that the hard sphere diameter D = 1.0"
+    @assert system.potential.D == 1.0 "This method assumes that the hard sphere diameter D = 1.0. Try using a SimpleMixture instead of a SimpleFluid."
     dk = π  ./ (method.dr * (method.M))
     r = [i*method.dr for i = 0.5:(method.M-0.5)]
     k = [j*dk for j = 0.5:(method.M-0.5)]
@@ -99,7 +99,8 @@ function solve(system::SimpleFluid{3, T1, T2, HardSpheres{T3}}, ::PercusYevick, 
 
     gr = @. Cr + γmulr / r + 1
     gr[r.<1.0] .= 0.0
-    return OZSolution(r, k, gr, Sk, Ck, Cr)
+    
+    return OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k)
 end
 
 function solve(system::SimpleFluid{1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
@@ -133,7 +134,7 @@ function solve(system::SimpleFluid{1, T1, T2, HardSpheres{T3}}, ::PercusYevick, 
 
     gr = @. Cr + γmulr / r + 1
     gr[r.<1.0] .= 0.0
-    return OZSolution(r, k, gr, Sk, Ck, Cr)
+    return OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k)
 end
 
 function solve(system::SimpleFluid{5, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
@@ -165,7 +166,7 @@ function solve(system::SimpleFluid{5, T1, T2, HardSpheres{T3}}, ::PercusYevick, 
 
     gr = @. Cr + γmulr / r + 1
     gr[r.<1.0] .= 0.0
-    return OZSolution(r, k, gr, Sk, Ck, Cr)
+    return OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k)
 end
 
 
@@ -234,8 +235,10 @@ function solve(system::SimpleMixture{3, species, T1, T2, HardSpheres{T3}}, ::Per
     for μ = 1:Ns, ν = 1:Ns
         expnegβu = (r .> d[μ, ν])
         γμν = inverse_radial_fourier_transform_3d((Hk[:, μ, ν] - Ck[:, μ, ν]) .* k, r, k) ./ r
-        @. gr[:, μ, ν] = (one(T) + γμν) * expnegβu
-        @. Cr[:, μ, ν] = (expnegβu - one(T)) * (1 + γμν)
+        @. gr[:, μ, ν] = (1.0 + γμν) * expnegβu
+        @. Cr[:, μ, ν] = (expnegβu - 1.0) * (1 + γμν)
     end
-    return OZSolution(r, k, gr, Sk, Ck, Cr)
+    γr = gr .- Cr .- 1.0
+    γk = Hk .- Ck
+    return OZSolution(r, k, gr, Sk, Cr, Ck, γr, γk)
 end

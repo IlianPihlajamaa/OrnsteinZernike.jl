@@ -1,3 +1,4 @@
+
 """
     Method
 
@@ -37,12 +38,12 @@ References:
 2. Baxter, R. J. "Ornstein–Zernike relation and Percus–Yevick approximation for fluid mixtures." The Journal of Chemical Physics 52.9 (1970): 4559-4562.
 3. Leutheusser, E. "Exact solution of the Percus-Yevick equation for a hard-core fluid in odd dimensions." Physica A: Statistical Mechanics and its Applications 127.3 (1984): 667-676.
 """
-struct Exact <: Method 
+struct Exact <: Method
     M::Int
     dr::Float64
 end
 
-function Exact(;  M=1000, dr = 10.0/M)
+function Exact(; M=1000, dr=10.0 / M)
     return Exact(M, dr)
 end
 
@@ -70,7 +71,7 @@ Arguments:
 
 Default: `FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance=10^-6, verbose=true, M=1000, dr=10.0/M)`
 """
-struct FourierIteration <: Method 
+struct FourierIteration <: Method
     M::Int
     dr::Float64
     mixing_parameter::Float64
@@ -79,9 +80,9 @@ struct FourierIteration <: Method
     verbose::Bool
 end
 
-function FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance=10^-10, verbose=true, M=1000, dr=10.0/M)
-    @assert max_iterations > 0 
-    @assert tolerance > 0 
+function FourierIteration(; mixing_parameter=0.5, max_iterations=10^5, tolerance=10^-10, verbose=true, M=1000, dr=10.0 / M)
+    @assert max_iterations > 0
+    @assert tolerance > 0
     @assert 0 <= mixing_parameter <= 1
     @assert M > 0
     FourierIteration(M, dr, mixing_parameter, max_iterations, tolerance, verbose)
@@ -113,7 +114,7 @@ Default: `NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-6, verbos
 References:
 Ng, K. C. (1974). Hypernetted chain solutions for the classical one‐component plasma up to Γ= 7000. The Journal of Chemical Physics, 61(7), 2680-2689.
 """
-struct NgIteration <: Method 
+struct NgIteration <: Method
     M::Int
     dr::Float64
     N_stages::Int64
@@ -122,9 +123,9 @@ struct NgIteration <: Method
     verbose::Bool
 end
 
-function NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-10, verbose=true, M=1000, dr=10.0/M)
-    @assert max_iterations > 0 
-    @assert tolerance > 0 
+function NgIteration(; N_stages=3, max_iterations=10^3, tolerance=10^-10, verbose=true, M=1000, dr=10.0 / M)
+    @assert max_iterations > 0
+    @assert tolerance > 0
     @assert N_stages > 0
     @assert M > 0
     NgIteration(M, dr, N_stages, max_iterations, tolerance, verbose)
@@ -144,13 +145,13 @@ Example:
 `DensityRamp(NgIteration(), [0.1, 0.3, 0.4]; verbose=false)`
 
 """
-struct DensityRamp{T<:Method, T2<:AbstractVector} <: Method 
+struct DensityRamp{T<:Method,T2<:AbstractVector} <: Method
     method::T
     densities::T2
     verbose::Bool
 end
 
-function DensityRamp(method::Method, densities::AbstractVector{T}; verbose=true) where T
+function DensityRamp(method::Method, densities::AbstractVector{T}; verbose=true) where {T}
     if method isa DensityRamp
         error("Nesting DensityRamp methods is not supported.")
     end
@@ -184,13 +185,13 @@ Example:
 `TemperatureRamp(NgIteration(), [0.1, 0.3, 0.4]; verbose=false)`
 
 """
-struct TemperatureRamp{T<:Method, T2<:AbstractVector} <: Method 
+struct TemperatureRamp{T<:Method,T2<:AbstractVector} <: Method
     method::T
     temperatures::T2
     verbose::Bool
 end
 
-function TemperatureRamp(method, temperatures::AbstractVector{T}; verbose=true) where T
+function TemperatureRamp(method, temperatures::AbstractVector{T}; verbose=true) where {T}
     @assert issorted(temperatures, rev=true)
     return TemperatureRamp(method, temperatures, verbose)
 end
@@ -210,16 +211,18 @@ Solves the system `system` using the closure `closure` with the default method `
 """
 function solve end
 
-function solve(system::System, closure::Closure; init=nothing)
-    solve(system, closure, defaultsolver(); init=init)
+function solve(system::System, closure::Closure; gamma_0=nothing)
+    solve(system, closure, defaultsolver(); gamma_0=gamma_0)
 end
 
-function solve(system::System, closure::Closure,  ::Exact)
+function solve(system::System, closure::Closure, ::Exact)
     P = typeof(system.potential)
     error("The potential $(P) with closure $(typeof(closure)) has no implemented exact solution in $(dimensions(system)) dimensions.")
 end
 
-function compute_error(y1::Vector{T}, y2::Vector{T}) where T
+function compute_error(y1::AbstractArray, y2::AbstractArray) 
+    T = eltype(y1)
+    @assert T == eltype(y2)
     error = zero(T)
     @assert length(y1) == length(y2)
     for i in eachindex(y1)
@@ -228,32 +231,54 @@ function compute_error(y1::Vector{T}, y2::Vector{T}) where T
     return sqrt(sum(error))
 end
 
-function find_g_from_c_and_Γ(c::Vector{T}, Γ::Vector{T}, r) where T<:Number
-    return  @. c + Γ / r + one(T)
+
+
+
+
+
+struct OZSolverCache{T, S, F}
+    mayer_f::Vector{T}
+    fourierplan::F
+    r::Vector{S}
+    k::Vector{S}
+    βu_long_range::Vector{T}
+    βu::Vector{T}
+    Γhat::Vector{T}
+    C::Vector{T}
+    Ĉ::Vector{T}
+    Γ_new::Vector{T}
 end
 
-function find_g_from_c_and_Γ(c::Vector{T}, Γ::Vector{T}, r) where T<:AbstractMatrix
-    g = copy(c)
-    for i in eachindex(c, Γ)
-        g[i] = c[i] + Γ[i] / r[i] + ones(T)
-    end 
-    return g
+function OZSolverCache(system, method)
+    r = method.dr * (1:method.M) |> collect
+    βu1, _ = evaluate_long_range_potential(system.potential, system.kBT, r[1])
+    elementtype = typeof(r[1] .* system.kBT .* system.ρ .* βu1)
+    mayer_f = zeros(elementtype, length(r))
+    fourierplan = get_fourier_plan(system, method, mayer_f)
+    r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
+    k = fourierplan.k
+    βu, βu_long_range = evaluate_long_range_potential(system.potential, system.kBT, r)
+    mayer_f .= find_mayer_f_function.((system,), βu)
+
+    T = eltype(mayer_f);  TT = eltype(T)
+    Γhat = copy(mayer_f); Γ_new = copy(mayer_f)
+    C = copy(mayer_f); Ĉ = copy(mayer_f)
+    return OZSolverCache(mayer_f, fourierplan, r, k, βu_long_range, βu, Γhat, C, Ĉ, Γ_new)
 end
 
-function find_S_from_ĉ_and_ρ(ĉ::Vector{T}, ρ) where T<:Number
-    return  @. one(T) + ρ * ĉ / (one(T) - ρ * ĉ)
+# gets one iteration step of the OZ equation in k-space
+# computes Γ_new from C
+# overwrites Ĉ, Γhat, Γ_new
+function oz_iteration_step!(C, Ĉ, Γhat, Γ_new, ρ, plan)
+    k = plan.k
+    fourier!(Ĉ, C, plan)
+    @inbounds for ik in eachindex(Γhat, Ĉ)
+        Γhat[ik] = (k[ik] * I - Ĉ[ik] * ρ) \ (Ĉ[ik] * ρ * Ĉ[ik])
+    end
+    inverse_fourier!(Γ_new, Γhat, plan)
+    return 
 end
 
-function find_S_from_ĉ_and_ρ(ĉ::Vector{T}, ρ) where T<:AbstractMatrix
-    S = copy(ĉ)
-    ρtot = sum(ρ.diag)
-    x = ρ.diag/ρtot
-    for i in eachindex(ĉ)
-        Si = inv(one(T) ./ x .- sum(ρ)*ĉ[i])
-        S[i] = Si
-    end 
-    return S
-end
 
 
 

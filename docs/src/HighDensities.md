@@ -54,7 +54,7 @@ plot!(sol2.r, sol2.gr, lw=2, color=:black, label="exact")
 ```
 Which converges even though the density is clearly nonphysically high.
 
-Sometimes convergence is accelerated if the solution of the same equations at a slightly lower density is used as an initial condition. This is especially useful if the solution is needed at many different densities. While this can be done by hand using the `init` keyword argument of the `solve` function, a convenient method `DensityRamp` is implemented to do this automatically. For example, consider a hard sphere system at `ρ = 1.2`.
+Sometimes convergence is accelerated if the solution of the same equations at a slightly lower density is used as an initial condition. This is especially useful if the solution is needed at many different densities. While this can be done by hand using the `gamma_0` keyword argument of the `solve` function, a convenient method `DensityRamp` is implemented to do this automatically. For example, consider a hard sphere system at `ρ = 1.2`.
 
 ```julia
 using OrnsteinZernike

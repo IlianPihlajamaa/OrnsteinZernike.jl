@@ -14,7 +14,7 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::Temperat
         if method.verbose
             println("\nSolving the system at kBT = $(system.kBT).\n")
         end
-        sol = solve(system, closure, method.method, init=γ_old)
+        sol = solve(system, closure, method.method, gamma_0=γ_old)
         push!(sols, sol)
         @. γ_old =  sol.gr - one(eltype(sol.gr)) - sol.cr
     end
@@ -22,7 +22,7 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::Temperat
         println("\nSolving the system at kBT = $(kBTtarget).\n")
     end
     system.kBT = kBTtarget
-    sol = solve(system, closure, method.method, init=γ_old)
+    sol = solve(system, closure, method.method, gamma_0=γ_old)
     push!(sols, sol)
     return sols
 end 

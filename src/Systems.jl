@@ -137,22 +137,22 @@ debye_kappa(ρ::AbstractVector, z::AbstractVector, ℓB; dims::Integer=3) =
 
 # Charged constructors
 function SimpleChargedFluid(base::SimpleFluid; z::Number, εr=78.4, κ=:auto)
-    dims = dimensions(base)
+    dims = dims_of(base)
     ℓB = bjerrum_length(base.kBT, εr; dims=dims)
     κD = debye_kappa(base.ρ, z, ℓB; dims=dims)
     κv = κ === :auto ? κD : Float64(κ)
-    return SimpleChargedFluid{dimensions(base), typeof(base.ρ), typeof(base.kBT), typeof(base.potential), typeof(z)}(base, z, ℓB, κv)
+    return SimpleChargedFluid{dims_of(base), typeof(base.ρ), typeof(base.kBT), typeof(base.potential), typeof(z)}(base, z, ℓB, κv)
 end
 
 function SimpleChargedMixture(base::SimpleMixture; z::AbstractVector, εr=78.4, κ=:auto)
-    dims = dimensions(base)
+    dims = dims_of(base)
     Ns = length(z)
     zS = SVector{Ns}(z)
     @assert isapprox(sum(diag(base.ρ) .* zS), 0.0; atol=1e-12) "Electroneutrality required: ∑ ρ_i z_i ≈ 0."
     ℓB = bjerrum_length(base.kBT, εr; dims=dims)
     κD = debye_kappa(base.ρ, zS, ℓB; dims=dims)
     κv = κ === :auto ? κD : Float64(κ)
-    return SimpleChargedMixture{dimensions(base), Ns, typeof(base.ρ), typeof(base.kBT), typeof(base.potential), eltype(zS)}(base, zS, ℓB, κv)
+    return SimpleChargedMixture{dims_of(base), Ns, typeof(base.ρ), typeof(base.kBT), typeof(base.potential), eltype(zS)}(base, zS, ℓB, κv)
 end
 
 
@@ -160,10 +160,10 @@ end
 # Common utilities / UI
 # -----------------------------
 
-dimensions(::SimpleFluid{dims,Tρ,TkT,P})          where {dims,Tρ,TkT,P} = dims
-dimensions(::SimpleMixture{dims,Ns,Tρ,TkT,P})        where {dims,Ns,Tρ,TkT,P} = dims
-dimensions(::SimpleChargedFluid{dims,Tρ,TkT,P,Tz})   where {dims,Tρ,TkT,P,Tz} = dims
-dimensions(::SimpleChargedMixture{dims,Ns,Tρ,TkT,P,Tz}) where {dims,Ns,Tρ,TkT,P,Tz} = dims
+dims_of(::SimpleFluid{dims,Tρ,TkT,P})          where {dims,Tρ,TkT,P} = dims
+dims_of(::SimpleMixture{dims,Ns,Tρ,TkT,P})        where {dims,Ns,Tρ,TkT,P} = dims
+dims_of(::SimpleChargedFluid{dims,Tρ,TkT,P,Tz})   where {dims,Tρ,TkT,P,Tz} = dims
+dims_of(::SimpleChargedMixture{dims,Ns,Tρ,TkT,P,Tz}) where {dims,Ns,Tρ,TkT,P,Tz} = dims
 
 number_of_species(::SimpleFluid) = 1
 number_of_species(::SimpleMixture{dims,Ns,Tρ,TkT,P})        where {dims,Ns,Tρ,TkT,P} = Ns
@@ -171,29 +171,57 @@ number_of_species(::SimpleChargedFluid) = 1
 number_of_species(::SimpleChargedMixture{dims,Ns,Tρ,TkT,P,Tz}) where {dims,Ns,Tρ,TkT,P,Tz} = Ns
 
 
+# base carrier (potential, kBT, ρ)
+base_of(sys::SimpleFluid)          = sys
+base_of(sys::SimpleMixture)        = sys
+base_of(sys::SimpleChargedFluid)   = sys.base
+base_of(sys::SimpleChargedMixture) = sys.base
+
+ρ_of(sys::SimpleFluid)           = sys.ρ                      # Number
+ρ_of(sys::SimpleMixture)         = sys.ρ                      # Diagonal
+ρ_of(sys::SimpleChargedFluid)    = sys.base.ρ
+ρ_of(sys::SimpleChargedMixture)  = sys.base.ρ
+
+# charge data: default 'uncharged'
+zvec_of(::SimpleFluid)             = SVector{1, Float64}(0.0)
+zvec_of(::SimpleMixture{dims,Ns,Tρ,TkT,P}) where {dims,Ns,Tρ,TkT,P} = zero(SVector{dims, TkT}) 
+zvec_of(sys::SimpleChargedFluid)   = SVector{1, Float64}(float(sys.z))
+zvec_of(sys::SimpleChargedMixture) = sys.z
+
+ℓB_of(::SimpleFluid)              = 0.0
+ℓB_of(::SimpleMixture)            = 0.0
+ℓB_of(sys::SimpleChargedFluid)    = sys.ℓB
+ℓB_of(sys::SimpleChargedMixture)  = sys.ℓB
+
+κsplit_of(::SimpleFluid)              = 1.0
+κsplit_of(::SimpleMixture)            = 1.0
+κsplit_of(sys::SimpleChargedFluid)    = sys.κ
+κsplit_of(sys::SimpleChargedMixture)  = sys.κ
+
+has_coulomb(sys::System) = any(!iszero, zvec_of(sys)) && ℓB_of(sys) > 0
 
 Base.show(io::IO, ::MIME"text/plain", s::SimpleFluid) = begin
-    println(io, "$(dimensions(s))D SimpleFluid (single component):")
+    println(io, "$(dims_of(s))D SimpleFluid (single component):")
     println(io, "  ρ = $(s.ρ)")
     println(io, "  kBT = $(s.kBT)")
     println(io, "  potential = $(s.potential)")
 end
 
 Base.show(io::IO, ::MIME"text/plain", s::SimpleMixture) = begin
-    println(io, "$(dimensions(s))D SimpleMixture (Ns=$(number_of_species(s))):")
+    println(io, "$(dims_of(s))D SimpleMixture (Ns=$(number_of_species(s))):")
     println(io, "  ρ = $(s.ρ)")
     println(io, "  kBT = $(s.kBT)")
     println(io, "  potential = $(s.potential)")
 end
 
 Base.show(io::IO, ::MIME"text/plain", s::SimpleChargedFluid) = begin
-    println(io, "$(dimensions(s))D SimpleChargedFluid (single component):")
+    println(io, "$(dims_of(s))D SimpleChargedFluid (single component):")
     println(io, "  z = $(s.z), ℓB = $(s.ℓB), κ = $(s.κ)")
     show(io, MIME"text/plain"(), s.base)
 end
 
 Base.show(io::IO, ::MIME"text/plain", s::SimpleChargedMixture) = begin
-    println(io, "$(dimensions(s))D SimpleChargedMixture (Ns=$(number_of_species(s))):")
+    println(io, "$(dims_of(s))D SimpleChargedMixture (Ns=$(number_of_species(s))):")
     println(io, "  z = $(s.z), ℓB = $(s.ℓB), κ = $(s.κ)")
     show(io, MIME"text/plain"(), s.base)
 end
