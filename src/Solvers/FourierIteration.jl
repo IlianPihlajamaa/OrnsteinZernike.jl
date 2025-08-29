@@ -161,3 +161,11 @@ function closure_c_from_gamma_short_ranged(closure::Closure, r::Number, βu, γ_
     c = @. -myone - γ_SR - q + exp(-(βu- βu_long_range_coul) + γ_SR + q + real.(B))
     return c
 end
+
+# to do
+# test
+# documentation
+# analytic FT for coul splitting if known
+# change closure to make gamma renormalization explicit and trait based
+# fix docs for thatg
+# add examples 
