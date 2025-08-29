@@ -254,3 +254,14 @@ function inverse_fourier!(F::AbstractVector{T}, F̂::AbstractVector{T}, Q::Hanke
 end
 
 
+function fourier(F, plan)
+    F̂ = similar(F)
+    fourier!(F̂, F, plan)
+    return F̂
+end
+
+function inverse_fourier(F̂, plan)
+    F = similar(F̂)
+    inverse_fourier!(F, F̂, plan)
+    return F
+end

@@ -161,7 +161,9 @@ function evaluate_potential(potential::CustomPotential, r::Number)
     return potential.f(r, potential.p)
 end
 
-
+function find_mayer_f_function(βu)
+    return exp(-βu) - 1.0
+end
 """
 exp(- beta * u) - 1.
 """

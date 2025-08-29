@@ -21,8 +21,10 @@ export compute_compressibility, compute_excess_energy, compute_virial_pressure
 export evaluate_potential, evaluate_potential_derivative, discontinuities
 export WCADivision
 
+
 include("Systems.jl")
 include("Potentials.jl")
+include("Coulomb.jl")
 include("PotentialSplitting.jl")
 include("Closures.jl")
 include("FourierTransforms.jl")
