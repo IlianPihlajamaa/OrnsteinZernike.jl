@@ -1,12 +1,12 @@
 M = 1000
-ρ = 0.5
+ρ = 1.0
 kBT = 1.1
 dims = 3
 dr = 10/M
 pot = HardSpheres(1.0)
 system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
-method = FourierIteration(M = M,dr=dr, tolerance=10^-10, mixing_parameter=0.8, verbose=false, max_iterations=10^4)
+method = FourierIteration(M = M,dr=dr, tolerance=10^-10, mixing_parameter=0.01, verbose=true, max_iterations=10^6)
 sol = solve(system, closure, method)
 
 sol2 = solve(system, closure, Exact(M=M,dr=dr,))

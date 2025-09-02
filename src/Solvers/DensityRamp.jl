@@ -11,11 +11,11 @@ end
 recast_γ(γ::Array{T, 1}) where {T} = γ
 
 
-function solve(system::SimpleUnchargedSystem, closure::Closure, method::DensityRamp)
+function solve(system::System, closure::Closure, method::DensityRamp; kwargs...)
     densities = method.densities
-    ρtarget = system.ρ
+    ρtarget = ρ_of(system)
     sols = []
-    system.ρ = densities[1]
+    base_of(system).ρ = densities[1]
     if method.verbose
         println("\nSolving the system at ρ = $(densities[1]).\n")
     end
@@ -26,18 +26,18 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::DensityR
         if method.verbose
             println("\nSolving the system at ρ = $(densities[i]).\n")
         end
-        system.ρ = densities[i]
+        base_of(system).ρ = densities[i]
         γ_old2 = recast_γ(γ_old)
-        sol = solve(system, closure, method.method, gamma_0=γ_old2)
+        sol = solve(system, closure, method.method, gamma_0=γ_old2; kwargs...)
         push!(sols, sol)
         @. γ_old =  sol.gr - one(eltype(sol.gr)) - sol.cr
     end
     if method.verbose
         println("\nSolving the system at ρ = $(ρtarget).\n")
     end
-    system.ρ = ρtarget
+    base_of(system).ρ = ρtarget
     γ_old2 = recast_γ(γ_old)
-    sol = solve(system, closure, method.method, gamma_0=γ_old2)
+    sol = solve(system, closure, method.method, gamma_0=γ_old2; kwargs...)
     push!(sols, sol)
     return sols
 end 

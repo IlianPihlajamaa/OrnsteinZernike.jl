@@ -13,7 +13,8 @@ makedocs(sitename="OrnsteinZernike.jl Documentation",
                             "HighDensities.md",
                             "OtherDimensions.md",
                             "Accuracy.md",
-                            "ThermodynamicConsistency.md"
+                            "ThermodynamicConsistency.md",
+                            "Electrolyte_tutorial.md"
                             ],
             "Basics"=> ["GeneralWorkflow.md",
                         "Potentials.md",

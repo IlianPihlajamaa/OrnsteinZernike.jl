@@ -18,6 +18,22 @@ function closure_cmulr_from_gammamulr(closure::Closure, r, mayer_f, Γmulr, βuL
 end
 
 """
+βu_LR_disp is the long ranged part of the base potential only, e.g. r^-6 for LJ, not including Coulomb)
+γ_SR is the short ranged part of γ, i.e. with the long coulomb tail subtracted
+q is the long ranged part of h, i.e.  the long coulomb tail
+the mayer function includes the full potential
+"""
+function closure_cmulr_from_gammamulr_short_ranged(closure::Closure, r::Number, βu, γ_SRmulr, q, βu_LR_disp, βu_long_range_coul)
+    γ_SR = γ_SRmulr / r
+    mayer_f = find_mayer_f_function.(βu)
+    B = bridge_function(closure, r, mayer_f, γ_SR .- βu_LR_disp) # same as in uncharged case
+    myone = one.(B)
+    c = @. -myone - γ_SR - q + exp(-(βu- βu_long_range_coul) + γ_SR + q + real(B))
+    return c*r
+end
+
+
+"""
     PercusYevick
 
 Implements the Percus-Yevick closure \$c(r) = f(r)(1+\\gamma(r))\$, or equivalently \$b(r) = \\ln(1 + \\gamma(r)) - γ(r)\$.

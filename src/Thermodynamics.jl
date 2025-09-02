@@ -50,15 +50,26 @@ uses the formula Eₓ = 1/2 ρ ∫dr g(r) u(r) for single component systems
 and Eₓ = 1/2 ρ Σᵢⱼ xᵢxⱼ ∫dr gᵢⱼ(r) uᵢⱼ(r) for mixtures. Here x is the concentration fraction xᵢ=ρᵢ/sum(ρ).
 
 """
-function compute_excess_energy(sol::OZSolution, system::SimpleUnchargedSystem)
+function compute_excess_energy(sol::OZSolution, system::System)
     dims = dims_of(system)
     Ns = number_of_species(system)
     r = sol.r
-    ρ = system.ρ
+    ρ =  ρ_of(system)
     ρ0 = sum(ρ)
     x = get_concentration_fraction(system)
     gr = sol.gr
-    u = evaluate_potential.(Ref(system.potential), r)
+    if system isa SimpleUnchargedSystem
+        u = evaluate_potential.(Ref(system.potential), r)
+    elseif system isa SimpleChargedSystem
+        basepot = base_of(system).potential
+        u_base = evaluate_potential.(Ref(basepot), r)
+        u_coul = evaluate_coulomb_potential(r, system) * kBT_of(system) # function returns in units of kBT
+        u = u_base .+ u_coul
+    else 
+        error("This function doesn't support systems of type $(typeof(system))")
+    end
+
+
     E = zero(eltype(eltype(gr)))
 
     rpow = dims-1
@@ -185,8 +196,8 @@ function compute_virial_pressure(sol::OZSolution, system:: SimpleUnchargedSystem
     return p
 end
 
-function get_concentration_fraction(system::SimpleUnchargedSystem)
-    ρ = system.ρ
+function get_concentration_fraction(system::System)
+    ρ = ρ_of(system)
     if ρ isa AbstractArray
         return ρ.diag / sum(ρ.diag)
     elseif ρ isa Number

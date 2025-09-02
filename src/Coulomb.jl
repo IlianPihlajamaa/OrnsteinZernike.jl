@@ -5,7 +5,12 @@ abstract type CoulombSplitting end
 
 Splits the Coulomb potential into short-range and long-range parts using the Ewald splitting parameter `α`.
 Fields:
-- α::Float64 : Ewald splitting parameter
+- α::Float64 : Ewald splitting  (inverse length scale)
+
+The short-range part is given by:
+    u_short_range(r) = (z_i * z_j * ℓB / r) * erfc(α * r)
+The long-range part is given by:
+    u_long_range(r) = (z_i * z_j * ℓB / r) * erf(α * r)
 """
 struct EwaldSplitting <: CoulombSplitting
     α::Float64
@@ -19,10 +24,6 @@ No splitting of the Coulomb potential; the entire potential is treated as long-r
 struct NoCoulombSplitting <: CoulombSplitting end
 
 
-"""
-see D.-M. Duh and A. D. J. Haymet: Integral equation theory for charged liquids J. Chern. Phys.• Vol. 97. No. 10. 15  1992
-"""
-struct OptimizedDHSplitting <: CoulombSplitting end
 
 # ---- Dimension constant for the Coulomb kernel's FT:  v̂(k) = (C_d / k^2) / (ε_r β) ----
 # (Matches the surface area of the unit sphere: C_3=4π, C_2=2π, C_1=2.)

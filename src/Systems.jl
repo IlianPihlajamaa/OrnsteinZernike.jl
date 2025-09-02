@@ -87,14 +87,12 @@ Fields:
 - base::SimpleFluid  — underlying neutral single-component system
 - z::Tz              — charge (in units of e)
 - ℓB::Float64        — Bjerrum length (in your length units)
-- κ::Float64         — Ewald/Gaussian split parameter
 - Cd::Float64       — surface area constant for the dimension (4π, 2π, 2) for d = 3, 2, 1
 """
 mutable struct SimpleChargedFluid{dims,Tρ,TkT,P,Tz} <: AbstractSingleComponent
     base::SimpleFluid{dims,Tρ,TkT,P}
     z::Tz
     ℓB::Float64
-    κ::Float64
     Cd::Float64 
 end
 
@@ -107,14 +105,12 @@ Fields:
 - base::SimpleMixture — underlying neutral mixture
 - z::SVector{Ns,Tz}   — per-species charges
 - ℓB::Float64         — Bjerrum length
-- κ::Float64          — Ewald/Gaussian split parameter
 - Cd::Float64       — surface area constant for the dimension (4π, 2π, 2) for d = 3, 2, 1
 """
 mutable struct SimpleChargedMixture{dims,Ns,Tρ,TkT,P,Tz} <: AbstractMixture
     base::SimpleMixture{dims,Ns,Tρ,TkT,P}
     z::SVector{Ns,Tz}
     ℓB::Float64
-    κ::Float64
     Cd::Float64 
 end
 
@@ -124,21 +120,17 @@ const SimpleChargedSystem = Union{SimpleChargedFluid, SimpleChargedMixture}
 
 
 # Charged constructors
-function SimpleChargedFluid(base::SimpleFluid, z::Number, lB::Number, κ=:auto)
+function SimpleChargedFluid(base::SimpleFluid, z::Number, lB::Number)
     dims = dims_of(base)
-    κD = debye_kappa(base.ρ, z, lB; dims=dims)
-    κv = κ === :auto ? κD : Float64(κ)
-    return SimpleChargedFluid{dims_of(base), typeof(base.ρ), typeof(base.kBT), typeof(base.potential), typeof(z)}(base, z, ℓlBB, κv, C_d(dims))
+    return SimpleChargedFluid{dims_of(base), typeof(base.ρ), typeof(base.kBT), typeof(base.potential), typeof(z)}(base, z, lB, C_d(dims))
 end
 
-function SimpleChargedMixture(base::SimpleMixture, z::AbstractVector, lB::Number, κ=:auto)
+function SimpleChargedMixture(base::SimpleMixture, z::AbstractVector, lB::Number)
     dims = dims_of(base)
     Ns = length(z)
     zS = SVector{Ns}(z)
     @assert isapprox(sum(diag(base.ρ) .* zS), 0.0; atol=1e-12) "Electroneutrality required: ∑ ρ_i z_i ≈ 0."
-    κD = debye_kappa(base.ρ, zS, lB; dims=dims)
-    κv = κ === :auto ? κD : Float64(κ)
-    return SimpleChargedMixture{dims_of(base), Ns, typeof(base.ρ), typeof(base.kBT), typeof(base.potential), eltype(zS)}(base, zS, lB, κv, C_d(dims))
+    return SimpleChargedMixture{dims_of(base), Ns, typeof(base.ρ), typeof(base.kBT), typeof(base.potential), eltype(zS)}(base, zS, lB, C_d(dims))
 end
 
 
@@ -179,10 +171,11 @@ zvec_of(sys::SimpleChargedMixture) = sys.z
 ℓB_of(sys::SimpleChargedFluid)    = sys.ℓB
 ℓB_of(sys::SimpleChargedMixture)  = sys.ℓB
 
-κsplit_of(::SimpleFluid)              = 1.0
-κsplit_of(::SimpleMixture)            = 1.0
-κsplit_of(sys::SimpleChargedFluid)    = sys.κ
-κsplit_of(sys::SimpleChargedMixture)  = sys.κ
+
+kBT_of(sys::SimpleFluid)          = sys.kBT
+kBT_of(sys::SimpleMixture)        = sys.kBT
+kBT_of(sys::SimpleChargedFluid)   = sys.base.kBT
+kBT_of(sys::SimpleChargedMixture) = sys.base.kBT
 
 has_coulomb(sys::System) = any(!iszero, zvec_of(sys)) && ℓB_of(sys) > 0
 
@@ -202,13 +195,13 @@ end
 
 Base.show(io::IO, ::MIME"text/plain", s::SimpleChargedFluid) = begin
     println(io, "$(dims_of(s))D SimpleChargedFluid (single component):")
-    println(io, "  z = $(s.z), ℓB = $(s.ℓB), κ = $(s.κ)")
+    println(io, "  z = $(s.z), ℓB = $(s.ℓB)")
     show(io, MIME"text/plain"(), s.base)
 end
 
 Base.show(io::IO, ::MIME"text/plain", s::SimpleChargedMixture) = begin
     println(io, "$(dims_of(s))D SimpleChargedMixture (Ns=$(number_of_species(s))):")
-    println(io, "  z = $(s.z), ℓB = $(s.ℓB), κ = $(s.κ)")
+    println(io, "  z = $(s.z), ℓB = $(s.ℓB)")
     show(io, MIME"text/plain"(), s.base)
 end
 
