@@ -10,7 +10,7 @@ This paper studies **2:2 electrolytes** (e.g., divalent cations and anions) usin
 
 ## Step 1. Setting up the environment
 
-```julia
+```@example elec
 using OrnsteinZernike, StaticArrays
 using Plots
 ```

@@ -81,7 +81,7 @@ plot!(sol.r, sol.gr[:, 1, 1], label="g_{11}(r)")
 plot!(sol.r, sol.gr[:, 2, 2], label="g_{22}(r)")
 ```
 
-We see that the unlike charges have a strong peak in g(r).
+We see that the unlike charges have a strong peak in g(r), and the highly negatively charged ions strongly repel.
 
 **Tip:** If convergence is delicate, try:
 - increasing `M` (grid size) and/or decreasing `dr`,

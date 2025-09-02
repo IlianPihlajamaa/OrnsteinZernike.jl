@@ -136,10 +136,6 @@ end
 
 
 # to do
-# test
-# Ng
-# documentation
 # analytic FT for coul splitting if known
 # change closure to make gamma renormalization explicit and trait based
-# fix docs for thatg
-# add examples 
+# fix docs for that g
