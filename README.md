@@ -12,7 +12,7 @@ $$h(r) = c(r) + \rho \int d\textbf{r}' c(\textbf{r}')h(\textbf{r}- \textbf{r}') 
 
 Here $h(r) = g(r) - 1$, where $g(r)$ is the radial distribution function, which describes the structure of a liquid, $\rho$ is the number density, and $c(r)$ is the direct correlation function. Together with an approximate closure relation, which links $c(r)$ to the interaction potential of the particles, this integral equation can be solved. 
 
-This package implements common solution methods for the Ornstein Zernike equation, for single component systems as well as mixtures, in any dimension. It implements many predefined closure relations and many interaction potentials. Moreover, it let's you easily use your own closures and interaction potentials.
+This package implements common solution methods for the Ornstein Zernike equation, for single component systems as well as mixtures, in any dimension. It implements many predefined closure relations and many interaction potentials, and includes specialized methods for solving charged systems. Moreover, it let's you easily use your own closures and interaction potentials.
 
 ## Example use
 

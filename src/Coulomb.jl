@@ -19,7 +19,7 @@ end
 """
     NoSplitting <: CoulombSplitting
 
-No splitting of the Coulomb potential; the entire potential is treated as long-range.
+No splitting of the Coulomb potential; the entire Coulomb potential is treated as long range.
 """
 struct NoCoulombSplitting <: CoulombSplitting end
 

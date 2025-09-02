@@ -1,4 +1,4 @@
-# How `OrnsteinZernike.jl` Solves Charged Systems
+# Charged Systems
 
 Charged fluids have long-ranged Coulomb interactions that require special handling in the Ornstein–Zernike (OZ) solver. This page explains the decomposition used in the code, how the *short-ranged* (SR) and *long-ranged* (LR) pieces are propagated through the OZ relations, and how the solver iterates to convergence.
 
@@ -9,36 +9,36 @@ Charged fluids have long-ranged Coulomb interactions that require special handli
 Potentials and correlation functions are consistently decomposed into **short-ranged** and **long-ranged** parts:
 
 - **Potential**
-  \[
+  $
   \beta u_{\text{coul}} = \underbrace{\beta u_{\text{SR,coul}}}_{\text{Coulomb SR split}}
   + \underbrace{\beta u_{\text{LR,coul}}}_{\text{Coulomb LR split}}.
-  \]
+  $
 
 - **Direct correlation**
-  \[
+  $
   c = c_{\text{short\_range}} + \Phi,
   \qquad \Phi \equiv -\,\beta u_{\text{LR,coul}}.
-  \]
+  $
 
 - **Indirect correlation**
-  \[
+  $
   \gamma = \gamma_{\text{short\_range}} + \gamma_{\text{long\_range}}.
-  \]
+  $
 
 - **Total correlation**
-  \[
+  $
   h = h_{\text{short\_range}} + q,
-  \]
-  where the LR part \(q\) is defined by the **LR OZ relation** in Fourier space:
-  \[
+  $
+  where the LR part $q$ is defined by the **LR OZ relation** in Fourier space:
+  $
   \widehat{q}(k) = \widehat{\Phi} + \widehat{\Phi} \rho \widehat{q}(k).
-  \]
+  $
 
 ---
 
 ## Coulomb Splitting in Practice
 
-The Coulomb potential \(z_i z_j \,\ell_B / r\) is split into SR and LR pieces by a user-selectable strategy. Other strategies can be easily implemented by a user.
+The Coulomb potential $z_i z_j \,\ell_B / r$ is split into SR and LR pieces by a user-selectable strategy. Other strategies can be easily implemented by a user.
 
 ```@docs
 NoCoulombSplitting
@@ -47,7 +47,7 @@ EwaldSplitting
 
 The SR/LR split is produced by `split_coulomb_potential(r, system, coulombsplitting)`.
 
-Given \(\Phi\) and its transform, the LR OZ part is solved analytically in \(k\)-space. This gives a fixed LR reference \(q\) used throughout the SR iteration.
+Given $\Phi$ and its transform, the LR OZ part is solved analytically in $k$-space. This gives a fixed LR reference $q$ used throughout the SR iteration.
 
 ---
 

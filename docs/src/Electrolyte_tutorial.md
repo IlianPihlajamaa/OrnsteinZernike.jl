@@ -1,4 +1,4 @@
-# Tutorial: Reproducing Electrolyte HNC Results from Literature
+# Electrolyte Mixtures with HNC
 
 In this tutorial, we demonstrate how to use `OrnsteinZernike.jl` to reproduce classical results for symmetric electrolytes obtained with the **Hypernetted Chain (HNC)** closure. Specifically, this page will reproduce some of the results presented in.
 
@@ -29,6 +29,7 @@ e = 1.602176634e-19      # elementary charge (C)
 ϵ = ϵ0 * ϵr
 kB = 1.380649e-23        # Boltzmann constant (J/K)
 B = 5377.75 * 4 * 10^-10 # repulsion parameter (m K)
+nothing # hide
 ```
 The potential used is given by
 
@@ -38,6 +39,7 @@ For convenience, we can also compute the approximate position of the potential m
 
 ```@example elec
 Rm = (3^(1/4) * B^(1/8) * kB^(1/8)*(4*π*ϵ)^(1/8)*σ)/(e^(1/4)*2^(1/4))
+nothing # hide
 ```
 
 ---
@@ -66,6 +68,8 @@ kBT = kB * (T0 + 25)   # thermal energy at 298 K
 
 # Bjerrum length in meters
 bjerrum_length = e^2/(4*π*ϵ*kBT) 
+nothing # hide
+
 ```
 
 ---
@@ -141,7 +145,7 @@ Finally, we set axis limits and show the combined plots.
 plot!(p2, xlims=(0.0, 16.0))
 plot!(p1, xlims=(0.0, 16.0))
 
-display(plot(p1, p2, layout=(2,1)))
+p = plot(p1, p2, layout=(2,1))
 ```
 
 ---
