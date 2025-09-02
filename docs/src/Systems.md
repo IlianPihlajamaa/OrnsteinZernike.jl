@@ -94,7 +94,8 @@ base = SimpleFluid(dims, ρ, kBT, core)
 
 # OCP: single species of charge z in a uniform neutralizing background
 z    = 1.0
-sys  = SimpleChargedFluid(base; z=z, εr=78.4)  # κ chosen automatically (Debye)
+lB = 7.0                                # Bjerrum length
+sys  = SimpleChargedFluid(base, z, lB)  # κ chosen automatically (Debye)
 
 # Now use closures/solvers as usual:
 # sol = solve(sys, HypernettedChain(); method=NgIteration(M=2000, dr=0.01))
@@ -120,7 +121,8 @@ hs   = HardSpheres([1.0, 1.0])         # per-species diameters (short-range)
 base = SimpleMixture(dims, ρ, kBT, hs)
 
 z    = [ 1.0, -1.0 ]                   # charges (must be electroneutral with ρ)
-sys  = SimpleChargedMixture(base; z=z, εr=78.4)  # κ auto-set to Debye
+lB = 7.0                               # Bjerrum length
+sys  = SimpleChargedMixture(base, z, lB) 
 ```
 
 ---

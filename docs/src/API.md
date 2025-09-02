@@ -16,6 +16,6 @@ Private = false
 ```@autodocs
 Modules = [OrnsteinZernike]
 Order   = [:constant, :type, :function, :macro]
-Filter = t -> (!(typeof(t) === DataType || typeof(t) === UnionAll) || (!(t <: OrnsteinZernike.Closure) && !(t <: OrnsteinZernike.Potential) && !(t <: OrnsteinZernike.Method) && !(t <: OrnsteinZernike.System)))
+Filter = t -> (!(typeof(t) === DataType || typeof(t) === UnionAll) || (!(t <: OrnsteinZernike.Closure) && !(t <: OrnsteinZernike.Potential) && !(t <: OrnsteinZernike.Method) && !(t <: OrnsteinZernike.CoulombSplitting) && !(t <: OrnsteinZernike.System)))
 Private = false
 ```

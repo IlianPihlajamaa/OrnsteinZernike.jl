@@ -56,14 +56,13 @@ nothing # hide
 
 ## Step 4. Ion charges and thermodynamics
 
-We consider a symmetric 2:2 electrolyte, so the charges are `+2` and `–2`. The temperature is set to room temperature (298 K). We also prepare a list of mixing parameters to ensure numerical convergence of the iterative solver.
+We consider a symmetric 2:2 electrolyte, so the charges are `+2` and `–2`. The temperature is set to room temperature (298 K). 
 
 ```@example elec
 Z = [2, -2] 
 T0 = 273.15
 kBT = kB * (T0 + 25)   # thermal energy at 298 K
 
-mixing_parameters = [0.05, 0.005, 0.05, 0.05, 0.05, 0.05]
 
 # Bjerrum length in meters
 bjerrum_length = e^2/(4*π*ϵ*kBT) 
@@ -82,7 +81,7 @@ We now study several salt concentrations (in mol/L). For each concentration:
 5. Add the results to the plots.
 
 ```@example elec
-for (i,c) in enumerate([0.001, 0.005, 0.02, 0.0625, 0.2, 0.5625]) # mol/L
+for (i,c) in enumerate([0.001, 0.02, 0.0625, 0.2, 0.5625]) # mol/L
     # Convert molar concentration to number density
     ρ0 = c * 6.02214076e23 * 1e3  
     ρ = [ρ0, ρ0] # equal density of cations and anions
@@ -110,7 +109,7 @@ for (i,c) in enumerate([0.001, 0.005, 0.02, 0.0625, 0.2, 0.5625]) # mol/L
     method = FourierIteration(M = M,
                               dr = dr,
                               tolerance = 1e-8,
-                              mixing_parameter = mixing_parameters[i],
+                              mixing_parameter = 0.05,
                               verbose = false,
                               max_iterations = 10^6)
 
