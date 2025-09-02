@@ -52,7 +52,7 @@ Given \(\Phi\) and its transform, the LR OZ part is solved analytically in \(k\)
 ---
 
 
-## Minimal Usage Example
+## Minimal Usage Example: 1-3 electrolyte
 
 ```@example charges
 using OrnsteinZernike, StaticArrays, Plots
@@ -81,7 +81,9 @@ plot!(sol.r, sol.gr[:, 1, 1], label="g_{11}(r)")
 plot!(sol.r, sol.gr[:, 2, 2], label="g_{22}(r)")
 ```
 
+We see that the unlike charges have a strong peak in g(r).
+
 **Tip:** If convergence is delicate, try:
 - increasing `M` (grid size) and/or decreasing `dr`,
-- reducing the `mixing_parameter` or changing the number of stages if using `NgIteration`
+- reducing the `mixing_parameter` or changing the number of stages if using `NgIteration`.
 
