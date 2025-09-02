@@ -4,7 +4,7 @@ In this tutorial, we demonstrate how to use `OrnsteinZernike.jl` to reproduce cl
 
 > D.‐M. Duh; A. D. J. Haymet, *Integral equation theory for charged liquids: Model 2–2 electrolytes and the bridge function*, J. Chem. Phys. **97**, 7716–7729 (1992).
 
-This paper studies **2:2 electrolytes** (e.g., divalent cations and anions) using integral equation theory. Our goal here is to set up the same model, run the HNC closure, and reproduce the radial distribution functions (RDFs) and excess energies across different concentrations,.  
+This paper studies **2:2 electrolytes** (e.g., divalent cations and anions) using integral equation theory. Our goal here is to set up the same model, run the HNC closure, and reproduce the radial distribution functions (RDFs) and excess energies across different concentrations.  
 
 ---
 
@@ -33,13 +33,12 @@ nothing # hide
 ```
 The potential used is given by
 
-$$u_{ij}(r) = \frac{k_B B}{\sigma} * \left(\frac{\sigma}{r}\right)^9 +  \frac{Z_i Z_j e^2}{4\pi\epsilon r}$$
+$$u_{ij}(r) = \frac{k_B B}{\sigma}  \left(\frac{\sigma}{r}\right)^9 +  \frac{Z_i Z_j e^2}{4\pi\epsilon r}$$
 
 For convenience, we can also compute the approximate position of the potential minimum (not strictly needed, but useful for diagnostics):
 
 ```@example elec
 Rm = (3^(1/4) * B^(1/8) * kB^(1/8)*(4*π*ϵ)^(1/8)*σ)/(e^(1/4)*2^(1/4))
-nothing # hide
 ```
 
 ---
