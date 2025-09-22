@@ -134,8 +134,3 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::FourierIte
     return construct_solution(r, k, C, C_hat, Γ, Γ_hat, ρ)
 end
 
-
-# to do
-# analytic FT for coul splitting if known
-# change closure to make gamma renormalization explicit and trait based
-# fix docs for that g
