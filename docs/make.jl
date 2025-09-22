@@ -1,10 +1,9 @@
 using Documenter
+push!(LOAD_PATH,"../src/")
 using OrnsteinZernike
 
 ENV["PLOTS_TEST"] = "true"
 ENV["GKSwstype"] = "100"
-
-push!(LOAD_PATH,"../src/")
 makedocs(sitename="OrnsteinZernike.jl Documentation",
          pages = [
             "Index" => "index.md",

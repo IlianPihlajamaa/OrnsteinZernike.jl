@@ -7,8 +7,8 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::NgIterat
     ρ = ρ_of(system)
 
     cache = OZSolverCache(system, method)
-    mayer_f, fourierplan, r, k, βu_long_range, βu, Γhat, C, Ĉ, Γ_new = 
-        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_long_range, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
+    mayer_f, fourierplan, r, k, βu_disp_tail, βu, Γhat, C, Ĉ, Γ_new = 
+        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
 
     T = eltype(mayer_f)
     TT = eltype(T)
@@ -45,7 +45,8 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::NgIterat
     iteration = 0
     # first bootstrapping steps 
     for stage = reverse(1:N_stages)
-        C .= closure_cmulr_from_gammamulr.((closure,), r, mayer_f, fn_full[stage+1], βu_long_range)
+        ctx_stage = UnchargedClosureEvalContext(r, mayer_f, fn_full[stage+1], βu, βu_disp_tail)
+        closure_apply!(C, closure, ctx_stage)
         oz_iteration_step!(C, Ĉ, Γhat, gn_full[stage+1], ρ, fourierplan)
         fn_flat[stage] .= gn_flat[stage+1]
     end
@@ -54,7 +55,8 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::NgIterat
         if iteration > max_iterations || isnan(err)
             error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
         end
-        C .= closure_cmulr_from_gammamulr.((closure,), r, mayer_f, fn_full[1], βu_long_range)
+        ctx_iter = UnchargedClosureEvalContext(r, mayer_f, fn_full[1], βu, βu_disp_tail)
+        closure_apply!(C, closure, ctx_iter)
         oz_iteration_step!(C, Ĉ, Γhat, Γ_new, ρ, fourierplan)
         gn_flat[1] .= Γ_new_flat
         err = compute_error(gn_flat[1], fn_flat[1])
@@ -100,10 +102,11 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
 
     cache = OZSolverCache(base_of(system), method)
     mayer_f, fourierplan, r, k, βu_LR_disp, βu, Γ_SR_hat, C_SR, C_SR_hat, Γ_SR_new = 
-        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_long_range, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
+        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
 
     βu_SR_coul, βu_LR_coul = split_coulomb_potential(r, system, coulombsplitting)
     βu = βu .+ βu_SR_coul .+ βu_LR_coul
+    mayer_f .= find_mayer_f_function.(βu)
 
     φ = -βu_LR_coul # long range part of c 
     Φ_hat = fourier(φ .* r, fourierplan)  # note that the FT work on the "mulr" functions
@@ -152,8 +155,8 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
     iteration = 0
     # first bootstrapping steps 
     for stage = reverse(1:N_stages)
-
-        C_SR .= closure_cmulr_from_gammamulr_short_ranged.((closure, ), r, βu, fn_full[stage+1], q, βu_LR_disp, βu_LR_coul) 
+        ctx_stage = ChargedClosureEvalContext(r, mayer_f, fn_full[stage+1], βu, βu_LR_disp, βu_LR_coul, q)
+        closure_apply!(C_SR, closure, ctx_stage)
         fourier!(C_SR_hat, C_SR, fourierplan)
         C_hat .= C_SR_hat .+ Φ_hat
         for ik in eachindex(Γ_hat)
@@ -169,7 +172,8 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
             error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
         end
 
-        C_SR .= closure_cmulr_from_gammamulr_short_ranged.((closure, ), r, βu, fn_full[1], q, βu_LR_disp, βu_LR_coul)
+        ctx_iter = ChargedClosureEvalContext(r, mayer_f, fn_full[1], βu, βu_LR_disp, βu_LR_coul, q)
+        closure_apply!(C_SR, closure, ctx_iter)
         fourier!(C_SR_hat, C_SR, fourierplan)
         C_hat .= C_SR_hat .+ Φ_hat
         for ik in eachindex(Γ_hat)

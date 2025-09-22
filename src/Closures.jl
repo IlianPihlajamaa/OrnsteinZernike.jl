@@ -5,31 +5,72 @@ Abstract closure type
 """
 abstract type Closure end
 
-function closure_c_from_gamma(closure::Closure, r, mayer_f, γ, βuLR)
-    B = bridge_function(closure, r, mayer_f, γ .- βuLR)
-    myone = one.(B)
-    c = @. -myone - γ + (mayer_f + myone)*exp(γ)*real(exp(B))
-    return c
+"""
+    uses_renormalized_gamma(::Closure)::Bool
+
+Trait signalling whether a closure expects the dispersion tail to be removed from
+the indirect correlation function (i.e. it uses \\(γ^* = γ_{SR} - βu_{LR}^{disp}\\)).
+"""
+uses_renormalized_gamma(::Closure) = false
+
+abstract type ClosureEvalContext end
+
+struct UnchargedClosureEvalContext{TR,TM,TΓ,Tβ,TβLR} <: ClosureEvalContext
+    r::TR
+    mayer_f::TM
+    Γ_mulr::TΓ
+    βu::Tβ
+    βu_LR_disp::TβLR
 end
 
-function closure_cmulr_from_gammamulr(closure::Closure, r, mayer_f, Γmulr, βuLR)
-    γ = Γmulr/r
-    return r*closure_c_from_gamma(closure, r, mayer_f, γ, βuLR) 
+struct ChargedClosureEvalContext{TR,TM,TΓ,Tβ,TβLR,TβC,TQ} <: ClosureEvalContext
+    r::TR
+    mayer_f::TM
+    Γ_mulr::TΓ
+    βu::Tβ
+    βu_LR_disp::TβLR
+    βu_LR_coul::TβC
+    q::TQ
 end
 
-"""
-βu_LR_disp is the long ranged part of the base potential only, e.g. r^-6 for LJ, not including Coulomb)
-γ_SR is the short ranged part of γ, i.e. with the long coulomb tail subtracted
-q is the long ranged part of h, i.e.  the long coulomb tail
-the mayer function includes the full potential
-"""
-function closure_cmulr_from_gammamulr_short_ranged(closure::Closure, r::Number, βu, γ_SRmulr, q, βu_LR_disp, βu_long_range_coul)
-    γ_SR = γ_SRmulr / r
-    mayer_f = find_mayer_f_function.(βu)
-    B = bridge_function(closure, r, mayer_f, γ_SR .- βu_LR_disp) # same as in uncharged case
-    myone = one.(B)
-    c = @. -myone - γ_SR - q + exp(-(βu- βu_long_range_coul) + γ_SR + q + real(B))
-    return c*r
+@inline function closure_cmulr_point(closure::Closure, r, mayer_f, γ_SR, _βu, βu_LR_disp, βu_LR_coul, q, renorm::Bool)
+    γ_for_bridge = renorm ? γ_SR .- βu_LR_disp : γ_SR
+    B = bridge_function(closure, r, mayer_f, γ_for_bridge)
+    oneunit = one.(γ_SR)
+    c = @. -oneunit - γ_SR - q + (mayer_f + oneunit) * exp(βu_LR_coul + γ_SR + q) * real(exp(B))
+    return c * r
+end
+
+function closure_apply!(dest, closure::Closure, ctx::UnchargedClosureEvalContext)
+    r = ctx.r
+    Γ_mulr = ctx.Γ_mulr
+    mayer_f = ctx.mayer_f
+    βu = ctx.βu
+    βu_LR_disp = ctx.βu_LR_disp
+    renorm = uses_renormalized_gamma(closure)
+    @inbounds for i in eachindex(dest, r, Γ_mulr, mayer_f, βu, βu_LR_disp)
+        ri = r[i]
+        γ_SR = Γ_mulr[i] / ri
+        dest[i] = closure_cmulr_point(closure, ri, mayer_f[i], γ_SR, βu[i], βu_LR_disp[i], zero(βu[i]), zero(γ_SR), renorm)
+    end
+    return dest
+end
+
+function closure_apply!(dest, closure::Closure, ctx::ChargedClosureEvalContext)
+    r = ctx.r
+    Γ_mulr = ctx.Γ_mulr
+    mayer_f = ctx.mayer_f
+    βu = ctx.βu
+    βu_LR_disp = ctx.βu_LR_disp
+    βu_LR_coul = ctx.βu_LR_coul
+    q = ctx.q
+    renorm = uses_renormalized_gamma(closure)
+    @inbounds for i in eachindex(dest, r, Γ_mulr, mayer_f, βu, βu_LR_disp, βu_LR_coul, q)
+        ri = r[i]
+        γ_SR = Γ_mulr[i] / ri
+        dest[i] = closure_cmulr_point(closure, ri, mayer_f[i], γ_SR, βu[i], βu_LR_disp[i], βu_LR_coul[i], q[i], renorm)
+    end
+    return dest
 end
 
 
@@ -44,10 +85,6 @@ closure = PercusYevick()
 ```
 """
 struct PercusYevick <: Closure end
-
-function closure_cmulr_from_gammamulr(::PercusYevick, r::Number, mayer_f::T, Γmulr::T, βuLR) where T
-    return  @. mayer_f*(r + Γmulr)
-end
 
 
 function bridge_function(::PercusYevick, _, _, γ)
@@ -173,6 +210,8 @@ References:
 """
 struct SoftCoreMeanSpherical <: Closure end
 
+uses_renormalized_gamma(::SoftCoreMeanSpherical) = true
+
 function bridge_function(::SoftCoreMeanSpherical, _, _, γ)
     γstar = γ
     return @. -γstar + log1p(γstar)
@@ -209,17 +248,6 @@ function bridge_function(closure::RogersYoung, r, _, γ)
     b = @. -γ + log1p((exp(f*γ)-oneunit)/f)
     return b
 end
-
-# function closure_c_from_gamma(closure::RogersYoung, r, mayer_f, γ, _)
-#     oneunit = one.(γ)
-#     α = closure.α
-#     @assert α > 0 
-#     f = @. 1.0 - exp(-α*r)
-#     term = @. (exp(f*γ)-oneunit)/f
-
-#     return @. (mayer_f + oneunit)*(oneunit + term) - γ - oneunit
-# end
-
 
 """
     ExtendedRogersYoung <: Closure
@@ -285,6 +313,8 @@ function ZerahHansen(; α=0.5)
     return ZerahHansen(α)
 end
 
+uses_renormalized_gamma(::ZerahHansen) = true
+
 function bridge_function(closure::ZerahHansen, r, _, γstar)
     α = closure.α
     f = 1.0 - exp(-α*r)
@@ -307,6 +337,8 @@ References:
 
 """
 struct DuhHaymet <: Closure end
+
+uses_renormalized_gamma(::DuhHaymet) = true
 
 function bridge_function(::DuhHaymet, _, _, γstar)
     oneunit = one.(γstar)
@@ -342,6 +374,8 @@ function Lee(; ζ=1.073, ϕ=1.816, α=1.0, ρ=0.4)
     return Lee(ζ, ϕ, α, ρ)
 end
 
+uses_renormalized_gamma(::Lee) = true
+
 function bridge_function(closure::Lee, _, mayerf, γ)
     oneunit = one.(γ)
     ρ = closure.ρ
@@ -376,6 +410,8 @@ end
 function ChoudhuryGhosh(; α=1.01752)
     return ChoudhuryGhosh(α)
 end
+
+uses_renormalized_gamma(::ChoudhuryGhosh) = true
 
 function bridge_function(closure::ChoudhuryGhosh, _, _, γstar)
     oneunit = one.(γstar)
@@ -430,6 +466,8 @@ Vompe, A. G., and G. A. Martynov. "The bridge function expansion and the self‐
 """
 struct VompeMartynov <: Closure end
 
+uses_renormalized_gamma(::VompeMartynov) = true
+
 function bridge_function(::VompeMartynov, _, _, γstar)
     oneunit = one.(γstar)
     return @. sqrt(oneunit+2γstar) - oneunit - γstar
@@ -457,6 +495,8 @@ end
 function CharpentierJackse(; α=0.5)
     return CharpentierJackse(α)
 end
+
+uses_renormalized_gamma(::CharpentierJackse) = true
 
 function bridge_function(closure::CharpentierJackse, _, _, γstar)
     oneunit = one.(γstar)
@@ -486,6 +526,8 @@ end
 function BomontBretonnet(; f=0.5)
     return BomontBretonnet(f)
 end
+
+uses_renormalized_gamma(::BomontBretonnet) = true
 
 function bridge_function(closure::BomontBretonnet, _, _, γstar)
     oneunit = one.(γstar)

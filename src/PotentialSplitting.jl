@@ -30,31 +30,41 @@ end
 
 
 """
-    βU, βULR = evalutate_long_range_potential(pot::DividedPotential, kBT, r)
+    dispersion_tail(potential::Potential, kBT, r, βu)
 
-return the potential and the long range part of the potential, at distance r in units of kBT. 
+Return the dispersion long-range contribution associated with `potential`. The
+default implementation returns zero, signalling that no tail is provided.
 """
-function evaluate_long_range_potential(pot::Potential, kBT, r::Number)
-    U = evaluate_potential(pot, r) / kBT
-    return U, zero(U)
-end
-function evaluate_long_range_potential(potdiv::Potential, kBT, r::AbstractArray)
-    Utuples = evaluate_long_range_potential.((potdiv, ), kBT, r)
-    return first.(Utuples), last.(Utuples)
+dispersion_tail(::Potential, kBT, r::Number, βu) = zero(βu)
+
+function dispersion_tail(potential::Potential, kBT, r::AbstractArray, βu::AbstractArray)
+    return dispersion_tail.((potential,), kBT, r, βu)
 end
 
-function evaluate_long_range_potential(potdiv::WCADivision, kBT, r::Number)
-    pot = potdiv.potential
-    U = evaluate_potential(pot, r) / kBT
+"""
+    βu, βu_LR = evaluate_long_range_potential(potential, kBT, r)
+
+Return the total reduced potential βu together with its dispersion tail βuₗᵣ.
+"""
+function evaluate_long_range_potential(potential::Potential, kBT, r::Number)
+    βu = evaluate_potential(potential, r) / kBT
+    βu_LR = dispersion_tail(potential, kBT, r, βu)
+    return βu, βu_LR
+end
+
+function evaluate_long_range_potential(potential::Potential, kBT, r::AbstractArray)
+    βu_βuLR = evaluate_long_range_potential.((potential,), kBT, r)
+    return first.(βu_βuLR), last.(βu_βuLR)
+end
+
+function dispersion_tail(potdiv::WCADivision, kBT, r::Number, βu)
     if r > potdiv.cutoff
-        ULR = U
+        return βu
     else
-        ULR = potdiv.U_c / kBT
+        return potdiv.U_c / kBT
     end
-    return U, ULR
 end
 
 function evaluate_potential(potential::WCADivision, r)
     evaluate_potential(potential.potential, r)
 end
-

@@ -40,11 +40,6 @@ Potentials and correlation functions are consistently decomposed into **short-ra
 
 The Coulomb potential $z_i z_j \,\ell_B / r$ is split into SR and LR pieces by a user-selectable strategy. Other strategies can be easily implemented by a user.
 
-```@docs
-NoCoulombSplitting
-EwaldSplitting
-```
-
 The SR/LR split is produced by `split_coulomb_potential(r, system, coulombsplitting)`.
 
 Given $\Phi$ and its transform, the LR OZ part is solved analytically in $k$-space. This gives a fixed LR reference $q$ used throughout the SR iteration.
@@ -54,14 +49,14 @@ Given $\Phi$ and its transform, the LR OZ part is solved analytically in $k$-spa
 
 ## Minimal Usage Example: 1-3 electrolyte
 
-```@example charges
+```julia
 using OrnsteinZernike, StaticArrays, Plots
 
 # Define a (neutral) base mixture first
 dims = 3
 ρ = [0.6, 0.2]              # number densities (reduced)
-Z = [1, -3]                   # charges
-ℓB = 7.0                      # Bjerrum length (reduced)
+Z = [1, -3]                 # charges
+ℓB = 7.0                    # Bjerrum length (reduced)
 
 pot = HardSpheres([1.0, 0.5])
 sys = SimpleMixture(dims, ρ, 1, pot)
@@ -70,20 +65,20 @@ sys = SimpleMixture(dims, ρ, 1, pot)
 charged = SimpleChargedMixture(sys, Z, ℓB)
 
 closure = HypernettedChain()
-method  = FourierIteration(M=4096, dr=0.01, tolerance=1e-8, mixing_parameter=0.5)
+method  = FourierIteration(M=2048, dr=0.02, tolerance=1e-6, mixing_parameter=0.3)
 
-# Solve with an explicit splitting choice (e.g., NoCoulombSplitting or EwaldSplitting(α))
-sol = solve(charged, closure, method; coulombsplitting=NoCoulombSplitting())
-# e.g.: sol = solve(charged, closure, method; coulombsplitting=EwaldSplitting(α=3.0))
-# plot the unlike charges:
-plot(sol.r, sol.gr[:, 1, 2], xlims=(0,3), label="g_{12}(r)", xlabel="r", ylabel="g(r)")
-plot!(sol.r, sol.gr[:, 1, 1], label="g_{11}(r)")
-plot!(sol.r, sol.gr[:, 2, 2], label="g_{22}(r)")
+# Solve with an explicit splitting choice
+your_solution = solve(charged, closure, method; coulombsplitting=EwaldSplitting(3.0))
+
+# Plot the unlike charges
+g12 = plot(your_solution.r, your_solution.gr[:, 1, 2], xlims=(0,3), label="g_{12}(r)", xlabel="r", ylabel="g(r)")
+plot!(your_solution.r, your_solution.gr[:, 1, 1], label="g_{11}(r)")
+plot!(your_solution.r, your_solution.gr[:, 2, 2], label="g_{22}(r)")
 ```
+
 
 We see that the unlike charges have a strong peak in g(r), and the highly negatively charged ions strongly repel.
 
 **Tip:** If convergence is delicate, try:
 - increasing `M` (grid size) and/or decreasing `dr`,
 - reducing the `mixing_parameter` or changing the number of stages if using `NgIteration`.
-

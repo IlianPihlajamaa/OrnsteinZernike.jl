@@ -1,13 +1,29 @@
 # Defining your own closure
 
-Creating your own closure type is very easy. It takes two steps. First, the type itself must be created, and secondly, one of the methods that evaluates the closure must be overloaded.
+Creating a closure amounts to two small steps. First, define a subtype of
+`OrnsteinZernike.Closure`. Second, implement how the bridge function should be
+evaluated through
 
-There are three options. One can overload either
-1.  `bridge_function(closure, r, mayer_f, γ)`
-2.  `closure_c_from_gamma(closure, r, mayer_f, γ, βu_LR)`
-3.  `closure_cmulr_from_gammamulr(closure, r, mayer_f, γ, βu_LR)`
+1. `bridge_function(closure, r, mayer_f, γ)` – the standard entry point.
+2. (Optional) `closure_cmulr_point(closure, r, mayer_f, γ_SR, βu, βu_LR_disp,
+   βu_LR_coul, q, uses_renorm)` – override this only if you need full control
+   over the numerical formula.
 
-Here, `mayer_f` is the Mayer-f function $f(r) = \exp(-\beta u(r)) - 1$, if the closure needs that, and `βu_LR` is the long range part of the potential. In practise, which of the three methods is overloaded can be arbitrary and depends on what is most convenient.
+The default evaluator calls `bridge_function`, takes care of Coulomb pieces, and
+handles the dispersion tail when the closure reports that it expects the
+renormalised quantity \(γ^* = γ_{SR} - βu_{LR}^{disp}\). This expectation is
+communicated via the trait
+
+```julia
+uses_renormalized_gamma(::Closure) = false
+```
+
+and can be specialised for individual closures whenever needed.
+
+```julia
+import OrnsteinZernike: uses_renormalized_gamma
+uses_renormalized_gamma(::MyClosure) = true
+```
 
 ### Example 
 
@@ -21,7 +37,8 @@ import OrnsteinZernike.Closure
 struct MyHNC <: Closure end
 ```
 
-Now we can define how this closure should be evaluated. Here, we can for example either do
+The hypernetted-chain closure is recovered by saying that the bridge function is
+zero everywhere:
 
 ```@example 1
 import OrnsteinZernike.bridge_function
@@ -30,14 +47,8 @@ function OrnsteinZernike.bridge_function(::MyHNC, _, _, _)
 end
 ```
 
-or
-
-```@example 1
-import OrnsteinZernike.closure_c_from_gamma
-function OrnsteinZernike.closure_c_from_gamma(::MyHNC, _, mayer_f, γ, _)
-    return (mayer_f + 1) * exp(γ) - γ - 1
-end
-```
+No explicit trait override is required because the closure does not rely on the
+renormalised \(γ^*\).
 
 Now we can use the closure as any other 
 
@@ -60,11 +71,14 @@ which can be compared to that of [First steps](@ref).
 
 ## Mixtures
 
-In the case of multicomponent systems, instead of a number the function that is overloaded should return a `StaticMatrix` containing either values for $c_{ij}$ or $b_{ij}$. Since, in that case also the inputs are `StaticMatrix`, we can make use of `Julia`'s broadcasting syntax to perform an closure elementwise. 
+In the case of multicomponent systems the bridge function should return a
+`StaticMatrix` of the pair values. Because the arguments are themselves
+`StaticMatrix` objects you can rely on broadcasting to write the expressions
+elementwise.
 
 ```julia
-import OrnsteinZernike.closure_c_from_gamma
-function OrnsteinZernike.closure_c_from_gamma(::MyHNC, _, mayer_f, γ, _)
-    return @. (mayer_f + 1) * exp(γ) - γ - 1 # note the @.
+import OrnsteinZernike.bridge_function
+function OrnsteinZernike.bridge_function(::MyHNC, _, _, γ)
+    return zero(γ) # or any other elementwise expression, e.g. @. ...
 end
 ```

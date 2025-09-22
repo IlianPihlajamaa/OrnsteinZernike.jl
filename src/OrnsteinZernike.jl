@@ -19,8 +19,8 @@ export VompeMartynov, CharpentierJackse, BomontBretonnet, Khanpour, ModifiedVerl
 export CustomPotential, PowerLaw, HardSpheres, LennardJones, SquareWell, Morse, TabulatedPotential, Yukawa, GaussianCore
 export compute_compressibility, compute_excess_energy, compute_virial_pressure
 export evaluate_potential, evaluate_potential_derivative, discontinuities
-export WCADivision
-export NoCoulombSplitting, EwaldSplitting
+export WCADivision, dispersion_tail
+export CoulombSplitting, NoCoulombSplitting, EwaldSplitting
 
 
 include("Systems.jl")

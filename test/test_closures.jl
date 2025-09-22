@@ -19,6 +19,7 @@ end
 function test_closures()
     @testset "Closure Tests" begin
         for closure in subtypes(OrnsteinZernike.Closure)
+            parentmodule(closure) === OrnsteinZernike || continue
             test_closure(closure())
         end
     end

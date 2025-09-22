@@ -2,7 +2,7 @@
 
 The discrete Fourier tranforms used by the `FourierIteration`, and `NgIteration` solvers to represent their continuous counterparts using first order accuracy in $n$ dimensions and second order accuracy in three dimensions (with the trapezoidal rule). To obtain the latter accuracy, it is important that any discontinuities of the interaction potential lie on an exact multiple of `dr`. To test this, we can compute the pressure of a hard-sphere system, and compare to the exact value. Below, we compute the relative error for different values of the number of gridpoints `M`, and plot the result on a log-log-scale
 
-```@example 5
+```julia
 using OrnsteinZernike,  Plots
 
 # Make sure the discontinuity is a multiple of dr
@@ -26,7 +26,7 @@ end
 ```
 We can see that the method has well-behaved second order convergence, and that with $M=10^4$, we get almost 6 digits of relative accuracy.
 
-```@example 5
+```julia 5
 η = ρ/6*π
 p_exact = (1+2η+3η^2)/(1-η)^2-1.0
 scatter(M_array, abs.(p.-p_exact)./p_exact)

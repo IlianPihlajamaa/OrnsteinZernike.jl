@@ -236,7 +236,7 @@ struct OZSolverCache{T, S, F}
     fourierplan::F
     r::Vector{S}
     k::Vector{S}
-    βu_long_range::Vector{T}
+    βu_dispersion_tail::Vector{T}
     βu::Vector{T}
     Γhat::Vector{T}
     C::Vector{T}
@@ -252,13 +252,13 @@ function OZSolverCache(system, method)
     fourierplan = get_fourier_plan(system, method, mayer_f)
     r .= fourierplan.r # in the case that dims != 3, we need to use the right grid
     k = fourierplan.k
-    βu, βu_long_range = evaluate_long_range_potential(system.potential, system.kBT, r)
+    βu, βu_dispersion_tail = evaluate_long_range_potential(system.potential, system.kBT, r)
     mayer_f .= find_mayer_f_function.((system,), βu)
 
     T = eltype(mayer_f);  TT = eltype(T)
     Γhat = copy(mayer_f); Γ_new = copy(mayer_f)
     C = copy(mayer_f); Ĉ = copy(mayer_f)
-    return OZSolverCache(mayer_f, fourierplan, r, k, βu_long_range, βu, Γhat, C, Ĉ, Γ_new)
+    return OZSolverCache(mayer_f, fourierplan, r, k, βu_dispersion_tail, βu, Γhat, C, Ĉ, Γ_new)
 end
 
 # gets one iteration step of the OZ equation in k-space
@@ -282,4 +282,3 @@ include("Solvers/FourierIteration.jl")
 include("Solvers/NgIteration.jl")
 include("Solvers/DensityRamp.jl")
 include("Solvers/TemperatureRamp.jl")
-
