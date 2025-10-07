@@ -7,7 +7,7 @@ M_array = 10 * round.(Int,  10 .^ (range(1,4,length=20)))
 p = zeros(length(M_array))
 ρ = 0.3
 kBT = 1.0
-dims = 3
+dims = 3 
 pot = HardSpheres(1.0)
 system = SimpleFluid(dims, ρ, kBT, pot)
 
@@ -18,26 +18,7 @@ for (i,M) in enumerate(M_array)
     pressure = compute_virial_pressure(sol, system)
     p[i] = pressure/ρ/kBT-1.0
     println(&quot;The pressure = &quot;, round(pressure, digits=8), &quot; with M = $(M) gridpoints.&quot;)
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">The pressure = 0.58024311 with M = 100 gridpoints.
-The pressure = 0.5831676 with M = 140 gridpoints.
-The pressure = 0.58483445 with M = 210 gridpoints.
-The pressure = 0.58550373 with M = 300 gridpoints.
-The pressure = 0.5858285 with M = 430 gridpoints.
-The pressure = 0.58598643 with M = 620 gridpoints.
-The pressure = 0.58606101 with M = 890 gridpoints.
-The pressure = 0.58609654 with M = 1270 gridpoints.
-The pressure = 0.58611421 with M = 1830 gridpoints.
-The pressure = 0.58612271 with M = 2640 gridpoints.
-The pressure = 0.58612675 with M = 3790 gridpoints.
-The pressure = 0.58612871 with M = 5460 gridpoints.
-The pressure = 0.58612966 with M = 7850 gridpoints.
-The pressure = 0.58613011 with M = 11290 gridpoints.
-The pressure = 0.58613033 with M = 16240 gridpoints.
-The pressure = 0.58613044 with M = 23360 gridpoints.
-The pressure = 0.58613049 with M = 33600 gridpoints.
-The pressure = 0.58613051 with M = 48330 gridpoints.
-The pressure = 0.58613053 with M = 69520 gridpoints.
-The pressure = 0.58613053 with M = 100000 gridpoints.</code></pre><p>We can see that the method has well-behaved second order convergence, and that with <span>$M=10^4$</span>, we get almost 6 digits of relative accuracy.</p><pre><code class="language-julia hljs">η = ρ/6*π
+end</code></pre><p>We can see that the method has well-behaved second order convergence, and that with <span>$M=10^4$</span>, we get almost 6 digits of relative accuracy.</p><pre><code class="language-julia hljs">η = ρ/6*π
 p_exact = (1+2η+3η^2)/(1-η)^2-1.0
 scatter(M_array, abs.(p.-p_exact)./p_exact)
-plot!(ylabel=&quot;relative error&quot;, xlabel=&quot;M&quot;, xscale=:log, yscale=:log)</code></pre><img src="Accuracy-d8bc194c.svg" alt="Example block output"/><p>In principle, these results can be extrapolated to improve the accuracy further.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="OtherDimensions.html">« Other dimensions</a><a class="docs-footer-nextpage" href="ThermodynamicConsistency.html">Thermodynamic Consistency »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Monday 22 September 2025 09:46">Monday 22 September 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plot!(ylabel=&quot;relative error&quot;, xlabel=&quot;M&quot;, xscale=:log, yscale=:log)</code></pre><p>In principle, these results can be extrapolated to improve the accuracy further.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="OtherDimensions.html">« Other dimensions</a><a class="docs-footer-nextpage" href="ThermodynamicConsistency.html">Thermodynamic Consistency »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Tuesday 7 October 2025 09:52">Tuesday 7 October 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

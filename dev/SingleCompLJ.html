@@ -3,13 +3,13 @@
 ϵ = 1.0
 σ = 1.0
 n = 8
-potential = PowerLaw(ϵ, σ, n)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">PowerLaw{Float64, Float64, Int64}(1.0, 1.0, 8)</code></pre><p>Now that we have the potential, we define the system</p><pre><code class="language-julia hljs">dims = 3 # we consider a 3D system
+potential = InversePowerLaw(ϵ, σ, n)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">InversePowerLaw{Float64, Float64, Int64}(1.0, 1.0, 8)</code></pre><p>Now that we have the potential, we define the system</p><pre><code class="language-julia hljs">dims = 3 # we consider a 3D system
 ρ = 0.6 # number density
 kBT = 1.0 # thermal energy
 system = SimpleFluid(dims, ρ, kBT, potential)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3D SimpleFluid (single component):
   ρ = 0.6
   kBT = 1.0
-  potential = PowerLaw{Float64, Float64, Int64}(1.0, 1.0, 8)
+  potential = InversePowerLaw{Float64, Float64, Int64}(1.0, 1.0, 8)
 </code></pre><p>The <code>SimpleFluid</code> object is meant to be used when dealing with systems that have spherically symmetric interaction potentials and no external fields. </p><p>The third step is to define a closure relation. For now, let&#39;s stick to the simple Hypernetted Chain closure</p><pre><code class="language-julia hljs">closure = HypernettedChain()</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">HypernettedChain()</code></pre><p>We can now solve the system. </p><pre><code class="language-julia hljs">sol = solve(system, closure)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">OZSolution{Vector{Float64}, Vector{Float64}}:
  r = [0.005 0.015 … 9.985 9.995000000000001]&#39;
  k = [0.15707963267948966 0.47123889803846897 … 313.6880264609408 314.00218572629984]&#39;
@@ -17,11 +17,11 @@ system = SimpleFluid(dims, ρ, kBT, potential)</code></pre><pre class="documente
  gr = [-1.0243272896559574e-10 -1.0231193670051653e-10 … 0.9999999938362887 0.9999999938605444]&#39;
  ck = [-16.014517909323175 -15.680903323809734 … 1.552960283565252e-16 -5.634497317451505e-17]&#39;
  Sk = [0.09426216097138174 0.09607493542793866 … 1.0 1.0]</code></pre><p>Note that we have not specified the method by which we do so. In this case, a simple default method is chosen that works well in most cases.</p><p>The <code>sol</code> object contains fields for the radial distribution function <code>gr</code>, direct correlation function (in real and Fourier space) <code>cr</code> and <code>ck</code>, the static structure factor <code>Sk</code>, and arrays for <code>r</code> and <code>k</code>. For example, we can plot the radial distribution function as follows:</p><pre><code class="language-julia hljs">using Plots
-plot(sol.r, sol.gr, xlims=(0,5), xlabel=&quot;r&quot;, ylabel=&quot;g(r)&quot;)</code></pre><img src="SingleCompLJ-de8dff4d.svg" alt="Example block output"/><p>Full code:</p><pre><code class="language-julia hljs">using OrnsteinZernike
+plot(sol.r, sol.gr, xlims=(0,5), xlabel=&quot;r&quot;, ylabel=&quot;g(r)&quot;)</code></pre><img src="SingleCompLJ-b52a6d70.svg" alt="Example block output"/><p>Full code:</p><pre><code class="language-julia hljs">using OrnsteinZernike
 ϵ = 1.0
 σ = 1.0
 n = 8
-potential = PowerLaw(ϵ, σ, n)
+potential = InversePowerLaw(ϵ, σ, n)
 dims = 3 # we consider a 3D system
 ρ = 0.6 # number density
 kBT = 1.0 # thermal energy
@@ -29,4 +29,4 @@ system = SimpleFluid(dims, ρ, kBT, potential)
 closure = HypernettedChain()
 sol = solve(system, closure)
 using Plots
-plot(sol.r, sol.gr, xlims=(0,5), xlabel=&quot;r&quot;, ylabel=&quot;g(r)&quot;)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="index.html">« Index</a><a class="docs-footer-nextpage" href="HardSphereMixture.html">Hard-sphere mixture »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Monday 22 September 2025 09:46">Monday 22 September 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plot(sol.r, sol.gr, xlims=(0,5), xlabel=&quot;r&quot;, ylabel=&quot;g(r)&quot;)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="index.html">« Index</a><a class="docs-footer-nextpage" href="HardSphereMixture.html">Hard-sphere mixture »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Tuesday 7 October 2025 09:52">Tuesday 7 October 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
