@@ -32,9 +32,7 @@ test_closures()
 @testset "Renormalized gamma support" begin
     closure = ZerahHansen()
     lj = LennardJones(1.0, 1.0)
-    rc = 2^(1/6)
-
-    @test_throws ErrorException OrnsteinZernike.ensure_dispersion_support(closure, lj)
-    @test OrnsteinZernike.ensure_dispersion_support(closure, WCADivision(lj, rc)) === nothing
-    @test OrnsteinZernike.ensure_dispersion_support(closure, AllShortRangeDivision(lj)) === nothing
+    sys = SimpleFluid(3, 0.6, 1.0, lj)
+    method = NgIteration(M=1000, dr=0.01, verbose=false)
+    @test_throws ErrorException  sol = solve(sys, closure, method) 
 end

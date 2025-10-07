@@ -73,8 +73,7 @@ end
 
 @testset "Dispersion tail helpers" begin
     pot = OZ.LennardJones(1.0, 1.0)
-    βu, βu_tail = OZ.evaluate_long_range_potential(pot, 1.0, 1.5)
-    @test βu_tail == zero(βu)
+    @test_throws ErrorException OZ.evaluate_long_range_potential(pot, 1.0, 1.5)
 
     rc = 2^(1/6)
     wca = OZ.WCADivision(pot, rc)

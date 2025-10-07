@@ -35,10 +35,9 @@ end
 Return the dispersion long-range contribution associated with `potential`. The
 default implementation returns zero, signalling that no tail is provided.
 """
-function dispersion_tail(::Potential, kBT, r::Number, βu)
-    cname = typeof(closure)
+function dispersion_tail(potential::Potential, kBT, r::Number, βu)
     pname = typeof(potential)
-    error("Closure $(cname) expects a dispersion-tail split but received potential $(pname). Wrap the potential in `WCADivision(...)` or `AllShortRangeDivision(...)` before calling the solver.")
+    error("Closure expects a dispersion-tail split but received potential $(pname) which does not have it implemented. Wrap the potential in `WCADivision(...)` or `AllShortRangeDivision(...)` before calling the solver, or define `dispersion_tail(pot::$pname, kBT, r::Number, βu)` for this potential.")
 end
 
 function dispersion_tail(potential::Potential, kBT, r::AbstractArray, βu::AbstractArray)

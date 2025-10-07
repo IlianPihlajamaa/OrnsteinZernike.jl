@@ -5,7 +5,8 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::FourierI
     end
     ρ = system.ρ
 
-    cache = OZSolverCache(system, method)
+    renorm = uses_renormalized_gamma(closure)
+    cache = OZSolverCache(system, method, renorm)
     mayer_f, fourierplan, r, k, βu_disp_tail, βu, Γhat, C, Ĉ, Γ_new = 
         cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
     
@@ -65,7 +66,8 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::FourierIte
     ρ = ρ_of(system)
 
     # construct solver cache from base system. Does not include Coulomb parts
-    cache = OZSolverCache(base_of(system), method)
+    renorm = uses_renormalized_gamma(closure)
+    cache = OZSolverCache(base_of(system), method, renorm)
     mayer_f, fourierplan, r, k, βu_LR_disp, βu, Γ_SR_hat, C_SR, C_SR_hat, Γ_SR_new = 
         cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
     

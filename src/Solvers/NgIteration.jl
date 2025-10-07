@@ -7,7 +7,8 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::NgIterat
     ρ = ρ_of(system)
 
 
-    cache = OZSolverCache(system, method)
+    renorm = uses_renormalized_gamma(closure)
+    cache = OZSolverCache(system, method, renorm)
     mayer_f, fourierplan, r, k, βu_disp_tail, βu, Γhat, C, Ĉ, Γ_new = 
         cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
 
@@ -101,7 +102,8 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
     N_stages = method.N_stages
     ρ = ρ_of(system)
 
-    cache = OZSolverCache(base_of(system), method)
+    renorm = uses_renormalized_gamma(closure)
+    cache = OZSolverCache(base_of(system), method, renorm)
     mayer_f, fourierplan, r, k, βu_LR_disp, βu, Γ_SR_hat, C_SR, C_SR_hat, Γ_SR_new = 
         cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
 
