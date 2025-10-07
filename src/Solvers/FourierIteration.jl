@@ -132,7 +132,7 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::FourierIte
     end
 
     C = @. C_SR/r + φ
-    @. C_hat = C_SR_hat/r + φ_hat
+    @. C_hat = C_SR_hat/k + φ_hat
     Γ = @. Γ_SR_new/r + q - φ
     @. Γ_hat = Γ_SR_hat/k + q_hat - φ_hat
 

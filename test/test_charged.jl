@@ -1,3 +1,4 @@
+using Test
 using OrnsteinZernike, StaticArrays
 #Integral equation theory for charged liquids: Model 2–2 electrolytes and the bridge function  D.‐M. Duh; A. D. J. Haymet J. Chem. Phys. 97, 7716–7729 (1992)
 σ = 2.8428 * 10^-10
@@ -43,4 +44,26 @@ for (i,c) = enumerate([0.001, 0.02, 0.0625, 0.2, 0.5625]) # mol/L
     @test -Ex ≈ Es[i] atol=0.01 
 end
 
+@testset "Charged Fourier vs Ng" begin
+    dims = 3
+    ρ = 0.05
+    kBT = 1.0
+    pot = HardSpheres(1.0)
 
+    base = SimpleFluid(dims, ρ, kBT, pot)
+    system = SimpleChargedFluid(base, 1.0, 5.0)
+
+    closure = HypernettedChain()
+    M = 256
+    dr = 10.0 / M
+    ng_method = NgIteration(M=M, dr=dr, tolerance=1e-8, verbose=false, max_iterations=10^4)
+    fourier_method = FourierIteration(M=M, dr=dr, tolerance=1e-8, verbose=false, max_iterations=10^5, mixing_parameter=0.5)
+
+    sol_ng = solve(system, closure, ng_method; coulombsplitting=OrnsteinZernike.NoCoulombSplitting())
+    sol_fourier = solve(system, closure, fourier_method; coulombsplitting=OrnsteinZernike.NoCoulombSplitting())
+
+    @test maximum(abs.(sol_ng.cr .- sol_fourier.cr)) < 5e-3
+    @test maximum(abs.(sol_ng.gr .- sol_fourier.gr)) < 5e-3
+    @test maximum(abs.(sol_ng.ck .- sol_fourier.ck)) < 5e-3
+    @test maximum(abs.(sol_ng.Sk .- sol_fourier.Sk)) < 5e-3
+end
