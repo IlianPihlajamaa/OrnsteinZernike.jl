@@ -64,6 +64,10 @@ function Base.show(io::IO, ::MIME"text/plain", p::HardSpheres)
     println(io, "HardSpheres($(p.D))")
 end
 
+function dispersion_tail(p::HardSpheres, kBT, r::Number, βu)
+    return zero(βu)
+end
+
 """
     LennardJones
 
@@ -90,7 +94,7 @@ end
 
 
 """
-    PowerLaw
+    InversePowerLaw
 
 Implements the power law pair interaction \$u(r) = \\epsilon (\\sigma/r)^{n}\$.
 
@@ -98,20 +102,24 @@ Expects values `ϵ`, `σ`, and `n`, which respecively are the strength of the po
 
 Example:
 ```julia
-potential = PowerLaw(1.0, 2.0, 8)
+potential = InversePowerLaw(1.0, 2.0, 8)
 ```
 """
-struct PowerLaw{T1, T2, T3} <: Potential 
+struct InversePowerLaw{T1, T2, T3} <: Potential 
     ϵ::T1
     σ::T2
     n::T3
 end
 
-function evaluate_potential(potential::PowerLaw, r::Number)
+function evaluate_potential(potential::InversePowerLaw, r::Number)
     ϵ = potential.ϵ
     σ = potential.σ
     n = potential.n
     return @. ϵ * (σ/r)^n 
+end
+
+function dispersion_tail(p::InversePowerLaw, kBT, r::Number, βu)
+    return zero(βu)
 end
 
 """
@@ -135,6 +143,10 @@ function evaluate_potential(potential::WCA, r::Number)
     ϵ = potential.ϵ
     σ = potential.σ
     return @. ifelse(r > σ * 2^(1/6), zero(ϵ), 4ϵ * ((σ/r)^12 - (σ/r)^6 - one(ϵ)) )
+end
+
+function dispersion_tail(p::WCA, kBT, r::Number, βu)
+    return zero(βu)
 end
 
 """
@@ -354,6 +366,9 @@ end
 
 discontinuities(::GaussianCore) = Float64[]
 
+function dispersion_tail(p::GaussianCore, kBT, r::Number, βu)
+    return zero(βu)
+end
 
 ##############################
 # Square-Well (with mixtures)#

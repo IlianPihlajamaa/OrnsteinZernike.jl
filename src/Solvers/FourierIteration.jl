@@ -5,8 +5,6 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::FourierI
     end
     ρ = system.ρ
 
-    ensure_dispersion_support(closure, system.potential)
-
     cache = OZSolverCache(system, method)
     mayer_f, fourierplan, r, k, βu_disp_tail, βu, Γhat, C, Ĉ, Γ_new = 
         cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
@@ -65,8 +63,6 @@ end
 # h = h_short_range + q (defined through long range oz relation: q = Φ + Φ ρ q (fourier))
 function solve(system::SimpleChargedSystem, closure::Closure, method::FourierIteration; gamma_0=nothing, coulombsplitting=NoCoulombSplitting())
     ρ = ρ_of(system)
-
-    ensure_dispersion_support(closure, base_of(system).potential)
 
     # construct solver cache from base system. Does not include Coulomb parts
     cache = OZSolverCache(base_of(system), method)

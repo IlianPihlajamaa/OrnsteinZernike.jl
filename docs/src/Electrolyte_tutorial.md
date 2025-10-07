@@ -101,7 +101,7 @@ for (i,c) in enumerate([0.001, 0.02, 0.0625, 0.2, 0.5625]) # mol/L
     Sones = ones(SMatrix{2,2, Float64, 4})
 
     # Define short-range repulsive potential
-    pot = PowerLaw(kB*B/σ*Sones/kBT, Sones, 9)
+    pot = InversePowerLaw(kB*B/σ*Sones/kBT, Sones, 9)
 
     # Build system and add Coulomb interactions
     system = SimpleMixture(dims, ρ*σ^3, 1, pot)

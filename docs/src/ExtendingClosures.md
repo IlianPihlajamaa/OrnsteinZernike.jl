@@ -25,6 +25,11 @@ import OrnsteinZernike: uses_renormalized_gamma
 uses_renormalized_gamma(::MyClosure) = true
 ```
 
+Declaring the trait obliges the user to provide a potential that advertises a
+dispersion tail. Any subtype of `DividedPotential`—for example
+`WCADivision` or the utility wrapper `AllShortRangeDivision`—satisfies this
+requirement. Otherwise the function `dispersion_tail` must be implemented. If now, the solvers will throw an error before the iteration starts.
+
 ### Example 
 
 Assume that we have forgotten that the HypernettedChain closure is already implemented, and we wanted to reimplement it. The hypernetted chain closure approximates $c(r) \approx (f(r)+1)\exp(\gamma(r)) - \gamma(r) - 1$, or equivalently $b(r) \approx 0$.
@@ -56,7 +61,7 @@ Now we can use the closure as any other
 ϵ = 1.0
 σ = 1.0
 n = 12
-potential = PowerLaw(ϵ, σ, n)
+potential = InversePowerLaw(ϵ, σ, n)
 dims = 3 
 ρ = 0.6 
 kBT = 1.0

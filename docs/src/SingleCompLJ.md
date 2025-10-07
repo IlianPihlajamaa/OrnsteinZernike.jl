@@ -12,7 +12,7 @@ using OrnsteinZernike
 ϵ = 1.0
 σ = 1.0
 n = 8
-potential = PowerLaw(ϵ, σ, n)
+potential = InversePowerLaw(ϵ, σ, n)
 ```
 
 Now that we have the potential, we define the system
@@ -51,7 +51,7 @@ using OrnsteinZernike
 ϵ = 1.0
 σ = 1.0
 n = 8
-potential = PowerLaw(ϵ, σ, n)
+potential = InversePowerLaw(ϵ, σ, n)
 dims = 3 # we consider a 3D system
 ρ = 0.6 # number density
 kBT = 1.0 # thermal energy

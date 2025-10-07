@@ -1,4 +1,4 @@
-import Pkg; Pkg.activate(".")
+# import Pkg; Pkg.activate(".")
 using OrnsteinZernike,  Plots
 
 # Make sure the discontinuity is a multiple of dr

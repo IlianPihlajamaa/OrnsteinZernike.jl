@@ -1,6 +1,6 @@
-import Pkg; Pkg.activate(".")
+# import Pkg; Pkg.activate(".")
 using Revise
-using OrnsteinZernike,  Plots, Dierckx
+using OrnsteinZernike, Plots, Dierckx
 import Roots, ForwardDiff
 
 function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
@@ -18,28 +18,7 @@ function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
         method = NgIteration(M=M, dr=dr, verbose=false)
         sol1 = solve(system1, BomontBretonnet(α), method)
 
-        dpdρ = @time ForwardDiff.derivative(ρ -> pressure(ρ, α), ρ)
-
-        @time begin
-            p1 = compute_virial_pressure(sol1, system1)
-            dρ = sqrt(eps(ρ))
-            system2 = SimpleFluid(dims, ρ+dρ, kBT, pot)
-            sol2 = solve(system2, BomontBretonnet(α), method)
-            p2 = compute_virial_pressure(sol2, system2)
-            dpdρ2 = (p2-p1)/dρ
-        end
-        @time begin
-            dρ = sqrt(eps(ρ))
-            system2 = SimpleFluid(dims, ρ+dρ, kBT, pot)
-            sol2 = solve(system2, BomontBretonnet(α), method)
-            p2 = compute_virial_pressure(sol2, system2)
-            system3 = SimpleFluid(dims, ρ-dρ, kBT, pot)
-            sol3 = solve(system3, BomontBretonnet(α), method)
-            p3 = compute_virial_pressure(sol3, system3)
-            dpdρ3 = (p2-p3)/dρ/2
-        end
-        @show dpdρ, dpdρ2, dpdρ3
-
+        dpdρ = ForwardDiff.derivative(ρ -> pressure(ρ, α), ρ)
         χ = compute_compressibility(sol1, system1)
         inconsistency = dpdρ/kBT - 1/(ρ*kBT*χ)
 
@@ -53,6 +32,7 @@ function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
     sol = solve(system, BomontBretonnet(α), method)
     return system, sol, α
 end
+
 println("Hard Spheres")
 for ρstar = [0.3, 0.5, 0.7, 0.8, 0.9]
     ρ = ρstar
@@ -73,7 +53,7 @@ end
 
 for closure in [PercusYevick, MartynovSarkisov]
     for ρ in [0.3, 0.5, 0.7, 0.8, 0.9]
-        M = 1000000
+        M = 1000
         dr = 10.0/M
         kBT = 1.0
         dims = 3

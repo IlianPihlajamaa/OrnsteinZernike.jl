@@ -1,4 +1,4 @@
-import Pkg; Pkg.activate(".")
+# import Pkg; Pkg.activate(".")
 using Revise
 using OrnsteinZernike,  Plots, Dierckx
 import Roots, ForwardDiff

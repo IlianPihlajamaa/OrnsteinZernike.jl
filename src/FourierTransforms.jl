@@ -1,3 +1,5 @@
+import ForwardDiff
+
 struct My3DPlan{T1,T2,T3,T4, T5, T6}
     plan::T1
     r::T5
@@ -35,8 +37,20 @@ function get_fourier_plan(::Union{SimpleFluid{1, T1, T2, P}, SimpleMixture{1,Ns,
 end
 
 
-function get_fourier_plan(::Union{SimpleFluid{3, T1, T2, P}, SimpleMixture{3,Ns,T1,T2,P}} , method, F::Vector{T}) where {Ns, T1, T2, P, T<:Union{Float64, AbstractMatrix{Float64}}}
-    plan =  find_fourier_plan_3d(F)
+function _fft_template(F::Vector{T}) where T
+    if T <: ForwardDiff.Dual
+        return zeros(Float64, length(F))
+    elseif T <: AbstractMatrix
+        first_entry = F[1]
+        if eltype(first_entry) <: ForwardDiff.Dual
+            return [zeros(Float64, size(first_entry)) for _ in eachindex(F)]
+        end
+    end
+    return F
+end
+
+function get_fourier_plan(::Union{SimpleFluid{3, T1, T2, P}, SimpleMixture{3,Ns,T1,T2,P}} , method, F::Vector{T}) where {Ns, T1, T2, P, T}
+    plan =  find_fourier_plan_3d(_fft_template(F))
     M = method.M
     dr = method.dr
     dk =  π/(M*dr)
@@ -157,6 +171,98 @@ function inverse_fourier!(F::AbstractVector{T}, F̂::AbstractVector{T}, myplan::
         F2 = reinterpret(reshape, eltype(T), F)
         plan*F2
     end
+end
+
+@inline function _dual_value_type(::Type{ForwardDiff.Dual{Tag,V,N}}) where {Tag,V,N}
+    return V
+end
+
+@inline function _dual_partials_count(::Type{ForwardDiff.Dual{Tag,V,N}}) where {Tag,V,N}
+    return N
+end
+
+@inline function _rebuild_dual(value, ::Val{0}, ::Type{ForwardDiff.Dual{Tag,V,0}}) where {Tag,V}
+    return ForwardDiff.Dual{Tag,V,0}(value)
+end
+
+@inline function _rebuild_dual(value, parts::NTuple{N,V}, ::Type{ForwardDiff.Dual{Tag,V,N}}) where {Tag,V,N}
+    return ForwardDiff.Dual{Tag,V,N}(value, ForwardDiff.Partials(parts))
+end
+
+function fourier!(F̂::Vector{T}, F::Vector{T}, myplan::My3DPlan) where T<:ForwardDiff.Dual
+    V = _dual_value_type(T)
+    N = _dual_partials_count(T)
+    n = length(F)
+
+    values_in = Vector{V}(undef, n)
+    @inbounds for i in 1:n
+        values_in[i] = ForwardDiff.value(F[i])
+    end
+    values_out = similar(values_in)
+    invoke(fourier!, Tuple{Vector{V}, Vector{V}, typeof(myplan)}, values_out, values_in, myplan)
+
+    partials_out = N == 0 ? nothing : [Vector{V}(undef, n) for _ in 1:N]
+    if N > 0
+        tmp_in = Vector{V}(undef, n)
+        tmp_out = Vector{V}(undef, n)
+        for j in 1:N
+            @inbounds for i in 1:n
+                tmp_in[i] = ForwardDiff.partials(F[i])[j]
+            end
+            invoke(fourier!, Tuple{Vector{V}, Vector{V}, typeof(myplan)}, tmp_out, tmp_in, myplan)
+            copy!(partials_out[j], tmp_out)
+        end
+    end
+
+    if N == 0
+        @inbounds for i in 1:n
+            F̂[i] = _rebuild_dual(values_out[i], Val(0), T)
+        end
+    else
+        @inbounds for i in 1:n
+            parts_tuple = ntuple(j -> partials_out[j][i], N)
+            F̂[i] = _rebuild_dual(values_out[i], parts_tuple, T)
+        end
+    end
+    return F̂
+end
+
+function inverse_fourier!(F::Vector{T}, F̂::Vector{T}, myplan::My3DPlan) where T<:ForwardDiff.Dual
+    V = _dual_value_type(T)
+    N = _dual_partials_count(T)
+    n = length(F̂)
+
+    values_in = Vector{V}(undef, n)
+    @inbounds for i in 1:n
+        values_in[i] = ForwardDiff.value(F̂[i])
+    end
+    values_out = Vector{V}(undef, n)
+    invoke(inverse_fourier!, Tuple{Vector{V}, Vector{V}, typeof(myplan)}, values_out, values_in, myplan)
+
+    partials_out = N == 0 ? nothing : [Vector{V}(undef, n) for _ in 1:N]
+    if N > 0
+        tmp_in = Vector{V}(undef, n)
+        tmp_out = Vector{V}(undef, n)
+        for j in 1:N
+            @inbounds for i in 1:n
+                tmp_in[i] = ForwardDiff.partials(F̂[i])[j]
+            end
+            invoke(inverse_fourier!, Tuple{Vector{V}, Vector{V}, typeof(myplan)}, tmp_out, tmp_in, myplan)
+            copy!(partials_out[j], tmp_out)
+        end
+    end
+
+    if N == 0
+        @inbounds for i in 1:n
+            F[i] = _rebuild_dual(values_out[i], Val(0), T)
+        end
+    else
+        @inbounds for i in 1:n
+            parts_tuple = ntuple(j -> partials_out[j][i], N)
+            F[i] = _rebuild_dual(values_out[i], parts_tuple, T)
+        end
+    end
+    return F
 end
 
 """

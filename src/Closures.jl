@@ -195,24 +195,23 @@ end
 
 
 """
-    SoftCoreMeanSpherical <: Closure
+    SMSA <: Closure
 
-Implements the soft core mean spherical closure \$b(r) = \\ln(\\gamma^*(r) + 1) - \\gamma^*(r)\$. Here \$\\gamma^* = \\gamma - u_{LR}\$ , in which \$u_{LR}\$ is the long range tail of the potential.
+Implements the soft-core mean spherical closure \$b(r) = \\ln(\\gamma^*(r) + 1) - \\gamma^*(r)\$. Here \$\\gamma^* = \\gamma - u_{LR}\$ , in which \$u_{LR}\$ is the long range tail of the potential.
 
 Example:
 ```julia
-closure = SoftCoreMeanSpherical()
+closure = SMSA()
 ```
 
 References:
 
-
 """
-struct SoftCoreMeanSpherical <: Closure end
+struct SMSA <: Closure end
 
-uses_renormalized_gamma(::SoftCoreMeanSpherical) = true
+uses_renormalized_gamma(::SMSA) = true
 
-function bridge_function(::SoftCoreMeanSpherical, _, _, γ)
+function bridge_function(::SMSA, _, _, γ)
     γstar = γ
     return @. -γstar + log1p(γstar)
 end
@@ -229,7 +228,7 @@ closure = RogersYoung(0.5)
 ```
 
 References:
-
+Rogers, Forrest J., and David A. Young. "New, thermodynamically consistent, integral equation for simple fluids." Physical Review A 30.2 (1984): 999.
 
 """
 struct RogersYoung{T} <: Closure 

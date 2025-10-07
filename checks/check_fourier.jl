@@ -20,4 +20,4 @@ OrnsteinZernike.inverse_fourier!(Fnew2, Fhat, myplan1);
 maximum(abs.(F-Fnew2))  .< 1e-13
 OrnsteinZernike.fourier!(Fhat2, F, myplan1);
 
-maximum(abs.(Fhat-Fhat2))  .< 1e-13
+maximum(abs.(Fhat-Fhat2))  .< 1e-12

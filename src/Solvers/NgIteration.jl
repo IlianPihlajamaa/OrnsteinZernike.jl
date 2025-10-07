@@ -6,14 +6,13 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::NgIterat
     N_stages = method.N_stages
     ρ = ρ_of(system)
 
-    ensure_dispersion_support(closure, system.potential)
 
     cache = OZSolverCache(system, method)
     mayer_f, fourierplan, r, k, βu_disp_tail, βu, Γhat, C, Ĉ, Γ_new = 
         cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
 
     T = eltype(mayer_f)
-    TT = eltype(T)
+    TT = T <: Number ? T : eltype(T)
     A = zeros(TT, N_stages, N_stages)
     b = zeros(TT, N_stages)
 
@@ -102,8 +101,6 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
     N_stages = method.N_stages
     ρ = ρ_of(system)
 
-    ensure_dispersion_support(closure, base_of(system).potential)
-
     cache = OZSolverCache(base_of(system), method)
     mayer_f, fourierplan, r, k, βu_LR_disp, βu, Γ_SR_hat, C_SR, C_SR_hat, Γ_SR_new = 
         cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
@@ -125,7 +122,7 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
     C_hat = 0.0copy(mayer_f); Γ_hat = 0.0copy(mayer_f) 
 
     T = eltype(mayer_f)
-    TT = eltype(T)
+    TT = T <: Number ? T : eltype(T)
     A = zeros(TT, N_stages, N_stages)
     b = zeros(TT, N_stages)
 

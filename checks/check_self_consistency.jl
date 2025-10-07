@@ -1,4 +1,4 @@
-import Pkg; Pkg.activate(".")
+# import Pkg; Pkg.activate(".")
 using Revise
 using OrnsteinZernike,  Plots
 import Roots 
@@ -55,7 +55,7 @@ import Roots
 #     σ = 1.0
 #     ϵ = 1.0
 
-#     pot = PowerLaw(ϵ, σ, 12)
+#     pot = InversePowerLaw(ϵ, σ, 12)
 #     method = NgIteration(dr=dr, M=M, verbose=false)
 #     system, sol, α = find_self_consistent_solution(ρ, kBT, method, dims, pot)
 #     P = compute_virial_pressure(sol, system)/ρ/kBT - 1
@@ -75,7 +75,7 @@ import Roots
 #     σ = 1.0
 #     ϵ = 1.0
 
-#     pot = PowerLaw(ϵ, σ, 9)
+#     pot = InversePowerLaw(ϵ, σ, 9)
 #     method = NgIteration(dr=dr, M=M, verbose=false)
 #     system, sol, α = find_self_consistent_solution(ρ, kBT, method, dims, pot)
 #     P = compute_virial_pressure(sol, system)/ρ/kBT - 1
@@ -95,7 +95,7 @@ import Roots
 #     σ = 1.0
 #     ϵ = 1.0
 
-#     pot = PowerLaw(ϵ, σ, 6)
+#     pot = InversePowerLaw(ϵ, σ, 6)
 #     method = NgIteration(dr=dr, M=M, verbose=false)
 #     system, sol, α = find_self_consistent_solution(ρ, kBT, method, dims, pot)
 #     P = compute_virial_pressure(sol, system)/ρ/kBT - 1

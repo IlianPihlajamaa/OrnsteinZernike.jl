@@ -14,12 +14,12 @@ export SimpleFluid, SimpleMixture, SimpleChargedFluid, SimpleChargedMixture
 export OZSolution
 export Exact, FourierIteration, NgIteration, DensityRamp, TemperatureRamp
 export PercusYevick,  HypernettedChain, MeanSpherical, ModifiedHypernettedChain, Verlet, MartynovSarkisov
-export SoftCoreMeanSpherical, RogersYoung, ZerahHansen, DuhHaymet, Lee, ChoudhuryGhosh, BallonePastoreGalliGazzillo
+export SMSA, RogersYoung, ZerahHansen, DuhHaymet, Lee, ChoudhuryGhosh, BallonePastoreGalliGazzillo
 export VompeMartynov, CharpentierJackse, BomontBretonnet, Khanpour, ModifiedVerlet, CarbajalTinoko, ExtendedRogersYoung
-export CustomPotential, PowerLaw, HardSpheres, LennardJones, SquareWell, Morse, TabulatedPotential, Yukawa, GaussianCore
+export CustomPotential, InversePowerLaw, HardSpheres, LennardJones, SquareWell, Morse, TabulatedPotential, Yukawa, GaussianCore
 export compute_compressibility, compute_excess_energy, compute_virial_pressure
 export evaluate_potential, evaluate_potential_derivative, discontinuities
-export WCADivision, dispersion_tail
+export WCADivision, AllShortRangeDivision, dispersion_tail
 export CoulombSplitting, NoCoulombSplitting, EwaldSplitting
 
 

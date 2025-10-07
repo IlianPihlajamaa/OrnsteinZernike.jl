@@ -5,7 +5,7 @@ const OZ = OrnsteinZernike
 
 @testset "Closure renormalization trait" begin
     @test !OZ.uses_renormalized_gamma(OZ.PercusYevick())
-    @test OZ.uses_renormalized_gamma(OZ.SoftCoreMeanSpherical())
+    @test OZ.uses_renormalized_gamma(OZ.SMSA())
     @test OZ.uses_renormalized_gamma(OZ.ZerahHansen())
     @test OZ.uses_renormalized_gamma(OZ.BomontBretonnet())
 end

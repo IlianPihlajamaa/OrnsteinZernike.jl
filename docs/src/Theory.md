@@ -94,7 +94,7 @@ using OrnsteinZernike
 kBT     = 1.0
 σ, ϵ    = 1.0, 1.0
 closure = Verlet()   # any closure works; V shown here
-potential = PowerLaw(ϵ, σ, 8)
+potential = InversePowerLaw(ϵ, σ, 8)
 
 # Choose a target density and also a ramp to integrate from 0 → ρ_target
 ρ_target   = 0.8
