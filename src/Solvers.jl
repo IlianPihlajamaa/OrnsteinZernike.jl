@@ -244,6 +244,14 @@ struct OZSolverCache{T, S, F}
     Γ_new::Vector{T}
 end
 
+function ensure_dispersion_support(closure::Closure, potential::Potential)
+    if uses_renormalized_gamma(closure) && !(potential isa DividedPotential)
+        cname = typeof(closure)
+        pname = typeof(potential)
+        error("Closure $(cname) expects a dispersion-tail split but received potential $(pname). Wrap the potential in `WCADivision(...)` or `AllShortRangeDivision(...)` before calling the solver.")
+    end
+end
+
 function OZSolverCache(system, method)
     r = method.dr * (1:method.M) |> collect
     βu1, _ = evaluate_long_range_potential(system.potential, system.kBT, r[1])

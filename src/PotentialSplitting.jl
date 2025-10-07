@@ -42,6 +42,16 @@ function dispersion_tail(potential::Potential, kBT, r::AbstractArray, βu::Abstr
 end
 
 """
+    AllShortRangeDivision(potential)
+
+Wrapper that marks a potential as already short ranged. The long-range tail is
+set identically to zero so that closures requesting a renormalised gamma* subtract nothing.
+"""
+struct AllShortRangeDivision{P<:Potential} <: DividedPotential
+    potential::P
+end
+
+"""
     βu, βu_LR = evaluate_long_range_potential(potential, kBT, r)
 
 Return the total reduced potential βu together with its dispersion tail βuₗᵣ.
@@ -57,6 +67,10 @@ function evaluate_long_range_potential(potential::Potential, kBT, r::AbstractArr
     return first.(βu_βuLR), last.(βu_βuLR)
 end
 
+function dispersion_tail(p::AllShortRangeDivision, kBT, r::Number, βu)
+    return zero(βu)
+end
+
 function dispersion_tail(potdiv::WCADivision, kBT, r::Number, βu)
     if r > potdiv.cutoff
         return βu
@@ -66,5 +80,9 @@ function dispersion_tail(potdiv::WCADivision, kBT, r::Number, βu)
 end
 
 function evaluate_potential(potential::WCADivision, r)
+    evaluate_potential(potential.potential, r)
+end
+
+function evaluate_potential(potential::AllShortRangeDivision, r)
     evaluate_potential(potential.potential, r)
 end
