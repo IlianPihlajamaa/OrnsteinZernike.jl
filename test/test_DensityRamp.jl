@@ -11,10 +11,11 @@ function ramptest()
     closure = PercusYevick()
     method0 = NgIteration(tolerance=10^-10, M=M, dr=dr, N_stages=5, max_iterations=1000, verbose=false)
     method = DensityRamp(method0, ρ*(0.1:0.1:1.0), verbose=false)
-    sol = solve(system, closure, method)[end];
+    sols, = solve(system, closure, method)
+    sol = sols[end];
 
     method2 = Exact(M=M, dr=dr)
-    sol2 = solve(system, closure, method2);
+    sol2, = solve(system, closure, method2);
 
     atol = 0.1
     @test all(abs.(sol.cr .- sol2.cr) .< 10atol) 

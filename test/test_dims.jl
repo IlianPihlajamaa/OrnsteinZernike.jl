@@ -9,7 +9,7 @@ function dimstest()
         system = SimpleFluid(dims, ρ, kBT, pot)
         closure = PercusYevick()
         method = NgIteration(tolerance=10^-10, N_stages=5, M=M, verbose=false, max_iterations=10^3)
-        sol = solve(system, closure, method)
+        sol, = solve(system, closure, method)
         @test all(isfinite.(sol.gr)) # should test with exact method
     end
 end

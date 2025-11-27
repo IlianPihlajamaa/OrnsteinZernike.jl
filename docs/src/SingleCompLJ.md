@@ -32,7 +32,7 @@ closure = HypernettedChain()
 ```
 We can now solve the system. 
 ```@example lj
-sol = solve(system, closure)
+sol, = solve(system, closure)
 ```
 
 Note that we have not specified the method by which we do so. In this case, a simple default method is chosen that works well in most cases.
@@ -57,7 +57,7 @@ dims = 3 # we consider a 3D system
 kBT = 1.0 # thermal energy
 system = SimpleFluid(dims, ρ, kBT, potential)
 closure = HypernettedChain()
-sol = solve(system, closure)
+sol, = solve(system, closure)
 using Plots
 plot(sol.r, sol.gr, xlims=(0,5), xlabel="r", ylabel="g(r)")
 ```

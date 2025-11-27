@@ -11,7 +11,7 @@ using Roots: find_zero
 
 export solve
 export SimpleFluid, SimpleMixture, SimpleChargedFluid, SimpleChargedMixture
-export OZSolution
+export OZSolution, ConvergenceInfo
 export Exact, FourierIteration, NgIteration, DensityRamp, TemperatureRamp
 export PercusYevick,  HypernettedChain, MeanSpherical, ModifiedHypernettedChain, Verlet, MartynovSarkisov
 export SMSA, RogersYoung, ZerahHansen, DuhHaymet, Lee, ChoudhuryGhosh, BallonePastoreGalliGazzillo

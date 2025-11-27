@@ -8,7 +8,7 @@ pot = HardSpheres(1.0)
 system = SimpleFluid(dims, ρ, kBT, pot)
 closure = CarbajalTinoko(0.3)
 method = NgIteration()
-sol = solve(system, closure, method)
+sol, = solve(system, closure, method)
 
 using Roots
 λ = 0.3

@@ -93,7 +93,9 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::NgIterat
     ĉ = Ĉ ./ k
     γ = Γ_new ./ r
     γ̂ = Γhat ./ k
-    return construct_solution(r, k, c, ĉ, γ, γ̂, ρ)
+    sol = construct_solution(r, k, c, ĉ, γ, γ̂, ρ)
+    info = (converged=true, iterations=iteration, final_error=err, termination_reason=:converged)
+    return sol, info
 end
 
 
@@ -218,7 +220,9 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
     ĉ = C_SR_hat ./ k + φ_hat
     γ = Γ_SR_new ./ r + q - φ
     γ̂ = Γ_SR_hat ./ k + q_hat - φ_hat
-    return construct_solution(r, k, c, ĉ, γ, γ̂, ρ)
+    sol = construct_solution(r, k, c, ĉ, γ, γ̂, ρ)
+    info = (converged=true, iterations=iteration, final_error=err, termination_reason=:converged)
+    return sol, info
 end
 
 

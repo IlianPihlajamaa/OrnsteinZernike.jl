@@ -24,7 +24,7 @@ dims = 3; kBT = 1.0; ρ = 0.5;
 potential = HardSpheres(1.0)
 system = SimpleFluid(dims, ρ, kBT, potential)
 closure = PercusYevick()
-sol = @time solve(system, closure);
+sol, = @time solve(system, closure);
 ```
 which prints
 ```

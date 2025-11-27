@@ -54,7 +54,9 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::FourierI
     ĉ = Ĉ ./ k
     γ = Γ_new ./ r
     γ̂ = Γhat ./ k
-    return construct_solution(r, k, c, ĉ, γ, γ̂, ρ)
+    sol = construct_solution(r, k, c, ĉ, γ, γ̂, ρ)
+    info = (converged=true, iterations=iteration, final_error=err, termination_reason=:converged)
+    return sol, info
 end
 
 # definitions:
@@ -136,5 +138,7 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::FourierIte
     Γ = @. Γ_SR_new/r + q - φ
     @. Γ_hat = Γ_SR_hat/k + q_hat - φ_hat
 
-    return construct_solution(r, k, C, C_hat, Γ, Γ_hat, ρ)
+    sol = construct_solution(r, k, C, C_hat, Γ, Γ_hat, ρ)
+    info = (converged=true, iterations=iteration, final_error=err, termination_reason=:converged)
+    return sol, info
 end

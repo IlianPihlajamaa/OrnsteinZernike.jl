@@ -31,7 +31,7 @@ dims = 3 # we consider a 3D system
 kBT = 1.0 # thermal energy
 system = SimpleFluid(dims, ρ, kBT, potential)
 closure = HypernettedChain()
-sol = solve(system, closure)
+sol, = solve(system, closure)
 using Plots
 plot(sol.r, sol.gr, xlims=(0,5), xlabel="r", ylabel="g(r)")
 ```
@@ -76,7 +76,7 @@ potential = CustomPotential(mypotential, p)
 kBT = 1.0 # thermal energy
 system = SimpleMixture(dims, ρ, kBT, potential)
 closure = HypernettedChain()
-sol = solve(system, closure)
+sol, = solve(system, closure)
 using Plots
 plot(sol.r, sol.gr[:, 1, 1], xlims=(0,5), xlabel="r", ylabel="g(r)", label="g11(r)")
 plot!(sol.r, sol.gr[:, 1, 2], xlims=(0,5), xlabel="r", ylabel="g(r)", label="g12(r)")

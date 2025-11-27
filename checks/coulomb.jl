@@ -40,7 +40,7 @@ bjerrum_length = e^2/(4*π*ϵ*kBT)
     system = SimpleChargedMixture(system, Z, bjerrum_length / σ)
     closure = HypernettedChain()
     method = FourierIteration(M = M,dr=dr, tolerance=10^-8, mixing_parameter=mixing_parameters[i], verbose=false, max_iterations=10^6)
-    sol = solve(system, closure, method, coulombsplitting=OrnsteinZernike.NoCoulombSplitting())
+    sol, = solve(system, closure, method, coulombsplitting=OrnsteinZernike.NoCoulombSplitting())
     r = sol.r 
     g = sol.gr
 

@@ -67,7 +67,7 @@ dims = 3
 kBT = 1.0
 system = SimpleFluid(dims, ρ, kBT, potential)
 closure = MyHNC()
-sol = solve(system, closure)
+sol, = solve(system, closure)
 using Plots
 plot(sol.r, sol.gr, xlims=(0,5), xlabel="r", ylabel="g(r)")
 ```

@@ -16,9 +16,9 @@ dims = 3
 pot = HardSpheres(1.0)
 system = SimpleFluid(dims, ρ, kBT, pot)
 method = NgIteration(M=M, dr=dr, verbose=false)
-solRY = solve(system, RogersYoung(α), method)
-solPY = solve(system, PercusYevick(), method)
-solHNC = solve(system, HypernettedChain(), method)
+solRY, = solve(system, RogersYoung(α), method)
+solPY, = solve(system, PercusYevick(), method)
+solHNC, = solve(system, HypernettedChain(), method)
 
 plot(solRY.r, solRY.gr, label="Rogers-Young")
 plot!(solPY.r, solPY.gr, label="Percus-Yevick")
@@ -41,12 +41,12 @@ function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
     function RY_inconsistency(ρ, α)
         system1 = SimpleFluid(dims, ρ, kBT, pot)
         method = NgIteration(M=M, dr=dr, verbose=false)
-        sol1 = solve(system1, RogersYoung(α), method)
+        sol1, = solve(system1, RogersYoung(α), method)
         p1 = compute_virial_pressure(sol1, system1)
 
         dρ = sqrt(eps(ρ))
         system2 = SimpleFluid(dims, ρ+dρ, kBT, pot)
-        sol2 = solve(system2, RogersYoung(α), method)
+        sol2, = solve(system2, RogersYoung(α), method)
         p2 = compute_virial_pressure(sol2, system2)
         dpdρ = (p2-p1)/dρ
 
@@ -60,7 +60,7 @@ function find_self_consistent_solution(ρ, kBT, M, dr, dims, pot)
     α =  Roots.find_zero(func, (0.001,50.0), Roots.Bisection(), atol=0.0001)
     system = SimpleFluid(dims, ρ, kBT, pot)
     method = NgIteration(M=M, dr=dr, verbose=false)
-    sol = solve(system, RogersYoung(α), method)
+    sol, = solve(system, RogersYoung(α), method)
     return system, sol, α
 end
 

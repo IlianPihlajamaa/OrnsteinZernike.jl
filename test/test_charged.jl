@@ -36,7 +36,7 @@ for (i,c) = enumerate([0.001, 0.02, 0.0625, 0.2, 0.5625]) # mol/L
     system = SimpleChargedMixture(system, Z, bjerrum_length / σ)
     closure = HypernettedChain()
     method = FourierIteration(M = M,dr=dr, tolerance=10^-8, mixing_parameter=mixing_parameters[i], verbose=false, max_iterations=10^6)
-    sol = solve(system, closure, method, coulombsplitting=OrnsteinZernike.NoCoulombSplitting())
+    sol, = solve(system, closure, method, coulombsplitting=OrnsteinZernike.NoCoulombSplitting())
     r = sol.r 
     g = sol.gr
 
@@ -59,8 +59,8 @@ end
     ng_method = NgIteration(M=M, dr=dr, tolerance=1e-8, verbose=false, max_iterations=10^4)
     fourier_method = FourierIteration(M=M, dr=dr, tolerance=1e-8, verbose=false, max_iterations=10^5, mixing_parameter=0.5)
 
-    sol_ng = solve(system, closure, ng_method; coulombsplitting=OrnsteinZernike.NoCoulombSplitting())
-    sol_fourier = solve(system, closure, fourier_method; coulombsplitting=OrnsteinZernike.NoCoulombSplitting())
+    sol_ng, = solve(system, closure, ng_method; coulombsplitting=OrnsteinZernike.NoCoulombSplitting())
+    sol_fourier, = solve(system, closure, fourier_method; coulombsplitting=OrnsteinZernike.NoCoulombSplitting())
 
     @test maximum(abs.(sol_ng.cr .- sol_fourier.cr)) < 5e-3
     @test maximum(abs.(sol_ng.gr .- sol_fourier.gr)) < 5e-3

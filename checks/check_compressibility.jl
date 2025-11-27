@@ -17,10 +17,10 @@ for (i,M) in enumerate(Ms)
     @show i, M
     dr = Rmax/M
     method = NgIteration(M=M, dr=dr, verbose=false)
-    sol1 = solve(system, PercusYevick(), method)
+    sol1, = solve(system, PercusYevick(), method)
     χ1[i] = compute_compressibility(sol1, system)
     @show χ1[i]
-    sol2 = solve(system, PercusYevick(), Exact(M=M, dr=dr))
+    sol2, = solve(system, PercusYevick(), Exact(M=M, dr=dr))
     χ2[i] = compute_compressibility(sol2, system)
 end
 η = ρ/6*π

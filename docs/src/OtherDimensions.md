@@ -16,7 +16,8 @@ for i = 1:6
     system = SimpleFluid(dimension, density, kBT, potential)
     closure = PercusYevick()
     method = DensityRamp(NgIteration(), range(0.001, density-0.1, length=10))
-    sol = solve(system, closure, method)[end]
+    sols, = solve(system, closure, method)
+    sol = sols[end]
     plot!(p, sol.r, sol.gr .+ i, label="d = $dimension")
 end
 p

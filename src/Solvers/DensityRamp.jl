@@ -15,12 +15,14 @@ function solve(system::System, closure::Closure, method::DensityRamp; kwargs...)
     densities = method.densities
     ρtarget = ρ_of(system)
     sols = []
+    infos = []
     base_of(system).ρ = densities[1]
     if method.verbose
         println("\nSolving the system at ρ = $(densities[1]).\n")
     end
-    sol0 = solve(system, closure, method.method)
+    sol0, info0 = solve(system, closure, method.method)
     push!(sols, sol0)
+    push!(infos, info0)
     γ_old = @. sol0.gr - one(eltype(sol0.gr)) - sol0.cr
     for i = (firstindex(densities)+1):lastindex(densities)
         if method.verbose
@@ -28,8 +30,9 @@ function solve(system::System, closure::Closure, method::DensityRamp; kwargs...)
         end
         base_of(system).ρ = densities[i]
         γ_old2 = recast_γ(γ_old)
-        sol = solve(system, closure, method.method, gamma_0=γ_old2; kwargs...)
+        sol, info = solve(system, closure, method.method, gamma_0=γ_old2; kwargs...)
         push!(sols, sol)
+        push!(infos, info)
         @. γ_old =  sol.gr - one(eltype(sol.gr)) - sol.cr
     end
     if method.verbose
@@ -37,7 +40,8 @@ function solve(system::System, closure::Closure, method::DensityRamp; kwargs...)
     end
     base_of(system).ρ = ρtarget
     γ_old2 = recast_γ(γ_old)
-    sol = solve(system, closure, method.method, gamma_0=γ_old2; kwargs...)
+    sol, info = solve(system, closure, method.method, gamma_0=γ_old2; kwargs...)
     push!(sols, sol)
-    return sols
-end 
+    push!(infos, info)
+    return sols, infos
+end

@@ -103,12 +103,12 @@ delta_ρ = 0.01
 system_at = ρ -> SimpleFluid(3, ρ, kBT, potential)
 
 # (1) Virial-route pressure at ρ_target
-sol_target = solve(system_at(ρ_target), closure, NgIteration(M=5000, dr=0.01))
+sol_target, = solve(system_at(ρ_target), closure, NgIteration(M=5000, dr=0.01))
 p_virial   = compute_virial_pressure(sol_target, system_at(ρ_target))   # this is "virial pressure"
 
 # (2) Compressibility κ_T along a density grid
 chi_values = similar(ρ_grid)
-sols = solve(system_at(ρ_grid[end]), closure, DensityRamp(NgIteration(M=5000, dr=0.01), ρ_grid))
+sols, = solve(system_at(ρ_grid[end]), closure, DensityRamp(NgIteration(M=5000, dr=0.01), ρ_grid))
 
 for (i, ρ) in enumerate(ρ_grid)
     chi_values[i] = compute_compressibility(sols[i], system_at(ρ))  # Isothermal compressibility κ_T

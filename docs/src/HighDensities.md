@@ -11,7 +11,7 @@ pot = HardSpheres(1.0)
 system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration()
-sol = solve(system, closure, method);
+sol, = solve(system, closure, method);
 ```
 ```
 After iteration 0, the error is 3.41302002652.
@@ -44,12 +44,12 @@ max_iterations = 10^4 # max number of iterations before convergence
 N_stages = 8 # number of previous iterations to use for the next guess
 
 method = NgIteration(M=M; dr=dr, max_iterations=max_iterations, N_stages=N_stages)
-sol = solve(system, closure, method);
+sol, = solve(system, closure, method);
 ```
 ```julia pyhd
 using Plots
 plot(sol.r, sol.gr, xlims=(0,5), xlabel="r", ylabel="g(r)", lw=4, label="iterative")
-sol2 = solve(system, closure, Exact(M=M; dr=dr));
+sol2, = solve(system, closure, Exact(M=M; dr=dr));
 plot!(sol2.r, sol2.gr, lw=2, color=:black, label="exact")
 ```
 Which converges even though the density is clearly nonphysically high.
@@ -66,7 +66,7 @@ pot = HardSpheres(1.0)
 system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration(M=5000, dr=0.01)
-sol = solve(system, closure, method);
+sol, = solve(system, closure, method);
 ```
 ```
 After iteration 0, the error is 2.51773674949.

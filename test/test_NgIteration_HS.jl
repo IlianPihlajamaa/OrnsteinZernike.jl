@@ -10,8 +10,8 @@ pot = HardSpheres(1.0)
 system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration(tolerance=10^-10, N_stages=5, M=M, dr=dr, verbose=false, max_iterations=10^3)
-sol = solve(system, closure, method)
-sol2 = solve(system, closure, Exact(M=M, dr=dr))
+sol, = solve(system, closure, method)
+sol2, = solve(system, closure, Exact(M=M, dr=dr))
 
 atol = 0.1
 
@@ -33,10 +33,10 @@ system = SimpleMixture(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration(tolerance=10^-10,dr=dr, N_stages=5, M=M, verbose=false, max_iterations=10^3)
 
-sol = solve(system, closure, method)
+sol, = solve(system, closure, method)
 
 method = Exact(M=M, dr=dr,)
-sol2 = solve(system, closure, method)
+sol2, = solve(system, closure, method)
 
 
 atol = 0.1
@@ -58,8 +58,8 @@ pot = HardSpheres(1.0)
 system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration(tolerance=10^-10, N_stages=5, M=M, verbose=false, max_iterations=10^3)
-sol = solve(system, closure, method)
-sol2 = solve(system, closure, Exact(M=M))
+sol, = solve(system, closure, method)
+sol2, = solve(system, closure, Exact(M=M))
 
 atol = 0.1
 
@@ -79,8 +79,8 @@ pot = HardSpheres(1.0)
 system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = NgIteration(tolerance=10^-10, N_stages=5, M=M, verbose=false, max_iterations=10^3, dr=sqrt(π/(M+1))/(2π))
-sol = solve(system, closure, method)
-sol2 = solve(system, closure, Exact(M=M, dr=sqrt(π/(M+1))/(2π)))
+sol, = solve(system, closure, method)
+sol2, = solve(system, closure, Exact(M=M, dr=sqrt(π/(M+1))/(2π)))
 
 atol = 0.1
 

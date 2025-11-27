@@ -9,7 +9,7 @@ function test_closure(closure::OrnsteinZernike.Closure)
     pot = OrnsteinZernike.uses_renormalized_gamma(closure) ? AllShortRangeDivision(base_pot) : base_pot
     system = SimpleFluid(dims, ρ, kBT, pot)
     method0 = NgIteration(tolerance=10^-8, M=M, dr=dr, N_stages=2, max_iterations=1000, verbose=false)
-    sol = solve(system, closure, method0)
+    sol, = solve(system, closure, method0)
     @test !(any(isnan, sol.cr))  # Check for NaN in cr
     @test !(any(isnan, sol.gr))  # Check for NaN in gr
     @test !(any(isnan, sol.ck))  # Check for NaN in ck

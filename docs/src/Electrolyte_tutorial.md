@@ -117,7 +117,7 @@ for (i,c) in enumerate([0.001, 0.02, 0.0625, 0.2, 0.5625]) # mol/L
                               max_iterations = 10^6)
 
     # Solve OZ equation with HNC closure
-    sol = solve(system, closure, method,
+    sol, = solve(system, closure, method,
                 coulombsplitting = OrnsteinZernike.NoCoulombSplitting())
 
     # Extract RDFs

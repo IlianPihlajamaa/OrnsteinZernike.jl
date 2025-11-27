@@ -134,7 +134,9 @@ end
 """
     DensityRamp <: Method
 
-Solves the system by iteratively solving systems of increasing density, using the previous solution as initial guess at a higher density. This may help deal with convergence issues.
+Solve the system by iteratively solving systems of increasing density, using the previous solution as initial guess at a higher density. This may help deal with convergence issues.
+
+When used with `solve`, return a tuple of arrays `(Vector{OZSolution}, Vector{ConvergenceInfo})` containing results for each density step.
 
 Arguments
 - `method`: method by which to solve the system for individual densities.
@@ -174,15 +176,17 @@ end
 """
     TemperatureRamp <: Method
 
-Solves the system by iteratively solving systems of decreasing Temperature, using the previous solution as initial guess at a lower temperature. This may help deal with convergence issues.
+Solve the system by iteratively solving systems of decreasing temperature, using the previous solution as initial guess at a lower temperature. This may help deal with convergence issues.
+
+When used with `solve`, return a tuple of arrays `(Vector{OZSolution}, Vector{ConvergenceInfo})` containing results for each temperature step.
 
 Arguments
 - `method`: method by which to solve the system for individual temperatures.
-- `temperatures`: temperatures to consider. Must be a vector of increasing values.
+- `temperatures`: temperatures to consider. Must be a vector of decreasing values.
 - `verbose`: whether to print information.
 
 Example:
-`TemperatureRamp(NgIteration(), [0.1, 0.3, 0.4]; verbose=false)`
+`TemperatureRamp(NgIteration(), [0.4, 0.3, 0.1]; verbose=false)`
 
 """
 struct TemperatureRamp{T<:Method,T2<:AbstractVector} <: Method
@@ -201,13 +205,18 @@ defaultsolver() = NgIteration()
 
 
 """
-    solve(system::System, closure::Closure, method::Method)
+    solve(system::System, closure::Closure, method::Method) -> (OZSolution, ConvergenceInfo)
 
-Solves the system `system` using the closure `closure` with method `method`.
+Solve the system `system` using the closure `closure` with method `method` and return a tuple of ([`OZSolution`](@ref), [`ConvergenceInfo`](@ref)).
 
-    solve(system::System, closure::Closure)
+!!! note
+    On and before v0.2.0, `solve` returned only `OZSolution`.
 
-Solves the system `system` using the closure `closure` with the default method `NgIteration()`.
+---
+
+    solve(system::System, closure::Closure) -> (OZSolution, ConvergenceInfo)
+
+Solve the system `system` using the closure `closure` with the default method `NgIteration()`.
 """
 function solve end
 

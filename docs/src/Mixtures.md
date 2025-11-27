@@ -30,7 +30,7 @@ end
 pot = CustomPotential(lj_matrix, (1.0,1.0, 1.2,0.8, 1.1,0.9))
 system = SimpleMixture(3, ρ, 1.0, pot)
 
-sol = solve(system, HypernettedChain())
+sol, = solve(system, HypernettedChain())
 
 plot(sol.r, sol.gr[:,1,1], label="g_AA(r)")
 plot!(sol.r, sol.gr[:,1,2], label="g_AB(r)")

@@ -53,7 +53,7 @@ p1 = plot(xlims=(0,2), xlabel="r", ylabel="c(r)")
 p2 = plot(xlims=(0,20), xlabel="k", ylabel="c(k)")
 for M in [1000, 100, 50]
     dr = Rmax/M
-    sol  = @time solve(system, closure, NgIteration(M=M, dr=dr))
+    sol, = @time solve(system, closure, NgIteration(M=M, dr=dr))
     kmax = round(maximum(sol.k), digits=2)
     plot!(p1, sol.r, sol.cr, label="M=$M, kmax=$(kmax)", ls=:dash, markers=:o, legend=false)
     plot!(p2, sol.k, sol.ck, label="M=$M, kmax=$(kmax)", ls=:dash, markers=:o, legend=:bottomright)

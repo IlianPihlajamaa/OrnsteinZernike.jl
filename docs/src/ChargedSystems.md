@@ -68,7 +68,7 @@ closure = HypernettedChain()
 method  = FourierIteration(M=2048, dr=0.02, tolerance=1e-6, mixing_parameter=0.3)
 
 # Solve with an explicit splitting choice
-your_solution = solve(charged, closure, method; coulombsplitting=EwaldSplitting(3.0))
+your_solution, = solve(charged, closure, method; coulombsplitting=EwaldSplitting(3.0))
 
 # Plot the unlike charges
 g12 = plot(your_solution.r, your_solution.gr[:, 1, 2], xlims=(0,3), label="g_{12}(r)", xlabel="r", ylabel="g(r)")

@@ -27,7 +27,7 @@ closure = PercusYevick()
 
 And now we solve the system. 
 ```@example hs
-sol = solve(system, closure)
+sol, = solve(system, closure)
 ```
 
 For mixtures, the fields `sol.gr`, `sol.cr`, `sol.ck`, and `sol.Sk` are now three-dimensional arrays with shape `(Nr, Ns, Ns)`. For example, $g_{12}(r_6)$ is stored in `sol.gr[6,1,2]`.
@@ -36,7 +36,7 @@ We just solved the system using the default iterative solver [`NgIteration`](@re
 
 ```@example hs
 method = Exact()
-sol_exact = solve(system, closure, method)
+sol_exact, = solve(system, closure, method)
 ```
 
 Let's plot the resulting $g(r)$. 

@@ -12,7 +12,7 @@ using ForwardDiff
 
     pressure(ρ) = begin
         system = SimpleFluid(dims, ρ, kBT, pot)
-        sol = solve(system, closure, method)
+        sol, = solve(system, closure, method)
         compute_virial_pressure(sol, system)
     end
 

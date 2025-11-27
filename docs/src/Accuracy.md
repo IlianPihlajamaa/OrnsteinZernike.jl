@@ -18,7 +18,7 @@ system = SimpleFluid(dims, ρ, kBT, pot)
 for (i,M) in enumerate(M_array)
     dr = Rmax/M
     method = NgIteration(M=M, dr=dr, verbose=false)
-    sol = solve(system, PercusYevick(), method)
+    sol, = solve(system, PercusYevick(), method)
     pressure = compute_virial_pressure(sol, system)
     p[i] = pressure/ρ/kBT-1.0
     println("The pressure = ", round(pressure, digits=8), " with M = $(M) gridpoints.")

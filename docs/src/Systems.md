@@ -98,7 +98,7 @@ lB = 7.0                                # Bjerrum length
 sys  = SimpleChargedFluid(base, z, lB)  # κ chosen automatically (Debye)
 
 # Now use closures/solvers as usual:
-# sol = solve(sys, HypernettedChain(); method=NgIteration(M=2000, dr=0.01))
+# sol, = solve(sys, HypernettedChain(); method=NgIteration(M=2000, dr=0.01))
 ```
 
 ### `SimpleChargedMixture` — Electrolyte mixtures

@@ -32,7 +32,7 @@ fluid    = SimpleFluid(3, 0.4, 1.0, lj)
 
 # add a WCA split and the run succeeds
 wca_fluid = SimpleFluid(3, 0.4, 1.0, WCADivision(lj, 2^(1/6)))
-sol = solve(wca_fluid, closure, NgIteration())
+sol, = solve(wca_fluid, closure, NgIteration())
 ```
 
 For charged systems, the charges are always dealt with analytically. They are not included in the dispersion tails.

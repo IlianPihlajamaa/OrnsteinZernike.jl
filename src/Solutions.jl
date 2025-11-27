@@ -30,6 +30,19 @@ struct OZSolution{T1,T2}
     gamma_k::T2
 end
 
+"""
+    ConvergenceInfo
+
+A NamedTuple type alias holding convergence information from the OZ solver.
+
+Fields:
+- `converged::Bool`: always `true` (failures throw exceptions)
+- `iterations::Int`: number of iterations performed
+- `final_error`: final error at termination
+- `termination_reason::Symbol`: reason for termination (`:converged` or `:exact`)
+"""
+const ConvergenceInfo = NamedTuple{(:converged, :iterations, :final_error, :termination_reason)}
+
 function convert_vecofmat_to_3darr(a::Vector{T}) where {T<:AbstractMatrix}
     elT = eltype(eltype(a))
     Ns1, Ns2 = size(a[1])

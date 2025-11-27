@@ -8,10 +8,10 @@ pot = HardSpheres(1.0)
 system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = Exact(M=M)
-sol = solve(system, closure, method)
+sol, = solve(system, closure, method)
 
 method = NgIteration(M=M, tolerance=10^-10, verbose=false, max_iterations=10^3)
-sol2 = solve(system, closure, method)
+sol2, = solve(system, closure, method)
 
 
 p = compute_virial_pressure(sol, system)
@@ -39,10 +39,10 @@ pot = HardSpheres([1.0, 1.0])
 system = SimpleMixture(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = Exact(M=M)
-sol = solve(system, closure, method)
+sol, = solve(system, closure, method)
 
 method = NgIteration(M=M, tolerance=10^-10, verbose=false, max_iterations=10^3)
-sol2 = solve(system, closure, method)
+sol2, = solve(system, closure, method)
 
 p = compute_virial_pressure(sol, system)
 p2 = compute_virial_pressure(sol2, system)
@@ -70,10 +70,10 @@ pot = HardSpheres(1.0)
 system = SimpleFluid(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = Exact(M=M)
-sol = solve(system, closure, method)
+sol, = solve(system, closure, method)
 
 method = NgIteration(M=M, tolerance=10^-10, verbose=false, max_iterations=10^3)
-sol2 = solve(system, closure, method)
+sol2, = solve(system, closure, method)
 
 
 p = compute_virial_pressure(sol, system)
@@ -101,10 +101,10 @@ pot = HardSpheres([1.0, 1.0])
 system = SimpleMixture(dims, ρ, kBT, pot)
 closure = PercusYevick()
 method = Exact(M=M)
-sol = solve(system, closure, method)
+sol, = solve(system, closure, method)
 
 method = NgIteration(M=M, tolerance=10^-10, verbose=false, max_iterations=10^3)
-sol2 = solve(system, closure, method)
+sol2, = solve(system, closure, method)
 
 p = compute_virial_pressure(sol, system)
 p2 = compute_virial_pressure(sol2, system)

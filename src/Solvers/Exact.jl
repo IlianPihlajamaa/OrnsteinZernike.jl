@@ -100,7 +100,9 @@ function solve(system::SimpleFluid{3, T1, T2, HardSpheres{T3}}, ::PercusYevick, 
     gr = @. Cr + γmulr / r + 1
     gr[r.<1.0] .= 0.0
     
-    return OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k)
+    sol = OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k)
+    info = (converged=true, iterations=0, final_error=0.0, termination_reason=:exact)
+    return sol, info
 end
 
 function solve(system::SimpleFluid{1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
@@ -134,7 +136,9 @@ function solve(system::SimpleFluid{1, T1, T2, HardSpheres{T3}}, ::PercusYevick, 
 
     gr = @. Cr + γmulr / r + 1
     gr[r.<1.0] .= 0.0
-    return OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k)
+    sol = OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k)
+    info = (converged=true, iterations=0, final_error=0.0, termination_reason=:exact)
+    return sol, info
 end
 
 function solve(system::SimpleFluid{5, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
@@ -166,7 +170,9 @@ function solve(system::SimpleFluid{5, T1, T2, HardSpheres{T3}}, ::PercusYevick, 
 
     gr = @. Cr + γmulr / r + 1
     gr[r.<1.0] .= 0.0
-    return OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k)
+    sol = OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k)
+    info = (converged=true, iterations=0, final_error=0.0, termination_reason=:exact)
+    return sol, info
 end
 
 
@@ -240,5 +246,7 @@ function solve(system::SimpleMixture{3, species, T1, T2, HardSpheres{T3}}, ::Per
     end
     γr = gr .- Cr .- 1.0
     γk = Hk .- Ck
-    return OZSolution(r, k, gr, Sk, Cr, Ck, γr, γk)
+    sol = OZSolution(r, k, gr, Sk, Cr, Ck, γr, γk)
+    info = (converged=true, iterations=0, final_error=0.0, termination_reason=:exact)
+    return sol, info
 end
