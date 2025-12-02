@@ -11,12 +11,22 @@ For the implemented cases, `Exact` solves the system exactly, or throws an error
 Exact
 ```
 
-The methods `FourierIteration` and `NgIteration` both use recursive iteration to find improved estimates of the solution using Fourier Transforms. `NgIteration` uses a scheme to accelerate convergence, see Ref. [1]. 
+The methods `FourierIteration` and `NgIteration` both use recursive iteration to find improved estimates of the solution using Fourier Transforms. `NgIteration` uses a scheme to accelerate convergence, see Ref. [1].
 
 ```@docs
 FourierIteration
 NgIteration
 ```
+
+## Solution
+
+The `solve` function returns an [`OZSolution`](@ref) object containing both the solution data and convergence information:
+- `r`, `k`: grid points in real and reciprocal space
+- `gr`, `Sk`, `cr`, `ck`, `gamma_r`, `gamma_k`: correlation functions
+- `converged`: whether the solution converged (always `true`; failures throw exceptions)
+- `iterations`: number of iterations performed (0 for `Exact`)
+- `final_error`: final error at termination (0.0 for `Exact`)
+- `termination_reason`: `:converged` or `:exact`
 
 ## Meta-solvers
 

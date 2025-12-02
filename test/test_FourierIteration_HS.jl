@@ -21,6 +21,17 @@ function test1()
     @test all(abs.(sol.ck .- sol2.ck) .< 1.0)
     @test all(abs.(sol.Sk .- sol2.Sk) .< atol)
 
+    # Check convergence info for FourierIteration
+    @test sol.converged == true
+    @test sol.iterations > 0
+    @test sol.final_error < 10^-10
+    @test sol.termination_reason == :converged
+
+    # Check convergence info for Exact
+    @test sol2.converged == true
+    @test sol2.iterations == 0
+    @test sol2.final_error == 0.0
+    @test sol2.termination_reason == :exact
 
     M = 1000
     ρ = [0.1, 0.2, 0.12]

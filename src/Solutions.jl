@@ -2,24 +2,28 @@
 """
     OZSolution
 
-Holds the solution of an Ornstein Zernike problem. 
+Holds the solution of an Ornstein Zernike problem.
 
 Fields:
-- r: vector of distances
-- k: vector of wave numbers
-- gr: radial distribution function    
-- Sk: static structure factor
-- ck: direct correlation function in k space
-- cr: direct correlation function in real space
-- gamma_r: indirect correlation function in real space
-- gamma_k: indirect correlation function in k space
+- `r`: vector of distances
+- `k`: vector of wave numbers
+- `gr`: radial distribution function
+- `Sk`: static structure factor
+- `ck`: direct correlation function in k space
+- `cr`: direct correlation function in real space
+- `gamma_r`: indirect correlation function in real space
+- `gamma_k`: indirect correlation function in k space
+- `converged`: whether the solution converged (always `true`; failures throw exceptions)
+- `iterations`: number of iterations performed
+- `final_error`: final error at termination
+- `termination_reason`: reason for termination (`:converged` or `:exact`)
 
-if the system was a single-component system, `gr`, `Sk`, etc, are vectors. 
-If instead the system was a multicomponent one, they are three dimensional vectors, 
+if the system was a single-component system, `gr`, `Sk`, etc, are vectors.
+If instead the system was a multicomponent one, they are three dimensional vectors,
 where the first dimension contains the values along r, and the second and third dimension
 contain the data for the species.
 """
-struct OZSolution{T1,T2}
+struct OZSolution{T1,T2,T3}
     r::T1
     k::T1
     gr::T2
@@ -28,6 +32,10 @@ struct OZSolution{T1,T2}
     ck::T2
     gamma_r::T2
     gamma_k::T2
+    converged::Bool
+    iterations::Int
+    final_error::T3
+    termination_reason::Symbol
 end
 
 function convert_vecofmat_to_3darr(a::Vector{T}) where {T<:AbstractMatrix}
@@ -52,38 +60,40 @@ function find_g_from_c_and_γ(c::Vector{T}, γ::Vector{T}) where {T}
     return g
 end
 
-function find_S_from_ĉ_and_ρ(ĉ::Vector{T}, ρ) where {T<:Number}
-    return @. one(T) + ρ * ĉ / (one(T) - ρ * ĉ)
+function find_S_from_ĉ_and_ρ(ĉ::Vector{T}, ρ) where {T<:Number}
+    return @. one(T) + ρ * ĉ / (one(T) - ρ * ĉ)
 end
 
-function find_S_from_ĉ_and_ρ(ĉ::Vector{T}, ρ) where {T<:AbstractMatrix}
-    S = copy(ĉ)
+function find_S_from_ĉ_and_ρ(ĉ::Vector{T}, ρ) where {T<:AbstractMatrix}
+    S = copy(ĉ)
     ρtot = sum(ρ.diag)
     x = ρ.diag / ρtot
-    for i in eachindex(ĉ)
-        Si = inv(one(T) ./ x .- sum(ρ) * ĉ[i])
+    for i in eachindex(ĉ)
+        Si = inv(one(T) ./ x .- sum(ρ) * ĉ[i])
         S[i] = Si
     end
     return S
 end
 
 
-function construct_solution(r::T1, k::T1, cr::T, ck::T, gamma_r::T, gamma_k::T, ρ) where {T1,T<:Vector{<:AbstractMatrix}}
+function construct_solution(r::T1, k::T1, cr::T, ck::T, gamma_r::T, gamma_k::T, ρ;
+                            converged::Bool=true, iterations::Int=0, final_error=0.0, termination_reason::Symbol=:unknown) where {T1,T<:Vector{<:AbstractMatrix}}
     gr = find_g_from_c_and_γ(cr, gamma_r)
-    Sk = find_S_from_ĉ_and_ρ(ck, ρ)
+    Sk = find_S_from_ĉ_and_ρ(ck, ρ)
     gr = convert_vecofmat_to_3darr(gr)
     Sk = convert_vecofmat_to_3darr(Sk)
     ck = convert_vecofmat_to_3darr(ck)
     cr = convert_vecofmat_to_3darr(cr)
     gamma_r = convert_vecofmat_to_3darr(gamma_r)
     gamma_k = convert_vecofmat_to_3darr(gamma_k)
-    OZSolution(r, k, gr, Sk, cr, ck, gamma_r, gamma_k)
+    OZSolution(r, k, gr, Sk, cr, ck, gamma_r, gamma_k, converged, iterations, final_error, termination_reason)
 end
 
-function construct_solution(r::T1, k::T1, cr::T, ck::T, gamma_r::T, gamma_k::T, ρ) where {T1,T<:Vector{<:Number}}
+function construct_solution(r::T1, k::T1, cr::T, ck::T, gamma_r::T, gamma_k::T, ρ;
+                            converged::Bool=true, iterations::Int=0, final_error=0.0, termination_reason::Symbol=:unknown) where {T1,T<:Vector{<:Number}}
     gr = find_g_from_c_and_γ(cr, gamma_r)
-    Sk = find_S_from_ĉ_and_ρ(ck, ρ)
-    OZSolution(r, k, gr, Sk, cr, ck, gamma_r, gamma_k)
+    Sk = find_S_from_ĉ_and_ρ(ck, ρ)
+    OZSolution(r, k, gr, Sk, cr, ck, gamma_r, gamma_k, converged, iterations, final_error, termination_reason)
 end
 
 
@@ -101,7 +111,11 @@ function Base.show(io::IO, ::MIME"text/plain", p::OZSolution{T1,T2}) where {T1,T
     show(io, p.ck')
     print(io, "'\n Sk = ")
     show(io, p.Sk')
-    print("' \n")
+    print(io, "'\n converged = ", p.converged)
+    print(io, "\n iterations = ", p.iterations)
+    print(io, "\n final_error = ", p.final_error)
+    print(io, "\n termination_reason = ", p.termination_reason)
+    print("\n")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", p::OZSolution{T1,T2}) where {T1,T2<:AbstractArray}
@@ -118,5 +132,9 @@ function Base.show(io::IO, ::MIME"text/plain", p::OZSolution{T1,T2}) where {T1,T
     show(io, p.ck)
     print(io, "\n Sk = ")
     show(io, p.Sk)
+    print(io, "\n converged = ", p.converged)
+    print(io, "\n iterations = ", p.iterations)
+    print(io, "\n final_error = ", p.final_error)
+    print(io, "\n termination_reason = ", p.termination_reason)
     print("\n")
 end
