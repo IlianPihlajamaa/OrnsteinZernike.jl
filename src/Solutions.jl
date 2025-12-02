@@ -136,5 +136,5 @@ function Base.show(io::IO, ::MIME"text/plain", p::OZSolution{T1,T2}) where {T1,T
     print(io, "\n iterations = ", p.iterations)
     print(io, "\n final_error = ", p.final_error)
     print(io, "\n termination_reason = ", p.termination_reason)
-    print("\n")
+    print(io, "\n")
 end
