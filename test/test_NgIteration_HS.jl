@@ -15,11 +15,22 @@ sol2 = solve(system, closure, Exact(M=M, dr=dr))
 
 atol = 0.1
 
-@test all((abs.(sol.cr .- sol2.cr)) .< atol) 
-@test all((abs.(sol.gr .- sol2.gr)) .< atol) 
-@test all((abs.(sol.ck .- sol2.ck)) .< atol) 
-@test all((abs.(sol.Sk .- sol2.Sk)) .< atol) 
+@test all((abs.(sol.cr .- sol2.cr)) .< atol)
+@test all((abs.(sol.gr .- sol2.gr)) .< atol)
+@test all((abs.(sol.ck .- sol2.ck)) .< atol)
+@test all((abs.(sol.Sk .- sol2.Sk)) .< atol)
 
+# Check convergence info for NgIteration
+@test sol.converged == true
+@test sol.iterations > 0
+@test sol.final_error < 10^-10
+@test sol.termination_reason == :converged
+
+# Check convergence info for Exact
+@test sol2.converged == true
+@test sol2.iterations == 0
+@test sol2.final_error == 0.0
+@test sol2.termination_reason == :exact
 
 M = 2000
 dr = 5.0/M

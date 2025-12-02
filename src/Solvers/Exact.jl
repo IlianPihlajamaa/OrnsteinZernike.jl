@@ -25,7 +25,7 @@ function find_Ck_1dPYSC_exact(η, k)
     return Ck
 end
 
-function find_Cr_1dPYSC_exact(η, r) 
+function find_Cr_1dPYSC_exact(η, r)
     Q0 = -1/(1-η)
     c0 = -Q0^2
     c1 = η * Q0^2
@@ -35,10 +35,10 @@ function find_Cr_1dPYSC_exact(η, r)
 end
 
 function find_Ck_5dPYSC_exact(η, k)
-    T = 1+18η+6η^2 
-    Q0 = 1/(120η*(1-η)^3)*(1-33η-87η^2-6η^3-T^(3/2))   
-    Q1 = -1/(12*(1-η)^3)*((3+2η)*T^(1/2) + 3+19η+3η^2)   
-    Q2 =-T^(1/2)/(24(1-η)^3)*(2+3η+T^(1/2))   
+    T = 1+18η+6η^2
+    Q0 = 1/(120η*(1-η)^3)*(1-33η-87η^2-6η^3-T^(3/2))
+    Q1 = -1/(12*(1-η)^3)*((3+2η)*T^(1/2) + 3+19η+3η^2)
+    Q2 =-T^(1/2)/(24(1-η)^3)*(2+3η+T^(1/2))
 
     Q̃0 = -8Q2
     c0 = -(Q̃0)^2
@@ -46,21 +46,21 @@ function find_Ck_5dPYSC_exact(η, k)
     c3 = 20η*(8Q0*Q2-3Q1^2)
     c5 = -3/8*η*c0
     Ck = @. -(1/(k^10))*
-        8*π^2 * (8 * (720c5 - 18c3 * k^2 + c1 * k^4) + (-5760c5 + 
-        144*(c3 + 20c5) * k^2 - 8*(c1 + 9c3 + 30c5) * k^4 
-        + (3c0 + 4c1 + 6c3 + 8c5) * k^6)*cos(k) + 
-        k * (-5760c5 + 48*(3c3 + 20c5) * k^2 - 
-        (3c0 + 8*(c1 + 3c3 + 6c5)) * k^4 + 
+        8*π^2 * (8 * (720c5 - 18c3 * k^2 + c1 * k^4) + (-5760c5 +
+        144*(c3 + 20c5) * k^2 - 8*(c1 + 9c3 + 30c5) * k^4
+        + (3c0 + 4c1 + 6c3 + 8c5) * k^6)*cos(k) +
+        k * (-5760c5 + 48*(3c3 + 20c5) * k^2 -
+        (3c0 + 8*(c1 + 3c3 + 6c5)) * k^4 +
         (c0 + c1 + c3 + c5) * k^6) * sin(k))
 
     return Ck
 end
 
 function find_Cr_5dPYSC_exact(η, r)
-    T = 1+18η+6η^2 
-    Q0 = 1/(120η*(1-η)^3)*(1-33η-87η^2-6η^3-T^(3/2))   
-    Q1 = -1/(12*(1-η)^3)*((3+2η)*T^(1/2) + 3+19η+3η^2)   
-    Q2 =-T^(1/2)/(24(1-η)^3)*(2+3η+T^(1/2))   
+    T = 1+18η+6η^2
+    Q0 = 1/(120η*(1-η)^3)*(1-33η-87η^2-6η^3-T^(3/2))
+    Q1 = -1/(12*(1-η)^3)*((3+2η)*T^(1/2) + 3+19η+3η^2)
+    Q2 =-T^(1/2)/(24(1-η)^3)*(2+3η+T^(1/2))
 
     Q̃0 = -8Q2
     c0 = -(Q̃0)^2
@@ -99,8 +99,8 @@ function solve(system::SimpleFluid{3, T1, T2, HardSpheres{T3}}, ::PercusYevick, 
 
     gr = @. Cr + γmulr / r + 1
     gr[r.<1.0] .= 0.0
-    
-    return OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k)
+
+    return OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k, true, 0, 0.0, :exact)
 end
 
 function solve(system::SimpleFluid{1, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
@@ -117,7 +117,7 @@ function solve(system::SimpleFluid{1, T1, T2, HardSpheres{T3}}, ::PercusYevick, 
     r, k = fourierplan.r, fourierplan.k
 
     ρ = system.ρ
-    η = ρ 
+    η = ρ
 
     # baxter
     Cr = find_Cr_1dPYSC_exact(η, r)
@@ -134,7 +134,7 @@ function solve(system::SimpleFluid{1, T1, T2, HardSpheres{T3}}, ::PercusYevick, 
 
     gr = @. Cr + γmulr / r + 1
     gr[r.<1.0] .= 0.0
-    return OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k)
+    return OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k, true, 0, 0.0, :exact)
 end
 
 function solve(system::SimpleFluid{5, T1, T2, HardSpheres{T3}}, ::PercusYevick, method::Exact) where {T1,T2,T3}
@@ -166,7 +166,7 @@ function solve(system::SimpleFluid{5, T1, T2, HardSpheres{T3}}, ::PercusYevick, 
 
     gr = @. Cr + γmulr / r + 1
     gr[r.<1.0] .= 0.0
-    return OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k)
+    return OZSolution(r, k, gr, Sk, Cr, Ck, γmulr ./ r, γmulk ./ k, true, 0, 0.0, :exact)
 end
 
 
@@ -180,7 +180,7 @@ function solve_3dPYMC_exact(ρ, diameters, kᵢ::Number)
     a = [(1 - ξ[3])^(-2) * (1 - ξ[3] + 3 * ξ[2] * d[i, i]) for i = 1:p]
     b = [-3 / 2 * d[i, i]^2 * (1 - ξ[3])^(-2) * ξ[2] for i = 1:p]
     Q̃ = zeros(ComplexF64, Ns, Ns)
-    
+
     #analytical solution of integrals
     for μ = 1:Ns, ν = 1:Ns
         I0 = -1im / kᵢ * (cis(kᵢ * d[μ, ν]) - cis(kᵢ * s[μ, ν]))
@@ -240,5 +240,5 @@ function solve(system::SimpleMixture{3, species, T1, T2, HardSpheres{T3}}, ::Per
     end
     γr = gr .- Cr .- 1.0
     γk = Hk .- Ck
-    return OZSolution(r, k, gr, Sk, Cr, Ck, γr, γk)
+    return OZSolution(r, k, gr, Sk, Cr, Ck, γr, γk, true, 0, 0.0, :exact)
 end

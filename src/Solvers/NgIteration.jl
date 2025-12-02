@@ -9,8 +9,8 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::NgIterat
 
     renorm = uses_renormalized_gamma(closure)
     cache = OZSolverCache(system, method, renorm)
-    mayer_f, fourierplan, r, k, βu_disp_tail, βu, Γhat, C, Ĉ, Γ_new = 
-        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
+    mayer_f, fourierplan, r, k, βu_disp_tail, βu, Γhat, C, Ĉ, Γ_new =
+        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
 
     T = eltype(mayer_f)
     TT = T <: Number ? T : eltype(T)
@@ -18,7 +18,7 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::NgIterat
     b = zeros(TT, N_stages)
 
     # if T <: AbstractMatrix, we need to store gi as a vector of matrices
-    # if T <: Number, we need to store gi as a vectors of numbers 
+    # if T <: Number, we need to store gi as a vectors of numbers
     gn_full = [copy(mayer_f) for _ in 1:N_stages+1] # first element is g_n, second is g_{n-1} etc
     fn_full = [copy(mayer_f) for _ in 1:N_stages+1]
     dn_full = [copy(mayer_f) for _ in 1:N_stages+1]
@@ -45,11 +45,11 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::NgIterat
 
     err = tolerance * 2
     iteration = 0
-    # first bootstrapping steps 
+    # first bootstrapping steps
     for stage = reverse(1:N_stages)
         ctx_stage = UnchargedClosureEvalContext(r, mayer_f, fn_full[stage+1], βu, βu_disp_tail)
         closure_apply!(C, closure, ctx_stage)
-        oz_iteration_step!(C, Ĉ, Γhat, gn_full[stage+1], ρ, fourierplan)
+        oz_iteration_step!(C, Ĉ, Γhat, gn_full[stage+1], ρ, fourierplan)
         fn_flat[stage] .= gn_flat[stage+1]
     end
 
@@ -59,7 +59,7 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::NgIterat
         end
         ctx_iter = UnchargedClosureEvalContext(r, mayer_f, fn_full[1], βu, βu_disp_tail)
         closure_apply!(C, closure, ctx_iter)
-        oz_iteration_step!(C, Ĉ, Γhat, Γ_new, ρ, fourierplan)
+        oz_iteration_step!(C, Ĉ, Γhat, Γ_new, ρ, fourierplan)
         gn_flat[1] .= Γ_new_flat
         err = compute_error(gn_flat[1], fn_flat[1])
         if method.verbose && iteration % 10 == 0
@@ -90,10 +90,10 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::NgIterat
         println("the error is $(round(err, digits=ceil(Int, 1-log10(err)))).")
     end
     c = C ./ r
-    ĉ = Ĉ ./ k
+    ĉ = Ĉ ./ k
     γ = Γ_new ./ r
     γ̂ = Γhat ./ k
-    return construct_solution(r, k, c, ĉ, γ, γ̂, ρ)
+    return construct_solution(r, k, c, ĉ, γ, γ̂, ρ; iterations=iteration, final_error=err, termination_reason=:converged)
 end
 
 
@@ -104,14 +104,14 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
 
     renorm = uses_renormalized_gamma(closure)
     cache = OZSolverCache(base_of(system), method, renorm)
-    mayer_f, fourierplan, r, k, βu_LR_disp, βu, Γ_SR_hat, C_SR, C_SR_hat, Γ_SR_new = 
-        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
+    mayer_f, fourierplan, r, k, βu_LR_disp, βu, Γ_SR_hat, C_SR, C_SR_hat, Γ_SR_new =
+        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
 
     βu_SR_coul, βu_LR_coul = split_coulomb_potential(r, system, coulombsplitting)
     βu = βu .+ βu_SR_coul .+ βu_LR_coul
     mayer_f .= find_mayer_f_function.(βu)
 
-    φ = -βu_LR_coul # long range part of c 
+    φ = -βu_LR_coul # long range part of c
     Φ_hat = fourier(φ .* r, fourierplan)  # note that the FT work on the "mulr" functions
     φ_hat = Φ_hat ./ k
 
@@ -121,7 +121,7 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
     q = Q ./ r
 
     # capital letters are multiplied by r or k
-    C_hat = 0.0copy(mayer_f); Γ_hat = 0.0copy(mayer_f) 
+    C_hat = 0.0copy(mayer_f); Γ_hat = 0.0copy(mayer_f)
 
     T = eltype(mayer_f)
     TT = T <: Number ? T : eltype(T)
@@ -129,7 +129,7 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
     b = zeros(TT, N_stages)
 
     # if T <: AbstractMatrix, we need to store gi as a vector of matrices
-    # if T <: Number, we need to store gi as a vectors of numbers 
+    # if T <: Number, we need to store gi as a vectors of numbers
     gn_full = [copy(mayer_f) for _ in 1:N_stages+1] # first element is g_n, second is g_{n-1} etc
     fn_full = [copy(mayer_f) for _ in 1:N_stages+1]
     dn_full = [copy(mayer_f) for _ in 1:N_stages+1]
@@ -156,16 +156,16 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
 
     err = tolerance * 2
     iteration = 0
-    # first bootstrapping steps 
+    # first bootstrapping steps
     for stage = reverse(1:N_stages)
         ctx_stage = ChargedClosureEvalContext(r, mayer_f, fn_full[stage+1], βu, βu_LR_disp, βu_LR_coul, q)
         closure_apply!(C_SR, closure, ctx_stage)
         fourier!(C_SR_hat, C_SR, fourierplan)
         C_hat .= C_SR_hat .+ Φ_hat
         for ik in eachindex(Γ_hat)
-            Γ_hat[ik] = (I*k[ik] - C_hat[ik] * ρ) \ (C_hat[ik] * ρ * C_hat[ik]) 
+            Γ_hat[ik] = (I*k[ik] - C_hat[ik] * ρ) \ (C_hat[ik] * ρ * C_hat[ik])
         end
-        Γ_SR_hat .= Γ_hat .- (Q_hat .- Φ_hat) 
+        Γ_SR_hat .= Γ_hat .- (Q_hat .- Φ_hat)
         inverse_fourier!(gn_full[stage+1], Γ_SR_hat, fourierplan)
         fn_flat[stage] .= gn_flat[stage+1]
     end
@@ -180,9 +180,9 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
         fourier!(C_SR_hat, C_SR, fourierplan)
         C_hat .= C_SR_hat .+ Φ_hat
         for ik in eachindex(Γ_hat)
-            Γ_hat[ik] = (I*k[ik] - C_hat[ik] * ρ) \ (C_hat[ik] * ρ * C_hat[ik]) 
+            Γ_hat[ik] = (I*k[ik] - C_hat[ik] * ρ) \ (C_hat[ik] * ρ * C_hat[ik])
         end
-        Γ_SR_hat .= Γ_hat .- (Q_hat .- Φ_hat) 
+        Γ_SR_hat .= Γ_hat .- (Q_hat .- Φ_hat)
         inverse_fourier!(Γ_SR_new, Γ_SR_hat, fourierplan)
 
         gn_flat[1] .= Γ_SR_new_flat
@@ -215,10 +215,10 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::NgIteratio
         println("the error is $(round(err, digits=ceil(Int, 1-log10(err)))).")
     end
     c = C_SR ./ r + φ
-    ĉ = C_SR_hat ./ k + φ_hat
+    ĉ = C_SR_hat ./ k + φ_hat
     γ = Γ_SR_new ./ r + q - φ
     γ̂ = Γ_SR_hat ./ k + q_hat - φ_hat
-    return construct_solution(r, k, c, ĉ, γ, γ̂, ρ)
+    return construct_solution(r, k, c, ĉ, γ, γ̂, ρ; iterations=iteration, final_error=err, termination_reason=:converged)
 end
 
 
@@ -269,7 +269,7 @@ function find_Ng_coefficients(A::Matrix{T}, b::Vector{T}, N_stages, d0n::Vector{
     return coeffs
 end
 
-function inner(u::AbstractArray, v::AbstractArray, r) 
+function inner(u::AbstractArray, v::AbstractArray, r)
     @assert eltype(u) <: Number
     T = eltype(u)
     @assert length(u) == length(v)

@@ -7,9 +7,9 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::FourierI
 
     renorm = uses_renormalized_gamma(closure)
     cache = OZSolverCache(system, method, renorm)
-    mayer_f, fourierplan, r, k, βu_disp_tail, βu, Γhat, C, Ĉ, Γ_new = 
-        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
-    
+    mayer_f, fourierplan, r, k, βu_disp_tail, βu, Γhat, C, Ĉ, Γ_new =
+        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
+
     C_old = copy(mayer_f); Γ_old = copy(mayer_f)
 
     if isnothing(gamma_0)
@@ -28,12 +28,12 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::FourierI
     iteration = 0
     ctx = UnchargedClosureEvalContext(r, mayer_f, Γ_old, βu, βu_disp_tail)
 
-    while err > tolerance 
+    while err > tolerance
         if iteration > max_iterations
             error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
         end
         closure_apply!(C, closure, ctx)
-        oz_iteration_step!(C, Ĉ, Γhat, Γ_new, ρ, fourierplan)
+        oz_iteration_step!(C, Ĉ, Γhat, Γ_new, ρ, fourierplan)
         err = compute_error(Γ_new, Γ_old)
         if isnan(err)
             error("Encountered NaN in the solution after $iteration iterations.")
@@ -51,16 +51,16 @@ function solve(system::SimpleUnchargedSystem, closure::Closure, method::FourierI
         println("the error is $(round(err, digits=ceil(Int, 1-log10(err)))).")
     end
     c = C ./ r
-    ĉ = Ĉ ./ k
+    ĉ = Ĉ ./ k
     γ = Γ_new ./ r
     γ̂ = Γhat ./ k
-    return construct_solution(r, k, c, ĉ, γ, γ̂, ρ)
+    return construct_solution(r, k, c, ĉ, γ, γ̂, ρ; iterations=iteration, final_error=err, termination_reason=:converged)
 end
 
 # definitions:
 # βu = βu_short_range + βu_LR_disp + βu_SR_coul + βu_LR_coul (first two are WCA splitting latter are coul splitting)
 # c = c_short_range + Φ (long range part is just Φ=-βu_LR_coul)
-# γ = γ_short_range + γ_long_range 
+# γ = γ_short_range + γ_long_range
 # h = h_short_range + q (defined through long range oz relation: q = Φ + Φ ρ q (fourier))
 function solve(system::SimpleChargedSystem, closure::Closure, method::FourierIteration; gamma_0=nothing, coulombsplitting=NoCoulombSplitting())
     ρ = ρ_of(system)
@@ -68,14 +68,14 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::FourierIte
     # construct solver cache from base system. Does not include Coulomb parts
     renorm = uses_renormalized_gamma(closure)
     cache = OZSolverCache(base_of(system), method, renorm)
-    mayer_f, fourierplan, r, k, βu_LR_disp, βu, Γ_SR_hat, C_SR, C_SR_hat, Γ_SR_new = 
-        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
-    
+    mayer_f, fourierplan, r, k, βu_LR_disp, βu, Γ_SR_hat, C_SR, C_SR_hat, Γ_SR_new =
+        cache.mayer_f, cache.fourierplan, cache.r, cache.k, cache.βu_dispersion_tail, cache.βu, cache.Γhat, cache.C, cache.Ĉ, cache.Γ_new
+
     βu_SR_coul, βu_LR_coul = split_coulomb_potential(r, system, coulombsplitting)
     βu = βu .+ βu_SR_coul .+ βu_LR_coul
     mayer_f .= find_mayer_f_function.(βu)
 
-    φ = -βu_LR_coul # long range part of c 
+    φ = -βu_LR_coul # long range part of c
     Φ_hat = fourier(φ .* r, fourierplan)  # note that the FT work on the "mulr" functions
     φ_hat = Φ_hat ./ k
 
@@ -85,9 +85,9 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::FourierIte
     q = Q ./ r
 
     # capital letters are multiplied by r or k
-    Γ_SR_old = copy(mayer_f); C_hat = 0.0copy(mayer_f); Γ_hat = 0.0copy(mayer_f) 
+    Γ_SR_old = copy(mayer_f); C_hat = 0.0copy(mayer_f); Γ_hat = 0.0copy(mayer_f)
 
-    # initial guess for short ranged gamma    
+    # initial guess for short ranged gamma
     if isnothing(gamma_0)
         fill!(Γ_SR_old, zero(eltype(Γ_SR_old)))
     else
@@ -100,7 +100,7 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::FourierIte
     err = tolerance * 2;  iteration = 0
     ctx = ChargedClosureEvalContext(r, mayer_f, Γ_SR_old, βu, βu_LR_disp, βu_LR_coul, q)
 
-    while err > tolerance 
+    while err > tolerance
         if iteration > max_iterations || isnan(err)
             error("Recursive iteration did not converge within $iteration steps. Current error = $err.")
         end
@@ -108,16 +108,16 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::FourierIte
         fourier!(C_SR_hat, C_SR, fourierplan)
         C_hat .= C_SR_hat .+ Φ_hat
         for ik in eachindex(Γ_hat)
-            Γ_hat[ik] = (I*k[ik] - C_hat[ik] * ρ) \ (C_hat[ik] * ρ * C_hat[ik]) 
+            Γ_hat[ik] = (I*k[ik] - C_hat[ik] * ρ) \ (C_hat[ik] * ρ * C_hat[ik])
         end
-        Γ_SR_hat .= Γ_hat .- (Q_hat .- Φ_hat) 
+        Γ_SR_hat .= Γ_hat .- (Q_hat .- Φ_hat)
         inverse_fourier!(Γ_SR_new, Γ_SR_hat, fourierplan)
         err = compute_error(Γ_SR_new, Γ_SR_old) # compute error on mul_r functions, consistent with noncharged case
         if isnan(err)
             error("Encountered NaN in the solution after $iteration iterations.")
         end
-        # mixing 
-        @. Γ_SR_new = mixing_parameter * Γ_SR_new + (1.0 - mixing_parameter) * Γ_SR_old 
+        # mixing
+        @. Γ_SR_new = mixing_parameter * Γ_SR_new + (1.0 - mixing_parameter) * Γ_SR_old
 
         if method.verbose && iteration % 100 == 0
             println("After iteration $iteration, the error is $(round(err, digits=ceil(Int, 5-log10(tolerance)))).")
@@ -136,5 +136,5 @@ function solve(system::SimpleChargedSystem, closure::Closure, method::FourierIte
     Γ = @. Γ_SR_new/r + q - φ
     @. Γ_hat = Γ_SR_hat/k + q_hat - φ_hat
 
-    return construct_solution(r, k, C, C_hat, Γ, Γ_hat, ρ)
+    return construct_solution(r, k, C, C_hat, Γ, Γ_hat, ρ; iterations=iteration, final_error=err, termination_reason=:converged)
 end
